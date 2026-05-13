@@ -1,0 +1,11 @@
+.form-action {
+  text-align: right;
+}
+
+// Fix ng-zorro select height when using custom templates.
+// The ::after strut (30px) stacks with the custom content div (30px)
+// causing a 60px height. Using flex layout aligns them instead.
+:host ::ng-deep .ant-select-single.ant-select .ant-select-selector .ant-select-selection-item {
+  display: flex;
+  align-items: center;
+}

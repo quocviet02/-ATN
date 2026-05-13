@@ -1,0 +1,95 @@
+:host {
+  display: block;
+}
+
+/* ── Column drag styles ── */
+.board-dnd-list.cdk-drag-preview {
+  box-shadow: 0 8px 24px rgba(9, 30, 66, 0.25);
+  opacity: 0.95;
+  border-radius: 3px;
+}
+
+.board-dnd-list.cdk-drag-placeholder {
+  opacity: 0;
+  border: 2px dashed #c1c7d0;
+  background: rgba(9, 30, 66, 0.04) !important;
+  box-shadow: none !important;
+}
+
+.board-dnd-list.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .board-dnd-list:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.board-dnd-list {
+  @apply flex flex-col rounded-sm bg-backgroundLightest flex-shrink-0;
+  width: 272px;
+  min-height: 400px;
+  margin-right: 12px;
+}
+
+.add-col-wrap {
+  flex-shrink: 0;
+  width: 200px;
+  margin-right: 8px;
+}
+
+.add-col-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: #5e6c84;
+  font-size: 14px;
+  background: rgba(9, 30, 66, 0.04);
+  &:hover { background: rgba(9, 30, 66, 0.08); color: #172b4d; }
+}
+
+.add-col-form {
+  background: #ebecf0;
+  border-radius: 3px;
+  padding: 8px;
+}
+
+.add-col-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 2px solid #0052cc;
+  border-radius: 3px;
+  font-size: 14px;
+  margin-bottom: 6px;
+  outline: none;
+}
+
+.add-col-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-confirm {
+  background: #0052cc;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  &:hover { background: #0065ff; }
+}
+
+.btn-cancel {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #5e6c84;
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 16px;
+  &:hover { background: #dfe1e6; }
+}

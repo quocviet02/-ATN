@@ -1,0 +1,9 @@
+<issue-comment [createMode]="true"
+  [issueId]="issue?.id">
+
+</issue-comment>
+@for (comment of issue?.comments; track comment) {
+  <issue-comment
+    [comment]="comment">
+  </issue-comment>
+}

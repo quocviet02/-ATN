@@ -1,0 +1,45 @@
+<div class="flex mt-7 overflow-x-auto pb-4"
+  cdkDropList
+  cdkDropListOrientation="horizontal"
+  [cdkDropListData]="columns"
+  (cdkDropListDropped)="dropColumn($event)">
+
+  @for (col of columns; track col.id) {
+    <div class="board-dnd-list"
+      cdkDrag
+      board-dnd-list
+      [status]="col.status"
+      [columnId]="col.id"
+      [columnName]="col.name"
+      [role]="role"
+      [taskListIds]="taskListIds"
+      [currentUserId]="authQuery.userId$ | async"
+      [issues$]="projectQuery.issueByStatusSorted$(col.status)">
+    </div>
+  }
+
+  <!-- Add Column button — chỉ owner/admin -->
+  <div *ngIf="permissionService.canManageBoard$ | async" class="add-col-wrap">
+    <div *ngIf="!showAddColumn"
+      class="add-col-btn"
+      (click)="showAddColumn = true">
+      <i nz-icon nzType="plus" nzTheme="outline"></i>
+      Thêm cột
+    </div>
+    <div *ngIf="showAddColumn" class="add-col-form">
+      <input
+        class="add-col-input"
+        [(ngModel)]="newColumnName"
+        placeholder="Tên cột mới"
+        (keydown.enter)="submitAddColumn()"
+        (keydown.escape)="cancelAddColumn()"
+        autofocus />
+      <div class="add-col-actions">
+        <button class="btn-confirm" (click)="submitAddColumn()">Thêm</button>
+        <button class="btn-cancel" (click)="cancelAddColumn()">
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

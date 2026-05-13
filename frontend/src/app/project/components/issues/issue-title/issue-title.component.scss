@@ -1,0 +1,14 @@
+:host {
+  @apply flex;
+}
+
+.textarea-inline-control {
+  @apply text-2xl font-medium;
+  margin-left: -8px;
+}
+
+.readonly-title {
+  padding: 4px 0;
+  cursor: default;
+  line-height: 1.3;
+}

@@ -1,0 +1,121 @@
+<div class="flex flex-col w-full h-full py-8 pl-8 pr-6">
+  <breadcrumbs [items]="breadcrumbs"></breadcrumbs>
+
+  <!-- Loading -->
+  <ng-container *ngIf="projectQuery.isLoading$ | async; else loaded">
+    <div class="flex items-center justify-center flex-1 mt-16">
+      <nz-spin nzSize="large"></nz-spin>
+    </div>
+  </ng-container>
+
+  <ng-template #loaded>
+    <!-- Có project → hiển thị board bình thường -->
+    <ng-container *ngIf="projectQuery.hasProject$ | async; else noProject">
+      <header class="flex justify-between items-center mt-3 text-textDarkest">
+        <div class="text-2xl font-medium">Kanban Board</div>
+
+        <div class="flex items-center gap-3">
+          <!-- Background picker trigger — owner/admin only -->
+          <div *ngIf="permissionService.canManageBoard$ | async" class="bg-picker-wrap">
+            <button class="bg-picker-btn"
+              (click)="showBgPicker = !showBgPicker"
+              title="Đổi hình nền">
+              <i nz-icon nzType="bg-colors" nzTheme="outline"></i>
+              Hình nền
+            </button>
+
+            <!-- Click-outside overlay -->
+            <div *ngIf="showBgPicker" class="bg-picker-overlay" (click)="showBgPicker = false"></div>
+
+            <!-- Picker panel -->
+            <div *ngIf="showBgPicker" class="bg-picker-panel">
+              <div class="bg-picker-header">
+                <span>Màu</span>
+                <button class="bg-close-btn" (click)="showBgPicker = false">✕</button>
+              </div>
+
+              <div class="bg-section-label">Màu đơn sắc</div>
+              <div class="bg-swatch-grid">
+                <button *ngFor="let p of BG_COLORS"
+                  class="bg-swatch"
+                  [style.background]="p.thumb"
+                  [title]="p.label"
+                  (click)="applyBackground(p.value)">
+                </button>
+              </div>
+
+              <div class="bg-section-label">Gradient</div>
+              <div class="bg-swatch-grid">
+                <button *ngFor="let p of BG_GRADIENTS"
+                  class="bg-swatch"
+                  [style.background]="p.thumb"
+                  [title]="p.label"
+                  (click)="applyBackground(p.value)">
+                </button>
+              </div>
+
+              <div class="bg-section-label">Ảnh (URL)</div>
+              <div class="bg-url-row">
+                <input class="bg-url-input"
+                  [(ngModel)]="customBgUrl"
+                  placeholder="https://..."
+                  (keydown.enter)="applyCustomUrl()" />
+                <button class="bg-url-btn" (click)="applyCustomUrl()">Áp dụng</button>
+              </div>
+
+              <button class="bg-clear-btn" (click)="clearBackground()">
+                <i nz-icon nzType="delete" nzTheme="outline"></i>
+                Xóa hình nền
+              </button>
+            </div>
+          </div>
+
+          @if (projectQuery.myRole$ | async; as role) {
+            <span [class]="roleBadgeClass[role] || 'role-badge'">{{ role | uppercase }}</span>
+          }
+        </div>
+      </header>
+      <board-filter></board-filter>
+      <board-dnd></board-dnd>
+    </ng-container>
+
+    <!-- Chưa có project → form tạo mới -->
+    <ng-template #noProject>
+      <div class="empty-state">
+        <div class="empty-card">
+          <div class="empty-icon">📋</div>
+          <h2 class="empty-title">Chào mừng bạn!</h2>
+          <p class="empty-desc">Tạo project đầu tiên để bắt đầu quản lý công việc trên Kanban board.</p>
+
+          <div class="create-form">
+            <div class="field">
+              <label>Tên project <span class="required">*</span></label>
+              <input
+                [(ngModel)]="newProjectName"
+                placeholder="Ví dụ: Website Redesign"
+                (keydown.enter)="submitCreateProject()"
+                class="form-input" />
+            </div>
+            <div class="field mt-3">
+              <label>Mô tả (tuỳ chọn)</label>
+              <textarea
+                [(ngModel)]="newProjectDesc"
+                placeholder="Mô tả ngắn về project..."
+                rows="2"
+                class="form-input">
+              </textarea>
+            </div>
+            <p *ngIf="createError" class="error-msg">{{ createError }}</p>
+            <button
+              class="create-btn"
+              [disabled]="creating || !newProjectName.trim()"
+              (click)="submitCreateProject()">
+              {{ creating ? 'Đang tạo...' : 'Tạo Project & Board' }}
+            </button>
+            <p class="empty-hint">Board sẽ tự động có 4 cột: Backlog · Selected · In Progress · Done</p>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </ng-template>
+</div>

@@ -1,0 +1,36 @@
+<div class="status-list">
+  <div class="column-header px-3 pb-3 pt-3 uppercase text-textMedium text-13 truncate flex items-center justify-between"
+    cdkDragHandle
+    title="Kéo để di chuyển cột">
+    <span class="drag-handle-icon">⠿</span>
+    <span class="flex-1 truncate mx-2">
+      {{ columnName || IssueStatusDisplay[status] }}
+      <span class="lowercase text-13">{{ issuesCount }}</span>
+    </span>
+    <button
+      *ngIf="permissionService.canManageBoard$ | async"
+      (click)="deleteColumn()"
+      nz-tooltip
+      nzTooltipTitle="Xóa cột"
+      class="delete-col-btn"
+      title="Xóa cột">
+      <i nz-icon nzType="close" nzTheme="outline"></i>
+    </button>
+  </div>
+
+  <div class="pl-2 pr-1 overflow-y-auto"
+    style="flex: 1 1 0; min-height: 0;"
+    cdkDropList
+    [id]="status"
+    [cdkDropListData]="issues"
+    [cdkDropListConnectedTo]="connectedListIds"
+    (cdkDropListDropped)="drop($event)">
+    @for (issue of issues; track issue) {
+      <issue-card
+        [issue]="issue"
+        cdkDrag
+        [cdkDragData]="issue">
+      </issue-card>
+    }
+  </div>
+</div>

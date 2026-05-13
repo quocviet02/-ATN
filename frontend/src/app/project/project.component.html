@@ -1,0 +1,10 @@
+<div class="w-full h-full flex">
+    <app-navigation [expanded]="expanded" (manualToggle)="manualToggle()"></app-navigation>
+    <div id="content"
+         [style.background]="(projectQuery.background$ | async) || null"
+         [style.backgroundSize]="'cover'"
+         [style.backgroundPosition]="'center'">
+        <router-outlet></router-outlet>
+    </div>
+</div>
+<svg-definitions></svg-definitions>

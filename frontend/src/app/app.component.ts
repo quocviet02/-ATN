@@ -1,0 +1,38 @@
+import { Component, ViewEncapsulation, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
+import { environment } from '../environments/environment';
+import { ProjectQuery } from './project/state/project/project.query';
+import { GoogleAnalyticsService } from './core/services/google-analytics.service';
+import { AsyncPipe } from '@angular/common';
+import { SnowComponent } from './core/snow/snow.component';
+import { NzSpinComponent } from 'ng-zorro-antd/spin';
+
+@Component({
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    imports: [NzSpinComponent, RouterOutlet, SnowComponent, AsyncPipe]
+})
+export class AppComponent implements AfterViewInit {
+  constructor(
+    public router: Router,
+    public projectQuery: ProjectQuery,
+    private _cdr: ChangeDetectorRef,
+    private _googleAnalytics: GoogleAnalyticsService
+  ) {
+    if (environment.production) {
+      this.router.events.subscribe(this.handleGoogleAnalytics);
+    }
+  }
+
+  handleGoogleAnalytics = (event: any): void => {
+    if (event instanceof NavigationEnd) {
+      this._googleAnalytics.sendPageView(event.urlAfterRedirects);
+    }
+  };
+
+  ngAfterViewInit() {
+    this._cdr.detectChanges();
+  }
+}

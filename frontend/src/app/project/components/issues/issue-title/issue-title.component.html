@@ -1,0 +1,11 @@
+<ng-container *ngIf="canEdit; else readonlyTitle">
+  <textarea class="textarea-inline-control"
+            cdkTextareaAutosize
+            [formControl]="titleControl"
+            [rows]="1"
+            (blur)="onBlur()">
+  </textarea>
+</ng-container>
+<ng-template #readonlyTitle>
+  <div class="textarea-inline-control readonly-title">{{ issue?.title }}</div>
+</ng-template>

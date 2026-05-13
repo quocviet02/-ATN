@@ -1,0 +1,58 @@
+# ── Biến môi trường / Secrets ────────────────────────────────────────────────
+# KHÔNG bao giờ commit file này — chứa JWT secret, API key, MongoDB URI
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+
+# ── Node / npm ────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.bak
+
+# ── Build output ──────────────────────────────────────────────────────────────
+frontend/dist/
+frontend/.angular/
+frontend/docs/
+frontend/documentation.json
+
+# ── Angular cache / temp ──────────────────────────────────────────────────────
+.angular/
+.sass-cache/
+
+# ── Test / Coverage ───────────────────────────────────────────────────────────
+coverage/
+frontend/coverage/
+backend/coverage/
+*.lcov
+.nyc_output/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── IDE / Editor ─────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp

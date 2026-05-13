@@ -1,0 +1,49 @@
+<div class="mt-6 mb-1 uppercase text-textMedium text-13 font-bold">
+  Assignees
+</div>
+
+@for (assignee of assignees; track assignee) {
+  <j-button [className]="'btn-secondary mr-1-5 mb-2'">
+    <div class="flex items-center">
+      <j-user [user]="assignee"></j-user>
+      <svg-icon *ngIf="canAssignSelf || canAssignOthers"
+        (click)="removeUser(assignee.id)"
+        title="Remove user"
+        [size]="20"
+        [name]="'times'"
+        class="text-textLight">
+      </svg-icon>
+    </div>
+  </j-button>
+}
+
+<!-- Assign to me -->
+<div *ngIf="canAssignSelf && !isAlreadyAssignedToMe" class="mt-1">
+  <a class="add-more" (click)="assignToMe()">
+    <i class="mr-1" nz-icon nzType="user-add" nzTheme="outline"></i>
+    Gán cho tôi
+  </a>
+</div>
+
+<!-- Assign others dropdown -->
+<div *ngIf="canAssignOthers">
+  <a class="add-more"
+    nz-dropdown
+    [nzTrigger]="'click'"
+    [nzDropdownMenu]="menu">
+    <i class="mr-1" nz-icon nzType="plus" nzTheme="outline"></i>
+    Add Assignee
+  </a>
+
+  <nz-dropdown-menu #menu="nzDropdownMenu">
+    <ul class="mt-3" nz-menu nzNoAnimation>
+      @for (option of users; track option) {
+        @if (!isUserSelected(option)) {
+          <li nz-menu-item (click)="addUserToIssue(option)">
+            <j-user [user]="option"></j-user>
+          </li>
+        }
+      }
+    </ul>
+  </nz-dropdown-menu>
+</div>

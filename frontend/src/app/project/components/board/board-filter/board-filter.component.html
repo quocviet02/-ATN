@@ -1,0 +1,43 @@
+<div class="flex items-center mt-6">
+  <form class="w-40 mr-4">
+    <j-input aria-label="search" icon="search" [control]="searchControl"></j-input>
+  </form>
+
+  <!-- Member avatars -->
+  <div class="flex flex-row mr-3">
+    @for (user of projectQuery.users$ | async; track user.id) {
+      <div
+        class="lift-avatar"
+        nz-tooltip
+        [nzTooltipPlacement]="'bottom'"
+        [nzTooltipTitle]="user.name + (isUserSelected(user) ? ' (đang lọc)' : '')"
+        [class.is-active]="isUserSelected(user)"
+        (click)="userChanged(user)">
+        <j-avatar
+          className="select-none shadow-outline-white"
+          [avatarUrl]="user.avatarUrl"
+          [name]="user.name"
+          [size]="36">
+        </j-avatar>
+      </div>
+    }
+  </div>
+
+  <j-button class="ml-3" className="btn-empty"
+    [isActive]="filterQuery.onlyMyIssue$ | async"
+    (click)="onlyMyIssueChanged()">
+    Only My Issues
+  </j-button>
+  <j-button class="ml-3" className="btn-empty"
+    [isActive]="filterQuery.ignoreResolve$ | async"
+    (click)="ignoreResolvedChanged()">
+    Ignore Resolved
+  </j-button>
+
+  @if (filterQuery.any$ | async) {
+    <div class="ml-3 flex items-center">
+      <div class="mr-3 w-px bg-backgroundMedium self-stretch"></div>
+      <j-button [className]="'btn-secondary'" (click)="resetAll()">Clear all</j-button>
+    </div>
+  }
+</div>

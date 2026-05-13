@@ -1,0 +1,7 @@
+@if (avatarUrl) {
+  <div [ngClass]="['avatar-container', className]" [ngStyle]="containerStyle"></div>
+} @else {
+  <div [ngClass]="['avatar-container', 'avatar-initials', className]" [ngStyle]="containerStyle">
+    <span [ngStyle]="initialsStyle">{{ initials }}</span>
+  </div>
+}

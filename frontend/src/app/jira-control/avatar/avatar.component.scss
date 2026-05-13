@@ -1,0 +1,21 @@
+.avatar-container {
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-initials {
+  background: #0052cc;
+  color: #fff;
+  font-weight: 600;
+  user-select: none;
+
+  span {
+    display: block;
+    text-align: center;
+  }
+}

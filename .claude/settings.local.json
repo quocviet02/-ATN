@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(claude-api)",
+      "Bash(npx ng *)",
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem \"D:\\\\ĐATN\\\\backend\" -File)",
+      "Bash(Select-Object Name)"
+    ]
+  }
+}

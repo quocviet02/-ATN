@@ -1,0 +1,107 @@
+<div class="pr-6 py-8 pl-8 h-full w-full flex flex-col">
+  <breadcrumbs [items]="breadcrumbs"></breadcrumbs>
+  <div class="mt-3 mb-6 text-2xl font-medium">Thành viên dự án</div>
+
+  <!-- Invite form — owner hoặc admin -->
+  <ng-container *ngIf="permissionService.canManageBoard$ | async">
+    <div class="invite-box">
+      <h3 class="invite-title">Thêm thành viên mới</h3>
+      <div class="invite-row">
+        <input
+          class="invite-input"
+          [(ngModel)]="inviteEmail"
+          placeholder="Email của thành viên"
+          type="email"
+          (keydown.enter)="inviteMember()" />
+
+        <select class="invite-select" [(ngModel)]="inviteRole">
+          <option value="member">Member</option>
+          <option value="admin" *ngIf="myRole === 'owner'">Admin</option>
+        </select>
+
+        <button
+          class="invite-btn"
+          [disabled]="inviteLoading || !inviteEmail.trim()"
+          (click)="inviteMember()">
+          {{ inviteLoading ? 'Đang thêm...' : 'Thêm' }}
+        </button>
+      </div>
+      <p class="invite-error" *ngIf="inviteError">{{ inviteError }}</p>
+    </div>
+  </ng-container>
+
+  <!-- Member list -->
+  <div class="member-list" *ngIf="!loading; else spinner">
+    <div class="member-block" *ngFor="let m of members">
+      <!-- Main row -->
+      <div class="member-row">
+        <j-avatar [avatarUrl]="m.avatar" [name]="m.name" [size]="40"></j-avatar>
+
+        <div class="member-info">
+          <div class="member-name">{{ m.name }}</div>
+          <div class="member-email">{{ m.email }}</div>
+        </div>
+
+        <!-- Role badge / select -->
+        <div class="member-role">
+          <ng-container *ngIf="canChangeRole(m); else roleBadge">
+            <select
+              class="role-select"
+              [ngModel]="m.role"
+              (ngModelChange)="changeRole(m, $event)">
+              <option value="admin">Admin</option>
+              <option value="member">Member</option>
+            </select>
+          </ng-container>
+          <ng-template #roleBadge>
+            <span [ngClass]="['role-badge', roleColors[m.role]]">{{ m.role | uppercase }}</span>
+          </ng-template>
+        </div>
+
+        <!-- Remove button -->
+        <button
+          *ngIf="canRemove(m)"
+          class="remove-btn"
+          title="Xóa khỏi project"
+          (click)="removeMember(m)">
+          ✕
+        </button>
+      </div>
+
+      <!-- Permission row — visible to Owner, only for non-owner members -->
+      <div class="perm-row" *ngIf="myRole === 'owner' && m.role !== 'owner'">
+        <div class="perm-label">Quyền:</div>
+        <div class="perm-toggles">
+          <label class="perm-toggle">
+            <input type="checkbox" [(ngModel)]="m.canEditTask"
+              (ngModelChange)="updatePermission(m, 'canEditTask', $event)">
+            <span>Sửa task</span>
+          </label>
+          <label class="perm-toggle">
+            <input type="checkbox" [(ngModel)]="m.canDragTask"
+              (ngModelChange)="updatePermission(m, 'canDragTask', $event)">
+            <span>Kéo thả</span>
+          </label>
+          <label class="perm-toggle">
+            <input type="checkbox" [(ngModel)]="m.canAssignSelf"
+              (ngModelChange)="updatePermission(m, 'canAssignSelf', $event)">
+            <span>Gán bản thân</span>
+          </label>
+          <label class="perm-toggle">
+            <input type="checkbox" [(ngModel)]="m.canAssignOthers"
+              (ngModelChange)="updatePermission(m, 'canAssignOthers', $event)">
+            <span>Gán người khác</span>
+          </label>
+        </div>
+        <div class="perm-actions">
+          <button class="perm-btn perm-grant" (click)="grantAll(m)">Cấp tất cả</button>
+          <button class="perm-btn perm-revoke" (click)="revokeAll(m)">Thu hồi tất cả</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #spinner>
+    <div class="loading-text">Đang tải danh sách thành viên...</div>
+  </ng-template>
+</div>
