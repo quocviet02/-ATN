@@ -76,6 +76,8 @@ function mapTask(task: any, columnIdToStatus: Record<string, IssueStatus>, proje
   };
 }
 
+const STORAGE_KEY = 'selectedProjectId';
+
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
   baseUrl: string;
@@ -90,62 +92,17 @@ export class ProjectService {
 
   getProject() {
     this._store.setLoading(true);
+    const savedId = localStorage.getItem(STORAGE_KEY);
 
-    // 1. Get the first accessible project
     this._http.get<{ projects: any[] }>(`${this.baseUrl}/projects`).pipe(
       switchMap(({ projects }) => {
         if (!projects.length) {
           this._store.setLoading(false);
           return of(null);
         }
-        const proj   = projects[0];
-        const myRole = proj.myRole ?? '';
-
-        // 2. Get boards + members + my permissions in parallel
-        return forkJoin({
-          boardsRes:   this._http.get<{ boards: any[] }>(`${this.baseUrl}/projects/${proj.id}/boards`),
-          membersRes:  this._http.get<{ members: any[] }>(`${this.baseUrl}/projects/${proj.id}/members`),
-          myPermsRes:  this._http.get<{ permissions: MyPermissions }>(`${this.baseUrl}/projects/${proj.id}/my-permissions`)
-        }).pipe(
-          switchMap(({ boardsRes, membersRes, myPermsRes }) => {
-            const boards      = boardsRes.boards;
-            const members     = membersRes.members;
-            const myPerms     = myPermsRes.permissions;
-            const users: JUser[] = members.map((m: any) => mapBackendUser(m.user));
-
-            if (!boards.length) {
-              this._applyProject(proj, myRole, '', {}, {}, [], [], users, myPerms);
-              return of(null);
-            }
-
-            const boardId = boards[0].id;
-
-            // 3. Get full board detail (columns + tasks)
-            return this._http.get<{ board: any; columns: any[] }>(`${this.baseUrl}/projects/${proj.id}/boards/${boardId}`).pipe(
-              tap(({ columns }) => {
-                const columnIdToStatus: Record<string, IssueStatus> = {};
-                const columnStatusToId: Record<string, string>       = {};
-                const columnList: ProjectColumn[] = [];
-
-                columns.forEach((col, idx) => {
-                  const status = positionToStatus(idx);
-                  columnIdToStatus[col.id] = status;
-                  if (!columnStatusToId[status]) columnStatusToId[status] = col.id;
-                  columnList.push({ id: col.id, name: col.name, status });
-                });
-
-                const issues: JIssue[] = [];
-                columns.forEach((col) => {
-                  (col.tasks || []).forEach((t: any) => {
-                    issues.push(mapTask(t, columnIdToStatus, proj.id));
-                  });
-                });
-
-                this._applyProject(proj, myRole, boardId, columnIdToStatus, columnStatusToId, issues, columnList, users, myPerms);
-              })
-            );
-          })
-        );
+        const proj = (savedId ? projects.find(p => p.id === savedId) : null) ?? projects[0];
+        if (!savedId) localStorage.setItem(STORAGE_KEY, proj.id);
+        return this._loadProjectData(proj);
       }),
       catchError((err) => {
         this._store.setError(err);
@@ -153,6 +110,76 @@ export class ProjectService {
         return of(null);
       })
     ).subscribe(() => this._store.setLoading(false));
+  }
+
+  switchToProject(projectId: string): Observable<void> {
+    localStorage.setItem(STORAGE_KEY, projectId);
+    this._http.put(`${this.baseUrl}/projects/${projectId}/last-accessed`, {}).subscribe();
+    this._store.setLoading(true);
+
+    return this._http.get<{ projects: any[] }>(`${this.baseUrl}/projects`).pipe(
+      switchMap(({ projects }) => {
+        const proj = projects.find(p => p.id === projectId);
+        if (!proj) {
+          this._store.setLoading(false);
+          return of(undefined as void);
+        }
+        return this._loadProjectData(proj).pipe(switchMap(() => of(undefined as void)));
+      }),
+      catchError((e) => {
+        this._store.setError(e);
+        this._store.setLoading(false);
+        return of(undefined as void);
+      }),
+      tap(() => this._store.setLoading(false))
+    );
+  }
+
+  private _loadProjectData(proj: any): Observable<any> {
+    const myRole = proj.myRole ?? '';
+    return forkJoin({
+      boardsRes:  this._http.get<{ boards: any[] }>(`${this.baseUrl}/projects/${proj.id}/boards`),
+      membersRes: this._http.get<{ members: any[] }>(`${this.baseUrl}/projects/${proj.id}/members`),
+      myPermsRes: this._http.get<{ permissions: MyPermissions }>(`${this.baseUrl}/projects/${proj.id}/my-permissions`)
+    }).pipe(
+      switchMap(({ boardsRes, membersRes, myPermsRes }) => {
+        const boards  = boardsRes.boards;
+        const members = membersRes.members;
+        const myPerms = myPermsRes.permissions;
+        const users: JUser[] = members.map((m: any) => mapBackendUser(m.user));
+
+        if (!boards.length) {
+          this._applyProject(proj, myRole, '', {}, {}, [], [], users, myPerms);
+          return of(null);
+        }
+
+        const boardId = boards[0].id;
+
+        return this._http.get<{ board: any; columns: any[] }>(`${this.baseUrl}/projects/${proj.id}/boards/${boardId}`).pipe(
+          tap(({ columns }) => {
+            const columnIdToStatus: Record<string, IssueStatus> = {};
+            const columnStatusToId: Record<string, string>      = {};
+            const columnList: ProjectColumn[] = [];
+
+            columns.forEach((col, idx) => {
+              const status = positionToStatus(idx);
+              columnIdToStatus[col.id] = status;
+              if (!columnStatusToId[status]) columnStatusToId[status] = col.id;
+              columnList.push({ id: col.id, name: col.name, status });
+            });
+
+            const issues: JIssue[] = [];
+            columns.forEach((col) => {
+              (col.tasks || []).forEach((t: any) => {
+                issues.push(mapTask(t, columnIdToStatus, proj.id));
+              });
+            });
+
+            this._applyProject(proj, myRole, boardId, columnIdToStatus, columnStatusToId, issues, columnList, users, myPerms);
+          })
+        );
+      })
+    );
   }
 
   private _applyProject(
@@ -216,11 +243,13 @@ export class ProjectService {
 
   setupNewProject(name: string, description = ''): Observable<void> {
     const DEFAULT_COLUMNS = ['Backlog', 'Selected for Development', 'In Progress', 'Done'];
+    let newProjectId = '';
     return this._http.post<{ project: any }>(`${this.baseUrl}/projects`, { name, description }).pipe(
-      switchMap(({ project }) =>
-        this._http.post<{ board: any }>(`${this.baseUrl}/projects/${project.id}/boards`, { name: 'Kanban Board' }).pipe(
+      switchMap(({ project }) => {
+        newProjectId = project.id;
+        localStorage.setItem(STORAGE_KEY, project.id);
+        return this._http.post<{ board: any }>(`${this.baseUrl}/projects/${project.id}/boards`, { name: 'Kanban Board' }).pipe(
           switchMap(({ board }) => {
-            // Create columns sequentially so positions are correct
             const createCol$ = (colName: string) =>
               this._http.post(`${this.baseUrl}/projects/${project.id}/boards/${board.id}/columns`, { name: colName });
             return DEFAULT_COLUMNS.reduce(
@@ -228,10 +257,9 @@ export class ProjectService {
               of(null) as Observable<any>
             );
           })
-        )
-      ),
-      tap(() => this.getProject()),
-      switchMap(() => of(undefined as void))
+        );
+      }),
+      switchMap(() => this.switchToProject(newProjectId))
     );
   }
 
@@ -247,20 +275,18 @@ export class ProjectService {
     const state     = this._store.getValue();
     const prevIssue = state.issues.find((x) => x.id === issue.id);
 
-    // New issue (created via modal with a temp ID) → create via API
     if (!prevIssue) {
       const columnId = state.columnStatusToId[issue.status];
       if (!columnId) return;
 
       this._http.post<{ task: any }>(`${this.baseUrl}/columns/${columnId}/tasks`, {
-        title:      issue.title,
+        title:       issue.title,
         description: issue.description,
-        priority:   backendPriority(issue.priority),
-        assigneeId: issue.userIds?.[0] ?? null
+        priority:    backendPriority(issue.priority),
+        assigneeId:  issue.userIds?.[0] ?? null
       }).pipe(
         tap(({ task }) => {
           const newIssue = mapTask(task, state.columnIdToStatus, state.id);
-          // Replace temp-ID entry with real entry
           this._store.update((s) => ({
             ...s,
             issues: arrayUpsert(s.issues, newIssue.id, newIssue)
@@ -273,7 +299,6 @@ export class ProjectService {
     const columnId     = state.columnStatusToId[issue.status];
     const prevColumnId = state.columnStatusToId[prevIssue.status];
 
-    // Optimistic local update
     this._store.update((s) => ({ ...s, issues: arrayUpsert(s.issues, issue.id, issue) }));
 
     if (!columnId) return;
@@ -309,7 +334,6 @@ export class ProjectService {
     const isNew = !issue.comments?.some((c) => c.id === comment.id);
 
     if (isNew) {
-      // POST new comment
       this._http.post<{ comment: any }>(`${this.baseUrl}/tasks/${issueId}/comments`, {
         content: comment.body
       }).pipe(
@@ -320,7 +344,6 @@ export class ProjectService {
         })
       ).subscribe();
     } else {
-      // PATCH existing comment — update local state only (no edit API wired here)
       const comments = arrayUpsert(issue.comments ?? [], comment.id, comment);
       this.updateIssueLocal({ ...issue, comments });
     }

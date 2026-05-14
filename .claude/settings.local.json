@@ -5,7 +5,14 @@
       "Bash(npx ng *)",
       "Bash(npx tsc *)",
       "Bash(Get-ChildItem \"D:\\\\ĐATN\\\\backend\" -File)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(Get-ChildItem *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"require\\('nodemailer'\\); console.log\\('nodemailer OK'\\)\")",
+      "Bash(node --check src/server.js)",
+      "Bash(node --check src/services/notificationService.js)",
+      "Bash(node --check src/controllers/notificationController.js)",
+      "Bash(node --check src/models/Notification.js)"
     ]
   }
 }

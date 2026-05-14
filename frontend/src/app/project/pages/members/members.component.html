@@ -5,12 +5,12 @@
   <!-- Invite form — owner hoặc admin -->
   <ng-container *ngIf="permissionService.canManageBoard$ | async">
     <div class="invite-box">
-      <h3 class="invite-title">Thêm thành viên mới</h3>
+      <h3 class="invite-title">Gửi lời mời qua email</h3>
       <div class="invite-row">
         <input
           class="invite-input"
           [(ngModel)]="inviteEmail"
-          placeholder="Email của thành viên"
+          placeholder="Email người được mời"
           type="email"
           (keydown.enter)="inviteMember()" />
 
@@ -23,10 +23,37 @@
           class="invite-btn"
           [disabled]="inviteLoading || !inviteEmail.trim()"
           (click)="inviteMember()">
-          {{ inviteLoading ? 'Đang thêm...' : 'Thêm' }}
+          {{ inviteLoading ? 'Đang gửi...' : 'Gửi lời mời' }}
         </button>
       </div>
       <p class="invite-error" *ngIf="inviteError">{{ inviteError }}</p>
+    </div>
+
+    <!-- Pending invitations -->
+    <div class="pending-box" *ngIf="pendingInvitations.length > 0 || invitationsLoading">
+      <h3 class="pending-title">Lời mời đang chờ</h3>
+      <div class="pending-loading" *ngIf="invitationsLoading">Đang tải...</div>
+      <div class="pending-list" *ngIf="!invitationsLoading">
+        <div class="pending-item" *ngFor="let inv of pendingInvitations">
+          <div class="pending-email">{{ inv.email }}</div>
+          <div class="pending-meta">
+            <span class="pending-role role-badge" [ngClass]="{'badge-admin': inv.role === 'admin', 'badge-member': inv.role === 'member'}">
+              {{ inv.role | uppercase }}
+            </span>
+            <span class="pending-status" [ngClass]="'status-' + inv.status">{{ statusLabel(inv.status) }}</span>
+            <span class="pending-hours" *ngIf="inv.status === 'pending'">
+              còn {{ hoursLeft(inv.expiredAt) }}h
+            </span>
+          </div>
+          <button
+            class="cancel-btn"
+            *ngIf="inv.status === 'pending'"
+            title="Hủy lời mời"
+            (click)="cancelInvitation(inv)">
+            ✕
+          </button>
+        </div>
+      </div>
     </div>
   </ng-container>
 

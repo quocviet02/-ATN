@@ -6,6 +6,39 @@ function err(res, status, message, error) {
   return res.status(status).json({ statusCode: status, message, error });
 }
 
+// ─── GET /api/projects/my-projects ───────────────────────────────────────────
+
+exports.getMyProjects = async (req, res) => {
+  try {
+    const memberships = await ProjectMember.find({ user: req.user._id })
+      .populate({ path: 'projectId', select: 'id name description background' })
+      .sort({ lastAccessedAt: -1, createdAt: -1 });
+
+    const validMemberships = memberships.filter(m => m.projectId != null);
+
+    const projectIds = validMemberships.map(m => m.projectId._id);
+    const counts = await ProjectMember.aggregate([
+      { $match: { projectId: { $in: projectIds } } },
+      { $group: { _id: '$projectId', count: { $sum: 1 } } }
+    ]);
+    const countMap = {};
+    counts.forEach(c => { countMap[c._id.toString()] = c.count; });
+
+    const projects = validMemberships.map(m => ({
+      id:             m.projectId.id,
+      name:           m.projectId.name,
+      description:    m.projectId.description || '',
+      role:           m.role,
+      memberCount:    countMap[m.projectId._id.toString()] || 1,
+      lastAccessedAt: m.lastAccessedAt || null,
+    }));
+
+    res.json({ projects });
+  } catch (e) {
+    err(res, 500, e.message, 'Internal Server Error');
+  }
+};
+
 // ─── GET /api/projects ────────────────────────────────────────────────────────
 
 exports.getProjects = async (req, res) => {

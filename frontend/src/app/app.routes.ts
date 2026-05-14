@@ -7,6 +7,14 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./auth/login/login.component').then((m) => m.LoginComponent)
   },
   {
+    path: 'invite/accept/:token',
+    loadComponent: () => import('./invite/invite-accept.component').then((m) => m.InviteAcceptComponent)
+  },
+  {
+    path: 'invite/reject/:token',
+    loadComponent: () => import('./invite/invite-reject.component').then((m) => m.InviteRejectComponent)
+  },
+  {
     path: 'project',
     canActivate: [AuthGuard],
     loadChildren: () => import('./project/project.routes').then((m) => m.PROJECT_ROUTES)

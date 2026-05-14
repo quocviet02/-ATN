@@ -1,0 +1,105 @@
+<div class="switcher-wrap">
+
+  <!-- ── Trigger ─────────────────────────────────────────── -->
+  <div class="switcher-trigger" (click)="toggleDropdown()" [class.open]="isOpen">
+    <div class="proj-av" [style.background]="color(currentProjectName)">
+      {{ avatar(currentProjectName) }}
+    </div>
+    <div class="proj-info">
+      <div class="proj-name">{{ currentProjectName || 'Chọn dự án' }}</div>
+      <span class="role-chip" [ngClass]="roleClass(currentRole)">{{ roleLabel(currentRole) }}</span>
+    </div>
+    <span class="arrow" [class.rotated]="isOpen">
+      <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+        <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <span class="switching-spinner" *ngIf="switching"></span>
+  </div>
+
+  <!-- ── Dropdown (position:fixed, calculated on open) ──── -->
+  <div class="dropdown-panel"
+       *ngIf="isOpen"
+       [style.top]="dropdownStyle.top"
+       [style.left]="dropdownStyle.left"
+       [style.width]="dropdownStyle.width"
+       (click)="$event.stopPropagation()">
+
+    <!-- Search -->
+    <div class="dp-search">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+        <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <input class="dp-search-input"
+             [(ngModel)]="searchQuery"
+             placeholder="Tìm kiếm dự án..."
+             autofocus />
+    </div>
+
+    <!-- Recent section -->
+    <ng-container *ngIf="showRecentSection">
+      <div class="dp-section-label">TRUY CẬP GẦN ĐÂY</div>
+      <div class="dp-proj-item"
+           *ngFor="let p of recentProjects"
+           (click)="selectProject(p)"
+           [class.active]="p.id === currentProjectId">
+        <div class="dp-av" [style.background]="color(p.name)">{{ avatar(p.name) }}</div>
+        <span class="dp-name">{{ p.name }}</span>
+        <span class="dp-role" [ngClass]="roleClass(p.role)">{{ roleLabel(p.role) }}</span>
+        <span class="dp-check" *ngIf="p.id === currentProjectId">✓</span>
+      </div>
+      <div class="dp-divider"></div>
+    </ng-container>
+
+    <!-- All projects -->
+    <div class="dp-section-label">DỰ ÁN CỦA TÔI</div>
+
+    <!-- Skeleton while loading -->
+    <ng-container *ngIf="loadingProjects">
+      <div class="dp-skeleton" *ngFor="let i of [1,2,3]"></div>
+    </ng-container>
+
+    <!-- Project list -->
+    <ng-container *ngIf="!loadingProjects">
+      <div class="dp-proj-item"
+           *ngFor="let p of filteredProjects"
+           (click)="selectProject(p)"
+           [class.active]="p.id === currentProjectId">
+        <div class="dp-av" [style.background]="color(p.name)">{{ avatar(p.name) }}</div>
+        <span class="dp-name">{{ p.name }}</span>
+        <span class="dp-role" [ngClass]="roleClass(p.role)">{{ roleLabel(p.role) }}</span>
+        <span class="dp-check" *ngIf="p.id === currentProjectId">✓</span>
+      </div>
+      <div class="dp-empty" *ngIf="filteredProjects.length === 0">
+        Không tìm thấy dự án
+      </div>
+    </ng-container>
+
+    <div class="dp-divider"></div>
+
+    <!-- Create project -->
+    <ng-container *ngIf="!showCreateForm">
+      <div class="dp-create-btn" (click)="showCreateForm = true">
+        <span class="dp-create-icon">+</span>
+        Tạo dự án mới
+      </div>
+    </ng-container>
+    <ng-container *ngIf="showCreateForm">
+      <div class="dp-create-form">
+        <input class="dp-create-input"
+               [(ngModel)]="newProjectName"
+               placeholder="Tên dự án..."
+               (keydown.enter)="submitCreateProject()"
+               (keydown.escape)="showCreateForm = false" />
+        <div class="dp-create-actions">
+          <button class="dp-btn-create" (click)="submitCreateProject()" [disabled]="!newProjectName.trim() || creating">
+            {{ creating ? '...' : 'Tạo' }}
+          </button>
+          <button class="dp-btn-cancel" (click)="showCreateForm = false; newProjectName = ''">Hủy</button>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

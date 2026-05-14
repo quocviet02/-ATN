@@ -9,6 +9,7 @@ import { BoardComponent } from './pages/board/board.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { MembersComponent } from './pages/members/members.component';
 import { FullIssueDetailComponent } from './pages/full-issue-detail/full-issue-detail.component';
+import { NotificationsComponent } from './pages/notifications/notifications.component';
 import { ProjectConst } from './config/const';
 
 export const PROJECT_ROUTES: Routes = [
@@ -38,6 +39,10 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: `issue/:${ProjectConst.IssueId}`,
         component: FullIssueDetailComponent
+      },
+      {
+        path: 'notifications',
+        component: NotificationsComponent
       },
       {
         path: '',

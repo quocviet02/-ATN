@@ -19,6 +19,7 @@ const projectMemberSchema = new mongoose.Schema(
     canDragTask:    { type: Boolean, default: false },
     canAssignSelf:  { type: Boolean, default: false },
     canAssignOthers:{ type: Boolean, default: false },
+    lastAccessedAt: { type: Date, default: null },
   },
   { timestamps: true, toJSON: JSON_OPTS }
 );

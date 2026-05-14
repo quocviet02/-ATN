@@ -1,5 +1,6 @@
-const { Task, Column, User } = require('../models');
-const activityLogger = require('../utils/activityLogger');
+const { Task, Column, User, ProjectMember } = require('../models');
+const activityLogger   = require('../utils/activityLogger');
+const notifService     = require('../services/notificationService');
 
 const USER_SELECT = 'id name email avatar';
 
@@ -92,6 +93,17 @@ exports.createTask = async (req, res) => {
         { assigneeId: null },
         { assigneeId: task.assignee._id ?? task.assignee }
       );
+      const assigneeId = task.assignee._id ?? task.assignee;
+      if (assigneeId.toString() !== req.user.id) {
+        notifService.create({
+          recipient: assigneeId,
+          type:      'task_assigned',
+          title:     'Bạn được giao một task mới',
+          body:      `"${task.title}" đã được giao cho bạn bởi ${req.user.name}`,
+          link:      `/project/board`,
+          meta:      { taskId: task.id },
+        });
+      }
     }
 
     res.status(201).json({ task });
@@ -143,6 +155,16 @@ exports.updateTask = async (req, res) => {
         { assigneeId: snapshot.assigneeId },
         { assigneeId: newAssigneeId }
       );
+      if (newAssigneeId && newAssigneeId !== req.user.id) {
+        notifService.create({
+          recipient: newAssigneeId,
+          type:      'task_assigned',
+          title:     'Bạn được giao một task',
+          body:      `"${task.title}" đã được giao cho bạn bởi ${req.user.name}`,
+          link:      `/project/board`,
+          meta:      { taskId: task.id },
+        });
+      }
     }
 
     const oldDiff = {};

@@ -132,6 +132,20 @@ exports.getMyPermissions = async (req, res) => {
   }
 };
 
+// ─── PUT /api/projects/:id/last-accessed ────────────────────────────────────
+
+exports.updateLastAccessed = async (req, res) => {
+  try {
+    await ProjectMember.findOneAndUpdate(
+      { projectId: req.params.id, user: req.user._id },
+      { $set: { lastAccessedAt: new Date() } }
+    );
+    res.json({ success: true });
+  } catch (e) {
+    err(res, 500, e.message, 'Internal Server Error');
+  }
+};
+
 // ─── DELETE /api/projects/:id/members/:userId ────────────────────────────────
 
 exports.removeMember = async (req, res) => {

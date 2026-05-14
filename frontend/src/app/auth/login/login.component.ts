@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '@trungk18/project/auth/auth.service';
 
 @Component({
@@ -46,7 +46,12 @@ export class LoginComponent {
   loading = false;
   error = '';
 
-  constructor(private _fb: FormBuilder, private _auth: AuthService, private _router: Router) {
+  constructor(
+    private _fb: FormBuilder,
+    private _auth: AuthService,
+    private _router: Router,
+    private _route: ActivatedRoute
+  ) {
     this.form = this._fb.group({
       email:    ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
@@ -58,8 +63,9 @@ export class LoginComponent {
     this.loading = true;
     this.error = '';
     const { email, password } = this.form.value;
+    const returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/project';
     this._auth.login(email, password).subscribe({
-      next: () => this._router.navigate(['/project']),
+      next: () => this._router.navigateByUrl(returnUrl),
       error: (err) => {
         this.error = err.error?.message || 'Login failed. Please try again.';
         this.loading = false;

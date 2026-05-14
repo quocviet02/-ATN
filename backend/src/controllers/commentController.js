@@ -1,5 +1,6 @@
-const { Comment } = require('../models');
+const { Comment, Task } = require('../models');
 const activityLogger = require('../utils/activityLogger');
+const notifService   = require('../services/notificationService');
 
 const USER_SELECT = 'id name email avatar';
 
@@ -41,6 +42,21 @@ exports.createComment = async (req, res) => {
       commentId: comment.id,
       preview:   comment.content.slice(0, 100),
     });
+
+    // Notify task assignee (if not the commenter)
+    Task.findById(taskId).select('assignee title').then((task) => {
+      if (!task) return;
+      if (task.assignee && task.assignee.toString() !== req.user.id) {
+        notifService.create({
+          recipient: task.assignee,
+          type:      'comment_added',
+          title:     'Bình luận mới trên task của bạn',
+          body:      `${req.user.name}: "${comment.content.slice(0, 80)}"`,
+          link:      `/project/board`,
+          meta:      { taskId, commentId: comment.id },
+        });
+      }
+    }).catch(() => {});
 
     res.status(201).json({ comment });
   } catch (e) {

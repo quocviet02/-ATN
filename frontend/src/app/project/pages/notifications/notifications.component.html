@@ -1,0 +1,44 @@
+<div class="notif-page">
+  <div class="notif-header">
+    <h1 class="notif-heading">Thông báo</h1>
+    <div class="notif-actions">
+      <button class="btn-filter" [class.active]="unreadOnly" (click)="toggleFilter()">
+        {{ unreadOnly ? 'Tất cả' : 'Chưa đọc' }}
+      </button>
+      <button class="btn-read-all" (click)="markAllRead()">Đánh dấu tất cả đã đọc</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="notif-list" *ngIf="loading">
+    <div class="notif-skeleton" *ngFor="let i of [1,2,3,4,5]"></div>
+  </div>
+
+  <!-- List -->
+  <div class="notif-list" *ngIf="!loading">
+    <div class="notif-item"
+         *ngFor="let n of notifications"
+         [class.unread]="!n.isRead"
+         (click)="markRead(n)">
+      <div class="notif-icon">{{ typeIcon(n.type) }}</div>
+      <div class="notif-content">
+        <div class="notif-title">{{ n.title }}</div>
+        <div class="notif-body" *ngIf="n.body">{{ n.body }}</div>
+        <div class="notif-time">{{ relativeTime(n.createdAt) }}</div>
+      </div>
+      <button class="notif-delete" title="Xóa" (click)="$event.stopPropagation(); remove(n)">✕</button>
+    </div>
+
+    <div class="notif-empty" *ngIf="notifications.length === 0">
+      <div class="empty-icon">🔔</div>
+      <p>Không có thông báo nào</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="notif-pagination" *ngIf="totalPages > 1">
+    <button class="pg-btn" [disabled]="page === 1" (click)="prevPage()">← Trước</button>
+    <span class="pg-info">Trang {{ page }} / {{ totalPages }}</span>
+    <button class="pg-btn" [disabled]="page === totalPages" (click)="nextPage()">Sau →</button>
+  </div>
+</div>

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, NgClass, NgFor, NgIf, UpperCasePipe } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass, NgFor, NgIf, UpperCasePipe } from '@angular/common';
 import { ProjectQuery } from '@trungk18/project/state/project/project.query';
 import { ProjectStore } from '@trungk18/project/state/project/project.store';
 import { PermissionService } from '@trungk18/core/services/permission.service';
@@ -10,6 +10,15 @@ import { AvatarComponent } from '../../../jira-control/avatar/avatar.component';
 import { BreadcrumbsComponent } from '../../../jira-control/breadcrumbs/breadcrumbs.component';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { environment } from 'src/environments/environment';
+
+export interface InvitationItem {
+  id:         string;
+  email:      string;
+  role:       'admin' | 'member';
+  status:     string;
+  expiredAt:  string;
+  createdAt:  string;
+}
 
 export interface MemberItem {
   memberId:        string;
@@ -29,7 +38,7 @@ export interface MemberItem {
   templateUrl: './members.component.html',
   styleUrls:  ['./members.component.scss'],
   standalone: true,
-  imports: [BreadcrumbsComponent, AvatarComponent, FormsModule, AsyncPipe, NgIf, NgFor, NgClass, UpperCasePipe]
+  imports: [BreadcrumbsComponent, AvatarComponent, FormsModule, AsyncPipe, NgIf, NgFor, NgClass, UpperCasePipe, DatePipe]
 })
 export class MembersComponent implements OnInit {
   readonly breadcrumbs = ['Projects', 'Members'];
@@ -39,11 +48,15 @@ export class MembersComponent implements OnInit {
   myRole   = '';
   projectId = '';
 
-  // Add-member form
-  inviteEmail = '';
+  // Invite form
+  inviteEmail   = '';
   inviteRole: 'admin' | 'member' = 'member';
-  inviteError  = '';
+  inviteError   = '';
   inviteLoading = false;
+
+  // Pending invitations
+  pendingInvitations: InvitationItem[] = [];
+  invitationsLoading = false;
 
   readonly roleColors: Record<string, string> = {
     owner:  'badge-owner',
@@ -64,6 +77,7 @@ export class MembersComponent implements OnInit {
       if (p.id && p.id !== this.projectId) {
         this.projectId = p.id;
         this.loadMembers();
+        this.loadInvitations();
       }
     });
     this._projectQuery.myRole$.pipe(untilDestroyed(this)).subscribe(r => this.myRole = r);
@@ -99,51 +113,60 @@ export class MembersComponent implements OnInit {
     this.inviteLoading = true;
     this.inviteError   = '';
 
-    this._http.post<{ member: any }>(
-      `${environment.apiUrl}/projects/${this.projectId}/members`,
+    this._http.post<{ invitation: InvitationItem }>(
+      `${environment.apiUrl}/projects/${this.projectId}/invitations`,
       { email, role: this.inviteRole }
     ).subscribe({
-      next: ({ member }) => {
-        this.members.push({
-          memberId:        member.id,
-          userId:          member.user.id,
-          name:            member.user.name,
-          email:           member.user.email,
-          avatar:          member.user.avatar || '',
-          role:            member.role,
-          canEditTask:     false,
-          canDragTask:     false,
-          canAssignSelf:   false,
-          canAssignOthers: false
-        });
-
-        // Sync mới thành viên vào project store để dropdown Assignees cập nhật ngay
-        this._projectStore.update(s => ({
-          ...s,
-          users: [
-            ...s.users,
-            {
-              id:        member.user.id,
-              name:      member.user.name,
-              email:     member.user.email,
-              avatarUrl: member.user.avatar || '',
-              createdAt: member.user.createdAt || '',
-              updatedAt: member.user.updatedAt || '',
-              issueIds:  []
-            }
-          ]
-        }));
-
+      next: ({ invitation }) => {
+        this.pendingInvitations = [invitation, ...this.pendingInvitations];
         this.inviteEmail   = '';
         this.inviteRole    = 'member';
         this.inviteLoading = false;
-        this._notify.success('Đã thêm thành viên', `${member.user.name} đã được thêm vào project.`);
+        this._notify.success('Đã gửi lời mời', `Lời mời đã được gửi đến ${email}.`);
       },
       error: (err) => {
-        this.inviteError   = err.error?.message || 'Không thể thêm thành viên.';
+        this.inviteError   = err.error?.message || 'Không thể gửi lời mời.';
         this.inviteLoading = false;
       }
     });
+  }
+
+  loadInvitations(): void {
+    this.invitationsLoading = true;
+    this._http.get<{ invitations: InvitationItem[] }>(`${environment.apiUrl}/projects/${this.projectId}/invitations`)
+      .pipe(untilDestroyed(this))
+      .subscribe({
+        next: ({ invitations }) => {
+          this.pendingInvitations = invitations;
+          this.invitationsLoading = false;
+        },
+        error: () => { this.invitationsLoading = false; }
+      });
+  }
+
+  cancelInvitation(inv: InvitationItem): void {
+    this._http.delete(`${environment.apiUrl}/projects/${this.projectId}/invitations/${inv.id}`)
+      .subscribe({
+        next: () => {
+          this.pendingInvitations = this.pendingInvitations.filter(i => i.id !== inv.id);
+          this._notify.success('Đã hủy', `Lời mời đến ${inv.email} đã được hủy.`);
+        },
+        error: (err) => this._notify.error('Lỗi', err.error?.message || 'Không thể hủy lời mời.')
+      });
+  }
+
+  hoursLeft(expiredAt: string): number {
+    return Math.max(0, Math.round((new Date(expiredAt).getTime() - Date.now()) / 3_600_000));
+  }
+
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      pending:  'Đang chờ',
+      accepted: 'Đã chấp nhận',
+      rejected: 'Đã từ chối',
+      expired:  'Hết hạn'
+    };
+    return map[status] ?? status;
   }
 
   changeRole(m: MemberItem, newRole: 'admin' | 'member'): void {

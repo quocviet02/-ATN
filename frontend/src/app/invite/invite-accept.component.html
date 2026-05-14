@@ -1,0 +1,113 @@
+<div class="invite-page">
+  <div class="invite-card">
+    <div class="invite-logo">📋 Project Manager</div>
+
+    <!-- Loading -->
+    @if (state === 'loading') {
+      <div class="invite-center">
+        <div class="spinner"></div>
+        <p class="invite-sub">Đang tải thông tin lời mời...</p>
+      </div>
+    }
+
+    <!-- Idle — show invitation card -->
+    @if (state === 'idle' && invitation) {
+      <div class="invite-header">
+        <div class="avatar-wrap">
+          <img *ngIf="invitation.invitedBy.avatarUrl" [src]="invitation.invitedBy.avatarUrl" class="avatar" alt="">
+          <div *ngIf="!invitation.invitedBy.avatarUrl" class="avatar-fallback">
+            {{ invitation.invitedBy.name[0]?.toUpperCase() }}
+          </div>
+        </div>
+        <h2 class="invite-title">Bạn được mời tham gia project!</h2>
+        <p class="invite-sub">
+          <strong>{{ invitation.invitedBy.name }}</strong> đã mời bạn tham gia
+          <strong>{{ invitation.project.name }}</strong>
+        </p>
+      </div>
+
+      <div class="role-badge" [class.role-admin]="invitation.role === 'admin'">
+        {{ roleLabel }}
+      </div>
+
+      <div class="invite-actions">
+        <button class="btn-accept" (click)="accept()">
+          ✓ Chấp nhận lời mời
+        </button>
+        <button class="btn-reject" (click)="reject()">
+          ✕ Từ chối
+        </button>
+      </div>
+    }
+
+    <!-- Processing -->
+    @if (state === 'accepting') {
+      <div class="invite-center">
+        <div class="spinner"></div>
+        <p class="invite-sub">Đang xử lý...</p>
+      </div>
+    }
+
+    <!-- Accepted -->
+    @if (state === 'accepted' && invitation) {
+      <div class="invite-center">
+        <div class="state-icon success">✓</div>
+        <h2 class="invite-title">Chào mừng bạn đến với {{ invitation.project.name }}!</h2>
+        <p class="invite-sub">Đang chuyển hướng về board...</p>
+      </div>
+    }
+
+    <!-- Rejected -->
+    @if (state === 'rejected') {
+      <div class="invite-center">
+        <div class="state-icon neutral">✕</div>
+        <h2 class="invite-title">Bạn đã từ chối lời mời</h2>
+        <p class="invite-sub">Cảm ơn bạn đã phản hồi.</p>
+        <button class="btn-home" (click)="goHome()">Về trang chủ</button>
+      </div>
+    }
+
+    <!-- Expired -->
+    @if (state === 'expired') {
+      <div class="invite-center">
+        <div class="state-icon warn">⏱</div>
+        <h2 class="invite-title">Lời mời đã hết hạn</h2>
+        <p class="invite-sub">Lời mời này đã quá 48 giờ. Vui lòng liên hệ người quản lý project để được mời lại.</p>
+        <button class="btn-home" (click)="goHome()">Về trang chủ</button>
+      </div>
+    }
+
+    <!-- Email mismatch -->
+    @if (state === 'email_mismatch' && invitation) {
+      <div class="invite-center">
+        <div class="state-icon warn">⚠</div>
+        <h2 class="invite-title">Lời mời không dành cho tài khoản của bạn</h2>
+        <p class="invite-sub">
+          Lời mời này được gửi đến <strong>{{ maskedEmail }}</strong>.<br>
+          Vui lòng đăng nhập bằng đúng tài khoản được mời.
+        </p>
+        <button class="btn-home" (click)="goHome()">Về trang chủ</button>
+      </div>
+    }
+
+    <!-- Already processed -->
+    @if (state === 'already_processed' && invitation) {
+      <div class="invite-center">
+        <div class="state-icon neutral">ℹ</div>
+        <h2 class="invite-title">Lời mời này đã được xử lý</h2>
+        <p class="invite-sub">Trạng thái: <strong>{{ invitation.status }}</strong></p>
+        <button class="btn-home" (click)="goHome()">Về trang chủ</button>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (state === 'error') {
+      <div class="invite-center">
+        <div class="state-icon error">✕</div>
+        <h2 class="invite-title">Không tìm thấy lời mời</h2>
+        <p class="invite-sub">{{ errorMsg }}</p>
+        <button class="btn-home" (click)="goHome()">Về trang chủ</button>
+      </div>
+    }
+  </div>
+</div>

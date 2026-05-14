@@ -11,12 +11,13 @@ import { AvatarComponent } from '../../../../jira-control/avatar/avatar.componen
 import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { AsyncPipe, NgIf } from '@angular/common';
+import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 
 @Component({
     selector: 'app-navbar-left',
     templateUrl: './navbar-left.component.html',
     styleUrls: ['./navbar-left.component.scss'],
-    imports: [NzTooltipDirective, NzIconDirective, AvatarComponent, NzPopoverDirective, ButtonComponent, AsyncPipe, NgIf]
+    imports: [NzTooltipDirective, NzIconDirective, AvatarComponent, NzPopoverDirective, ButtonComponent, AsyncPipe, NgIf, NotificationBellComponent]
 })
 export class NavbarLeftComponent implements OnInit {
   items: NavItem[];
