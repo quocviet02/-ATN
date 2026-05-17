@@ -72,7 +72,8 @@ function mapTask(task: any, columnIdToStatus: Record<string, IssueStatus>, proje
     reporterId:    '',
     userIds:       task.assignee ? [task.assignee.id] : [],
     comments:      [],
-    projectId
+    projectId,
+    dueDate:       task.dueDate ? task.dueDate.split('T')[0] : undefined
   };
 }
 
@@ -316,7 +317,8 @@ export class ProjectService {
         title:       issue.title,
         description: issue.description,
         priority:    backendPriority(issue.priority),
-        assigneeId:  issue.userIds?.[0] ?? null
+        assigneeId:  issue.userIds?.[0] ?? null,
+        dueDate:     issue.dueDate || null
       }).subscribe();
     }
   }
@@ -378,6 +380,33 @@ export class ProjectService {
           this.updateIssueLocal({ ...issue, comments: mapped });
         }
       });
+  }
+
+  editComment(commentId: string, issueId: string, content: string): Observable<void> {
+    return this._http.put<{ comment: any }>(`${this.baseUrl}/comments/${commentId}`, { content }).pipe(
+      tap(({ comment: c }) => {
+        const issue = this._store.getValue().issues.find(x => x.id === issueId);
+        if (!issue) return;
+        const comments = (issue.comments || []).map(cm =>
+          cm.id === commentId
+            ? { ...cm, body: content, updatedAt: c.updatedAt || new Date().toISOString() }
+            : cm
+        );
+        this.updateIssueLocal({ ...issue, comments });
+      }),
+      switchMap(() => of(undefined as void))
+    );
+  }
+
+  deleteComment(commentId: string, issueId: string): Observable<void> {
+    return this._http.delete(`${this.baseUrl}/comments/${commentId}`).pipe(
+      tap(() => {
+        const issue = this._store.getValue().issues.find(x => x.id === issueId);
+        if (!issue) return;
+        this.updateIssueLocal({ ...issue, comments: (issue.comments || []).filter(c => c.id !== commentId) });
+      }),
+      switchMap(() => of(undefined as void))
+    );
   }
 
   private updateIssueLocal(issue: JIssue) {

@@ -12,7 +12,13 @@
       "Bash(node --check src/server.js)",
       "Bash(node --check src/services/notificationService.js)",
       "Bash(node --check src/controllers/notificationController.js)",
-      "Bash(node --check src/models/Notification.js)"
+      "Bash(node --check src/models/Notification.js)",
+      "Bash(node --check src/controllers/activityController.js)",
+      "Bash(node --check src/middleware/checkCommentOwner.js)",
+      "Bash(node --check src/routes/tasks.js)",
+      "Bash(dir src\\\\routes /b)",
+      "Bash(dir src\\\\controllers /b)",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\ĐATN\\\\frontend\\\\src\\\\app\\\\project\\\\components\\\\issues\" -Recurse -File | Where-Object { $_.Extension -in @\\('.ts', '.html', '.scss'\\) } | ForEach-Object { $_.FullName })"
     ]
   }
 }

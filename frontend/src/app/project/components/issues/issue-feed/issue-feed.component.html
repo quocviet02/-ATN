@@ -1,0 +1,163 @@
+<div class="feed-wrap">
+
+  <!-- ── Tab bar ─────────────────────────────────────────────────────── -->
+  <div class="tab-bar">
+    <button class="tab-btn" [class.active]="tab === 'all'" (click)="tab = 'all'">
+      Tất cả <span class="tab-count">({{ allItems.length }})</span>
+    </button>
+    <button class="tab-btn" [class.active]="tab === 'activity'" (click)="tab = 'activity'">
+      Hoạt động <span class="tab-count">({{ activities.length }})</span>
+    </button>
+    <button class="tab-btn" [class.active]="tab === 'comments'" (click)="tab = 'comments'">
+      Bình luận <span class="tab-count">({{ comments.length }})</span>
+    </button>
+  </div>
+
+  <!-- ── Loading skeleton ─────────────────────────────────────────────── -->
+  <div *ngIf="loadingActivities" class="skel-wrap">
+    <div class="skel-row" *ngFor="let i of [1,2,3]"></div>
+  </div>
+
+  <!-- ── Feed body ────────────────────────────────────────────────────── -->
+  <div class="feed-body" #feedBody *ngIf="!loadingActivities">
+
+    <!-- ════ ALL tab ════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="tab === 'all'">
+      <div class="empty-state" *ngIf="allItems.length === 0">Chưa có dữ liệu nào</div>
+
+      <ng-container *ngFor="let item of allItems">
+        <!-- Activity row -->
+        <ng-container *ngIf="item.feedType === 'activity'"
+          [ngTemplateOutlet]="actRow"
+          [ngTemplateOutletContext]="{ $implicit: item }">
+        </ng-container>
+        <!-- Comment row -->
+        <ng-container *ngIf="item.feedType === 'comment'"
+          [ngTemplateOutlet]="cmtRow"
+          [ngTemplateOutletContext]="{ $implicit: item }">
+        </ng-container>
+      </ng-container>
+
+      <ng-container [ngTemplateOutlet]="commentForm"></ng-container>
+    </ng-container>
+
+    <!-- ════ ACTIVITY tab ═══════════════════════════════════════════════ -->
+    <ng-container *ngIf="tab === 'activity'">
+      <div class="empty-state" *ngIf="activities.length === 0">Chưa có hoạt động nào</div>
+      <ng-container *ngFor="let act of activities"
+        [ngTemplateOutlet]="actRow"
+        [ngTemplateOutletContext]="{ $implicit: act }">
+      </ng-container>
+    </ng-container>
+
+    <!-- ════ COMMENTS tab ═══════════════════════════════════════════════ -->
+    <ng-container *ngIf="tab === 'comments'">
+      <div class="empty-state" *ngIf="comments.length === 0">
+        Chưa có bình luận nào. Hãy là người đầu tiên bình luận!
+      </div>
+      <ng-container *ngFor="let cmt of commentsAsFeed"
+        [ngTemplateOutlet]="cmtRow"
+        [ngTemplateOutletContext]="{ $implicit: cmt }">
+      </ng-container>
+      <ng-container [ngTemplateOutlet]="commentForm"></ng-container>
+    </ng-container>
+
+  </div><!-- /feed-body -->
+
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       TEMPLATES
+  ═══════════════════════════════════════════════════════════════════ -->
+
+  <!-- Activity row template -->
+  <ng-template #actRow let-item>
+    <div class="act-row">
+      <div class="act-line-dot"></div>
+      <j-avatar
+        [avatarUrl]="avatarOf(item.user)"
+        [name]="item.user?.name || ''"
+        [size]="24">
+      </j-avatar>
+      <div class="act-body">
+        <span class="act-text">{{ activityText(item) }}</span>
+        <span class="act-time">{{ relTime(item.createdAt) }}</span>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Comment row template -->
+  <ng-template #cmtRow let-item>
+    <div class="cmt-row">
+      <j-avatar
+        [avatarUrl]="avatarOf(item.user)"
+        [name]="item.user?.name || ''"
+        [size]="30">
+      </j-avatar>
+      <div class="cmt-body">
+        <div class="cmt-meta">
+          <span class="cmt-author">{{ item.user?.name }}</span>
+          <span class="cmt-time">{{ relTime(item.createdAt) }}</span>
+          <span class="cmt-edited" *ngIf="isEdited(item)">(đã chỉnh sửa)</span>
+        </div>
+
+        <!-- View mode -->
+        <ng-container *ngIf="editingId !== item.id">
+          <div class="cmt-content">{{ item.content }}</div>
+          <div class="cmt-actions">
+            <button class="cmt-link" *ngIf="canEdit(item)" (click)="startEdit(item)">
+              ✏️ Sửa
+            </button>
+            <button class="cmt-link cmt-del" *ngIf="canDelete(item)" (click)="deleteItem(item)">
+              🗑️ Xóa
+            </button>
+          </div>
+        </ng-container>
+
+        <!-- Edit mode -->
+        <ng-container *ngIf="editingId === item.id">
+          <textarea class="edit-area"
+            [(ngModel)]="editText"
+            rows="3"
+            (keydown.escape)="cancelEdit()">
+          </textarea>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveEdit(item)" [disabled]="!editText.trim()">Lưu</button>
+            <button class="btn-cancel-sm" (click)="cancelEdit()">Hủy</button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Comment form template -->
+  <ng-template #commentForm>
+    <div class="add-comment" *ngIf="currentUser">
+      <j-avatar
+        [avatarUrl]="currentUser.avatarUrl"
+        [name]="currentUser.name || ''"
+        [size]="30">
+      </j-avatar>
+      <div class="comment-input-wrap">
+        <textarea
+          class="comment-textarea"
+          [(ngModel)]="newCommentText"
+          [placeholder]="commentFocused ? '' : 'Nhập bình luận...'"
+          [rows]="commentFocused ? 3 : 1"
+          (focus)="commentFocused = true"
+          (keydown)="onCommentKeydown($event)">
+        </textarea>
+        <div class="comment-tip" *ngIf="commentFocused">
+          <span class="tip-text">Ctrl+Enter để gửi • Esc để hủy</span>
+          <div class="comment-btns">
+            <button class="btn-submit" (click)="submitComment()"
+              [disabled]="!newCommentText.trim() || submitting">
+              {{ submitting ? '...' : 'Gửi' }}
+            </button>
+            <button class="btn-cancel-sm" (click)="cancelComment()">Hủy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+</div>

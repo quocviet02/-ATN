@@ -12,8 +12,46 @@ exports.getActivities = async (req, res) => {
   try {
     const activities = await ActivityLog.find({ taskId: req.params.taskId })
       .populate('user', USER_SELECT)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: 1 });
     res.json({ activities });
+  } catch (e) {
+    err(res, 500, e.message, 'Internal Server Error');
+  }
+};
+
+// ─── GET /api/tasks/:taskId/feed ─────────────────────────────────────────────
+
+exports.getFeed = async (req, res) => {
+  try {
+    const { Comment } = require('../models');
+    const taskId = req.params.taskId;
+
+    const [activities, comments] = await Promise.all([
+      ActivityLog.find({ taskId }).populate('user', USER_SELECT).sort({ createdAt: 1 }),
+      Comment.find({ taskId, deletedAt: null }).populate('user', USER_SELECT).sort({ createdAt: 1 }),
+    ]);
+
+    const feed = [
+      ...activities.map(a => ({
+        feedType:  'activity',
+        id:        a._id,
+        action:    a.action,
+        oldValue:  a.oldValue,
+        newValue:  a.newValue,
+        createdAt: a.createdAt,
+        user:      a.user,
+      })),
+      ...comments.map(c => ({
+        feedType:  'comment',
+        id:        c._id,
+        content:   c.content,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+        user:      c.user,
+      })),
+    ].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    res.json({ feed });
   } catch (e) {
     err(res, 500, e.message, 'Internal Server Error');
   }

@@ -54,5 +54,6 @@ export interface JIssue {
   userIds: string[];
   comments: JComment[];
   projectId: string;
+  dueDate?: string;
 }
 

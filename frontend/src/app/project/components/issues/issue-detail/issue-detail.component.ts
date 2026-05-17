@@ -14,10 +14,12 @@ import { IssueAssigneesComponent } from '../issue-assignees/issue-assignees.comp
 import { IssueReporterComponent } from '../issue-reporter/issue-reporter.component';
 import { IssueStatusComponent } from '../issue-status/issue-status.component';
 import { IssueCommentsComponent } from '../issue-comments/issue-comments.component';
+import { IssueFeedComponent } from '../issue-feed/issue-feed.component';
 import { IssueDescriptionComponent } from '../issue-description/issue-description.component';
 import { IssueTitleComponent } from '../issue-title/issue-title.component';
 import { ButtonComponent } from '../../../../jira-control/button/button.component';
 import { IssueTypeComponent } from '../issue-type/issue-type.component';
+import { IssueDueDateComponent } from '../issue-due-date/issue-due-date.component';
 import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
 
 @UntilDestroy()
@@ -27,9 +29,10 @@ import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
     styleUrls: ['./issue-detail.component.scss'],
     imports: [
       IssueTypeComponent, ButtonComponent, IssueTitleComponent,
-      IssueDescriptionComponent, IssueCommentsComponent, IssueStatusComponent,
-      IssueReporterComponent, IssueAssigneesComponent, IssuePriorityComponent,
-      IssueLoaderComponent, AsyncPipe, DatePipe, NgIf
+      IssueDescriptionComponent, IssueCommentsComponent, IssueFeedComponent,
+      IssueStatusComponent, IssueReporterComponent, IssueAssigneesComponent,
+      IssuePriorityComponent, IssueDueDateComponent, IssueLoaderComponent,
+      AsyncPipe, DatePipe, NgIf
     ]
 })
 export class IssueDetailComponent implements OnInit, OnChanges {

@@ -6,11 +6,13 @@ const checkPermission  = require('../middleware/checkPermission');
 const taskCtrl         = require('../controllers/taskController');
 const commentCtrl      = require('../controllers/commentController');
 const activityCtrl     = require('../controllers/activityController');
+const aiCtrl           = require('../controllers/aiController');
 
 router.use(auth);
 
-// /:id/move must be declared before /:id to avoid being shadowed
-router.put('/:id/move', checkTask, checkPermission('canDragTask'), taskCtrl.moveTask);
+// Specific sub-routes must be declared before /:id to avoid being shadowed
+router.put( '/:id/move',             checkTask, checkPermission('canDragTask'),  taskCtrl.moveTask);
+router.post('/:id/suggest-deadline', checkTask, checkPermission('canEditTask'),  aiCtrl.suggestDeadline);
 
 router.get(   '/:id', checkTask, taskCtrl.getTask);
 router.put(   '/:id', checkTask, checkPermission('canEditTask'), taskCtrl.updateTask);
@@ -20,5 +22,6 @@ router.delete('/:id', checkTask, taskCtrl.deleteTask);
 router.get( '/:taskId/comments',   checkTaskAccess, commentCtrl.getComments);
 router.post('/:taskId/comments',   checkTaskAccess, commentCtrl.createComment);
 router.get( '/:taskId/activities', checkTaskAccess, activityCtrl.getActivities);
+router.get( '/:taskId/feed',       checkTaskAccess, activityCtrl.getFeed);
 
 module.exports = router;
