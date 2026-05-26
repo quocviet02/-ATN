@@ -4,12 +4,13 @@ import { Router } from '@angular/router';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { NotificationService, AppNotification } from '@trungk18/core/services/notification.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @UntilDestroy()
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [CommonModule, NzTooltipDirective],
+  imports: [CommonModule, NzTooltipDirective, TranslateModule],
   templateUrl: './notification-bell.component.html',
   styleUrls: ['./notification-bell.component.scss'],
 })
@@ -23,7 +24,8 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   constructor(
     private _notifService: NotificationService,
     private _router: Router,
-    private _elRef: ElementRef
+    private _elRef: ElementRef,
+    private _translate: TranslateService
   ) {}
 
   ngOnInit(): void {}
@@ -101,11 +103,11 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
   relativeTime(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const m = Math.floor(diff / 60000);
-    if (m < 1)  return 'Vừa xong';
-    if (m < 60) return `${m} phút trước`;
+    if (m < 1)  return this._translate.instant('time.justNow');
+    if (m < 60) return this._translate.instant('time.minutesAgo', { value: m });
     const h = Math.floor(m / 60);
-    if (h < 24) return `${h} giờ trước`;
+    if (h < 24) return this._translate.instant('time.hoursAgo', { value: h });
     const d = Math.floor(h / 24);
-    return `${d} ngày trước`;
+    return this._translate.instant('time.daysAgo', { value: d });
   }
 }

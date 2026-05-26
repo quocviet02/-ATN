@@ -1,11 +1,11 @@
 <div class="notif-page">
   <div class="notif-header">
-    <h1 class="notif-heading">Thông báo</h1>
+    <h1 class="notif-heading">{{ 'notification.title' | translate }}</h1>
     <div class="notif-actions">
       <button class="btn-filter" [class.active]="unreadOnly" (click)="toggleFilter()">
-        {{ unreadOnly ? 'Tất cả' : 'Chưa đọc' }}
+        {{ (unreadOnly ? 'notification.all' : 'notification.unreadOnly') | translate }}
       </button>
-      <button class="btn-read-all" (click)="markAllRead()">Đánh dấu tất cả đã đọc</button>
+      <button class="btn-read-all" (click)="markAllRead()">{{ 'notification.markAllReadAction' | translate }}</button>
     </div>
   </div>
 
@@ -26,19 +26,19 @@
         <div class="notif-body" *ngIf="n.body">{{ n.body }}</div>
         <div class="notif-time">{{ relativeTime(n.createdAt) }}</div>
       </div>
-      <button class="notif-delete" title="Xóa" (click)="$event.stopPropagation(); remove(n)">✕</button>
+      <button class="notif-delete" [title]="'notification.delete' | translate" (click)="$event.stopPropagation(); remove(n)">✕</button>
     </div>
 
     <div class="notif-empty" *ngIf="notifications.length === 0">
       <div class="empty-icon">🔔</div>
-      <p>Không có thông báo nào</p>
+      <p>{{ 'notification.empty' | translate }}</p>
     </div>
   </div>
 
   <!-- Pagination -->
   <div class="notif-pagination" *ngIf="totalPages > 1">
-    <button class="pg-btn" [disabled]="page === 1" (click)="prevPage()">← Trước</button>
-    <span class="pg-info">Trang {{ page }} / {{ totalPages }}</span>
-    <button class="pg-btn" [disabled]="page === totalPages" (click)="nextPage()">Sau →</button>
+    <button class="pg-btn" [disabled]="page === 1" (click)="prevPage()">{{ 'notification.prev' | translate }}</button>
+    <span class="pg-info">{{ 'notification.page' | translate }} {{ page }} {{ 'notification.of' | translate }} {{ totalPages }}</span>
+    <button class="pg-btn" [disabled]="page === totalPages" (click)="nextPage()">{{ 'notification.next' | translate }}</button>
   </div>
 </div>

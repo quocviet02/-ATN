@@ -2,7 +2,7 @@
 
   <!-- Bell trigger -->
   <div class="bell-btn" (click)="toggleDropdown()" [class.active]="isOpen"
-       nz-tooltip nzTooltipTitle="Thông báo" nzTooltipPlacement="right">
+       nz-tooltip [nzTooltipTitle]="'notification.title' | translate" nzTooltipPlacement="right">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -13,8 +13,8 @@
   <!-- Dropdown -->
   <div class="bell-dropdown" *ngIf="isOpen" (click)="$event.stopPropagation()">
     <div class="bd-header">
-      <span class="bd-title">Thông báo</span>
-      <button class="bd-read-all" (click)="markAllRead()">Đọc tất cả</button>
+      <span class="bd-title">{{ 'notification.title' | translate }}</span>
+      <button class="bd-read-all" (click)="markAllRead()">{{ 'notification.markAllRead' | translate }}</button>
     </div>
 
     <!-- Loading -->
@@ -37,10 +37,10 @@
         <div class="bd-dot" *ngIf="!n.isRead" (click)="markRead(n, $event)"></div>
       </div>
       <div class="bd-empty" *ngIf="notifications.length === 0">
-        Không có thông báo nào
+        {{ 'notification.empty' | translate }}
       </div>
     </ng-container>
 
-    <div class="bd-footer" (click)="goToAll()">Xem tất cả thông báo</div>
+    <div class="bd-footer" (click)="goToAll()">{{ 'notification.seeAll' | translate }}</div>
   </div>
 </div>

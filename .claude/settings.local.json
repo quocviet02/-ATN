@@ -18,7 +18,12 @@
       "Bash(node --check src/routes/tasks.js)",
       "Bash(dir src\\\\routes /b)",
       "Bash(dir src\\\\controllers /b)",
-      "PowerShell(Get-ChildItem -Path \"D:\\\\ĐATN\\\\frontend\\\\src\\\\app\\\\project\\\\components\\\\issues\" -Recurse -File | Where-Object { $_.Extension -in @\\('.ts', '.html', '.scss'\\) } | ForEach-Object { $_.FullName })"
+      "PowerShell(Get-ChildItem -Path \"D:\\\\ĐATN\\\\frontend\\\\src\\\\app\\\\project\\\\components\\\\issues\" -Recurse -File | Where-Object { $_.Extension -in @\\('.ts', '.html', '.scss'\\) } | ForEach-Object { $_.FullName })",
+      "Bash(npm list *)",
+      "Bash(xargs grep -l \"ai\\\\|suggest\\\\|gemini\\\\|claude\")",
+      "Bash(cat)",
+      "Bash(bash /tmp/extract_keys.sh)",
+      "Bash(xargs grep -l \"| *translate\")"
     ]
   }
 }

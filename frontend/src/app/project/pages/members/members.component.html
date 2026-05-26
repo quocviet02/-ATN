@@ -1,16 +1,16 @@
 <div class="pr-6 py-8 pl-8 h-full w-full flex flex-col">
   <breadcrumbs [items]="breadcrumbs"></breadcrumbs>
-  <div class="mt-3 mb-6 text-2xl font-medium">Thành viên dự án</div>
+  <div class="mt-3 mb-6 text-2xl font-medium">{{ 'member.title' | translate }}</div>
 
   <!-- Invite form — owner hoặc admin -->
   <ng-container *ngIf="permissionService.canManageBoard$ | async">
     <div class="invite-box">
-      <h3 class="invite-title">Gửi lời mời qua email</h3>
+      <h3 class="invite-title">{{ 'member.inviteTitle' | translate }}</h3>
       <div class="invite-row">
         <input
           class="invite-input"
           [(ngModel)]="inviteEmail"
-          placeholder="Email người được mời"
+          [placeholder]="'member.emailPlaceholder' | translate"
           type="email"
           (keydown.enter)="inviteMember()" />
 
@@ -23,7 +23,7 @@
           class="invite-btn"
           [disabled]="inviteLoading || !inviteEmail.trim()"
           (click)="inviteMember()">
-          {{ inviteLoading ? 'Đang gửi...' : 'Gửi lời mời' }}
+          {{ (inviteLoading ? 'member.sending' : 'member.invite') | translate }}
         </button>
       </div>
       <p class="invite-error" *ngIf="inviteError">{{ inviteError }}</p>
@@ -31,8 +31,8 @@
 
     <!-- Pending invitations -->
     <div class="pending-box" *ngIf="pendingInvitations.length > 0 || invitationsLoading">
-      <h3 class="pending-title">Lời mời đang chờ</h3>
-      <div class="pending-loading" *ngIf="invitationsLoading">Đang tải...</div>
+      <h3 class="pending-title">{{ 'member.pendingTitle' | translate }}</h3>
+      <div class="pending-loading" *ngIf="invitationsLoading">{{ 'member.loading' | translate }}</div>
       <div class="pending-list" *ngIf="!invitationsLoading">
         <div class="pending-item" *ngFor="let inv of pendingInvitations">
           <div class="pending-email">{{ inv.email }}</div>
@@ -42,13 +42,13 @@
             </span>
             <span class="pending-status" [ngClass]="'status-' + inv.status">{{ statusLabel(inv.status) }}</span>
             <span class="pending-hours" *ngIf="inv.status === 'pending'">
-              còn {{ hoursLeft(inv.expiredAt) }}h
+              {{ 'member.expiresIn' | translate: { hours: hoursLeft(inv.expiredAt) } }}
             </span>
           </div>
           <button
             class="cancel-btn"
             *ngIf="inv.status === 'pending'"
-            title="Hủy lời mời"
+            [title]="'member.cancelInvite' | translate"
             (click)="cancelInvitation(inv)">
             ✕
           </button>
@@ -89,7 +89,7 @@
         <button
           *ngIf="canRemove(m)"
           class="remove-btn"
-          title="Xóa khỏi project"
+          [title]="'member.removeFromProject' | translate"
           (click)="removeMember(m)">
           ✕
         </button>
@@ -97,38 +97,38 @@
 
       <!-- Permission row — visible to Owner, only for non-owner members -->
       <div class="perm-row" *ngIf="myRole === 'owner' && m.role !== 'owner'">
-        <div class="perm-label">Quyền:</div>
+        <div class="perm-label">{{ 'member.permissions' | translate }}</div>
         <div class="perm-toggles">
           <label class="perm-toggle">
             <input type="checkbox" [(ngModel)]="m.canEditTask"
               (ngModelChange)="updatePermission(m, 'canEditTask', $event)">
-            <span>Sửa task</span>
+            <span>{{ 'member.canEditTask' | translate }}</span>
           </label>
           <label class="perm-toggle">
             <input type="checkbox" [(ngModel)]="m.canDragTask"
               (ngModelChange)="updatePermission(m, 'canDragTask', $event)">
-            <span>Kéo thả</span>
+            <span>{{ 'member.canDragTask' | translate }}</span>
           </label>
           <label class="perm-toggle">
             <input type="checkbox" [(ngModel)]="m.canAssignSelf"
               (ngModelChange)="updatePermission(m, 'canAssignSelf', $event)">
-            <span>Gán bản thân</span>
+            <span>{{ 'member.canAssignSelf' | translate }}</span>
           </label>
           <label class="perm-toggle">
             <input type="checkbox" [(ngModel)]="m.canAssignOthers"
               (ngModelChange)="updatePermission(m, 'canAssignOthers', $event)">
-            <span>Gán người khác</span>
+            <span>{{ 'member.canAssignOthers' | translate }}</span>
           </label>
         </div>
         <div class="perm-actions">
-          <button class="perm-btn perm-grant" (click)="grantAll(m)">Cấp tất cả</button>
-          <button class="perm-btn perm-revoke" (click)="revokeAll(m)">Thu hồi tất cả</button>
+          <button class="perm-btn perm-grant" (click)="grantAll(m)">{{ 'member.grantAll' | translate }}</button>
+          <button class="perm-btn perm-revoke" (click)="revokeAll(m)">{{ 'member.revokeAll' | translate }}</button>
         </div>
       </div>
     </div>
   </div>
 
   <ng-template #spinner>
-    <div class="loading-text">Đang tải danh sách thành viên...</div>
+    <div class="loading-text">{{ 'member.loadingList' | translate }}</div>
   </ng-template>
 </div>

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { JIssue } from '@trungk18/interface/issue';
 import { ProjectService } from '@trungk18/project/state/project/project.service';
 import { environment } from 'src/environments/environment';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 interface SuggestionResult {
   suggestedDeadline: string;
@@ -18,7 +19,7 @@ interface SuggestionResult {
 @Component({
   selector: 'issue-due-date',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './issue-due-date.component.html',
   styleUrls: ['./issue-due-date.component.scss'],
 })
@@ -36,6 +37,7 @@ export class IssueDueDateComponent implements OnChanges {
   constructor(
     private _http: HttpClient,
     private _projectService: ProjectService,
+    private _translate: TranslateService,
   ) {}
 
   ngOnChanges(): void {
@@ -77,7 +79,7 @@ export class IssueDueDateComponent implements OnChanges {
     this.selectedDate = date;
     this._projectService.updateIssue({ ...this.issue, dueDate: date });
     this.showPopup = false;
-    this.showToast(`Đã áp dụng deadline: ${date}`);
+    this.showToast(date);
   }
 
   closePopup(): void {
@@ -93,11 +95,11 @@ export class IssueDueDateComponent implements OnChanges {
   }
 
   confidenceLabel(c: string): string {
-    return c === 'high' ? 'Cao' : c === 'medium' ? 'Trung bình' : 'Thấp';
+    return this._translate.instant(`issue.dueDate.confidence.${c}`);
   }
 
   private showToast(msg: string): void {
-    this.toastMsg = msg;
+    this.toastMsg = `${this._translate.instant('issue.dueDate.applied')} ${msg}`;
     setTimeout(() => { this.toastMsg = ''; }, 3000);
   }
 }

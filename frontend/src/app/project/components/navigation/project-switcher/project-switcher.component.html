@@ -6,7 +6,7 @@
       {{ avatar(currentProjectName) }}
     </div>
     <div class="proj-info">
-      <div class="proj-name">{{ currentProjectName || 'Chọn dự án' }}</div>
+      <div class="proj-name">{{ currentProjectName || ('switcher.selectProject' | translate) }}</div>
       <span class="role-chip" [ngClass]="roleClass(currentRole)">{{ roleLabel(currentRole) }}</span>
     </div>
     <span class="arrow" [class.rotated]="isOpen">
@@ -33,13 +33,13 @@
       </svg>
       <input class="dp-search-input"
              [(ngModel)]="searchQuery"
-             placeholder="Tìm kiếm dự án..."
+             [placeholder]="'switcher.searchPlaceholder' | translate"
              autofocus />
     </div>
 
     <!-- Recent section -->
     <ng-container *ngIf="showRecentSection">
-      <div class="dp-section-label">TRUY CẬP GẦN ĐÂY</div>
+      <div class="dp-section-label">{{ 'switcher.recent' | translate }}</div>
       <div class="dp-proj-item"
            *ngFor="let p of recentProjects"
            (click)="selectProject(p)"
@@ -53,7 +53,7 @@
     </ng-container>
 
     <!-- All projects -->
-    <div class="dp-section-label">DỰ ÁN CỦA TÔI</div>
+    <div class="dp-section-label">{{ 'switcher.myProjects' | translate }}</div>
 
     <!-- Skeleton while loading -->
     <ng-container *ngIf="loadingProjects">
@@ -72,7 +72,7 @@
         <span class="dp-check" *ngIf="p.id === currentProjectId">✓</span>
       </div>
       <div class="dp-empty" *ngIf="filteredProjects.length === 0">
-        Không tìm thấy dự án
+        {{ 'switcher.notFound' | translate }}
       </div>
     </ng-container>
 
@@ -82,21 +82,21 @@
     <ng-container *ngIf="!showCreateForm">
       <div class="dp-create-btn" (click)="showCreateForm = true">
         <span class="dp-create-icon">+</span>
-        Tạo dự án mới
+        {{ 'switcher.createNew' | translate }}
       </div>
     </ng-container>
     <ng-container *ngIf="showCreateForm">
       <div class="dp-create-form">
         <input class="dp-create-input"
                [(ngModel)]="newProjectName"
-               placeholder="Tên dự án..."
+               [placeholder]="'switcher.projectNamePlaceholder' | translate"
                (keydown.enter)="submitCreateProject()"
                (keydown.escape)="showCreateForm = false" />
         <div class="dp-create-actions">
           <button class="dp-btn-create" (click)="submitCreateProject()" [disabled]="!newProjectName.trim() || creating">
-            {{ creating ? '...' : 'Tạo' }}
+            {{ creating ? '...' : ('switcher.create' | translate) }}
           </button>
-          <button class="dp-btn-cancel" (click)="showCreateForm = false; newProjectName = ''">Hủy</button>
+          <button class="dp-btn-cancel" (click)="showCreateForm = false; newProjectName = ''">{{ 'switcher.cancel' | translate }}</button>
         </div>
       </div>
     </ng-container>

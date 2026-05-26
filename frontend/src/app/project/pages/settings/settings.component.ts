@@ -14,12 +14,13 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { ButtonComponent } from '../../../jira-control/button/button.component';
 import { AutofocusDirective } from '../../../core/directives/autofocus.directive';
 import { BreadcrumbsComponent } from '../../../jira-control/breadcrumbs/breadcrumbs.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @UntilDestroy()
 @Component({
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.scss'],
-    imports: [BreadcrumbsComponent, ReactiveFormsModule, AutofocusDirective, ButtonComponent, AsyncPipe, NgIf]
+    imports: [BreadcrumbsComponent, ReactiveFormsModule, AutofocusDirective, ButtonComponent, AsyncPipe, NgIf, TranslateModule]
 })
 export class SettingsComponent implements OnInit {
   project: JProject;
@@ -37,7 +38,8 @@ export class SettingsComponent implements OnInit {
     private _notification: NzNotificationService,
     private _modal: NzModalService,
     private _fb: UntypedFormBuilder,
-    private _router: Router
+    private _router: Router,
+    private _translate: TranslateService
   ) {
     this.categories = [ProjectCategory.BUSINESS, ProjectCategory.MARKETING, ProjectCategory.SOFTWARE];
   }
@@ -71,20 +73,20 @@ export class SettingsComponent implements OnInit {
   submitForm() {
     const formValue: Partial<JProject> = this.projectForm.getRawValue();
     this._projectService.updateProject(formValue);
-    this._notification.create('success', 'Changes have been saved successfully.', '');
+    this._notification.create('success', this._translate.instant('settings.save'), '');
   }
 
   confirmDeleteProject() {
     this._modal.confirm({
-      nzTitle:   'Xóa project?',
-      nzContent: 'Hành động này không thể hoàn tác. Tất cả board, cột và task sẽ bị xóa.',
-      nzOkText:  'Xóa',
+      nzTitle:   this._translate.instant('settings.deleteProjectTitle'),
+      nzContent: this._translate.instant('settings.deleteProjectDesc'),
+      nzOkText:  this._translate.instant('settings.deleteProjectBtn'),
       nzOkDanger: true,
       nzOnOk: () => {
         const obs = this._projectService.deleteProject();
         if (!obs) return;
         obs.subscribe(() => {
-          this._notification.create('success', 'Project đã được xóa.', '');
+          this._notification.create('success', this._translate.instant('settings.deleteProjectTitle'), '');
           this._router.navigate(['/login']);
         });
       }

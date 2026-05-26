@@ -1,5 +1,5 @@
 <div class="due-date-wrap">
-  <div class="field-label">Deadline</div>
+  <div class="field-label">{{ 'issue.dueDate.label' | translate }}</div>
 
   <div class="field-row">
     <input
@@ -9,12 +9,12 @@
       [disabled]="!canEdit"
       (change)="onDateChange(selectedDate)">
 
-    <button class="btn-clear" *ngIf="selectedDate && canEdit" (click)="clearDate()" title="Xóa deadline">
+    <button class="btn-clear" *ngIf="selectedDate && canEdit" (click)="clearDate()" [title]="'issue.dueDate.clearTitle' | translate">
       ×
     </button>
 
     <button class="btn-suggest" *ngIf="canEdit" (click)="openSuggest()">
-      ✨ Gợi ý
+      {{ 'issue.dueDate.suggest' | translate }}
     </button>
   </div>
 
@@ -23,14 +23,14 @@
     <div class="suggest-popup" (click)="$event.stopPropagation()">
 
       <div class="popup-header">
-        <span class="popup-title">✨ Gợi ý deadline AI</span>
+        <span class="popup-title">{{ 'issue.dueDate.popup.title' | translate }}</span>
         <button class="btn-close-popup" (click)="closePopup()">×</button>
       </div>
 
       <!-- Loading -->
       <div class="popup-loading" *ngIf="loading">
         <div class="spinner"></div>
-        <span>Đang phân tích task...</span>
+        <span>{{ 'issue.dueDate.popup.analyzing' | translate }}</span>
       </div>
 
       <!-- Error -->
@@ -41,11 +41,11 @@
 
         <div class="suggest-main">
           <span class="suggest-date">{{ suggestion.suggestedDeadline }}</span>
-          <span class="suggest-days">(~{{ suggestion.estimatedDays }} ngày làm việc)</span>
+          <span class="suggest-days">({{ 'issue.dueDate.popup.workingDays' | translate: { days: suggestion.estimatedDays } }})</span>
         </div>
 
         <div class="conf-row">
-          <span class="conf-label">Độ tin cậy: <strong>{{ confidenceLabel(suggestion.confidence) }}</strong></span>
+          <span class="conf-label">{{ 'issue.dueDate.popup.confidence' | translate }} <strong>{{ confidenceLabel(suggestion.confidence) }}</strong></span>
           <div class="conf-bar-bg">
             <div class="conf-bar-fill"
               [style.width.%]="confidencePct(suggestion.confidence)"
@@ -63,21 +63,21 @@
         </ng-container>
 
         <ng-container *ngIf="suggestion.alternatives?.length">
-          <div class="alt-label">Lựa chọn khác:</div>
+          <div class="alt-label">{{ 'issue.dueDate.popup.alternatives' | translate }}</div>
           <div class="alt-list">
             <div class="alt-item" *ngFor="let alt of suggestion.alternatives">
               <span class="alt-date">{{ alt.date }}</span>
               <span class="alt-desc">{{ alt.label }}</span>
-              <button class="btn-choose" (click)="applyDate(alt.date)">Chọn</button>
+              <button class="btn-choose" (click)="applyDate(alt.date)">{{ 'issue.dueDate.popup.choose' | translate }}</button>
             </div>
           </div>
         </ng-container>
 
         <div class="popup-footer">
           <button class="btn-apply" (click)="applyDate(suggestion.suggestedDeadline)">
-            Áp dụng gợi ý
+            {{ 'issue.dueDate.popup.apply' | translate }}
           </button>
-          <button class="btn-cancel" (click)="closePopup()">Đóng</button>
+          <button class="btn-cancel" (click)="closePopup()">{{ 'issue.dueDate.popup.close' | translate }}</button>
         </div>
 
       </ng-container>

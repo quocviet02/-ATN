@@ -3,27 +3,28 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '@trungk18/project/auth/auth.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
   template: `
     <div class="login-page">
       <div class="login-box">
-        <h2>Sign in to your account</h2>
+        <h2>{{ 'auth.signInTitle' | translate }}</h2>
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="field">
-            <label>Email</label>
+            <label>{{ 'auth.email' | translate }}</label>
             <input type="email" formControlName="email" placeholder="you@example.com" />
           </div>
           <div class="field">
-            <label>Password</label>
-            <input type="password" formControlName="password" placeholder="Password" />
+            <label>{{ 'auth.password' | translate }}</label>
+            <input type="password" formControlName="password" [placeholder]="'auth.password' | translate" />
           </div>
           <p class="error" *ngIf="error">{{ error }}</p>
           <button type="submit" [disabled]="loading">
-            {{ loading ? 'Signing in…' : 'Sign in' }}
+            {{ (loading ? 'auth.signingIn' : 'auth.signIn') | translate }}
           </button>
         </form>
       </div>
@@ -50,7 +51,8 @@ export class LoginComponent {
     private _fb: FormBuilder,
     private _auth: AuthService,
     private _router: Router,
-    private _route: ActivatedRoute
+    private _route: ActivatedRoute,
+    private _translate: TranslateService
   ) {
     this.form = this._fb.group({
       email:    ['', [Validators.required, Validators.email]],
@@ -67,7 +69,7 @@ export class LoginComponent {
     this._auth.login(email, password).subscribe({
       next: () => this._router.navigateByUrl(returnUrl),
       error: (err) => {
-        this.error = err.error?.message || 'Login failed. Please try again.';
+        this.error = err.error?.message || this._translate.instant('auth.loginFailed');
         this.loading = false;
       }
     });

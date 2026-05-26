@@ -1,0 +1,182 @@
+{
+  "lang": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "auth": {
+    "signInTitle": "Sign in to your account",
+    "email": "Email",
+    "password": "Password",
+    "signingIn": "Signing in…",
+    "signIn": "Sign in",
+    "loginFailed": "Login failed. Please try again."
+  },
+  "nav": {
+    "searchIssues": "Search issues",
+    "createIssue": "Create issue",
+    "about": "About"
+  },
+  "notification": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "empty": "No notifications",
+    "seeAll": "See all notifications",
+    "unreadOnly": "Unread",
+    "all": "All",
+    "markAllReadAction": "Mark all as read",
+    "delete": "Delete",
+    "prev": "← Previous",
+    "next": "Next →",
+    "page": "Page",
+    "of": "of"
+  },
+  "time": {
+    "justNow": "Just now",
+    "minutesAgo": "{{value}} minutes ago",
+    "hoursAgo": "{{value}} hours ago",
+    "daysAgo": "{{value}} days ago",
+    "yesterday": "Yesterday"
+  },
+  "board": {
+    "title": "Kanban Board",
+    "background": "Background",
+    "changeBackground": "Change background",
+    "colorLabel": "Color",
+    "solidColors": "Solid colors",
+    "gradients": "Gradients",
+    "imageUrl": "Image (URL)",
+    "apply": "Apply",
+    "clearBackground": "Clear background",
+    "welcome": "Welcome!",
+    "createFirstDesc": "Create your first project to start managing tasks on the Kanban board.",
+    "projectName": "Project name",
+    "required": "*",
+    "projectNamePlaceholder": "e.g.: Website Redesign",
+    "descriptionOptional": "Description (optional)",
+    "descriptionPlaceholder": "Short project description...",
+    "creating": "Creating...",
+    "createProjectBoard": "Create Project & Board",
+    "boardHint": "Board will automatically have 4 columns: Backlog · Selected · In Progress · Done"
+  },
+  "settings": {
+    "title": "Project Settings",
+    "nameLabel": "Name",
+    "urlLabel": "URL",
+    "categoryLabel": "Category",
+    "descriptionLabel": "Description",
+    "projectNamePlaceholder": "Project Name",
+    "projectUrlPlaceholder": "Project URL",
+    "projectDescPlaceholder": "Project Description",
+    "save": "Save",
+    "cancel": "Cancel",
+    "dangerZone": "Danger Zone",
+    "deleteProjectTitle": "Delete this project",
+    "deleteProjectDesc": "All boards, columns and tasks will be permanently deleted.",
+    "deleteProjectBtn": "Delete Project"
+  },
+  "member": {
+    "title": "Project Members",
+    "inviteTitle": "Send email invitation",
+    "emailPlaceholder": "Invitee's email",
+    "sending": "Sending...",
+    "invite": "Send invitation",
+    "pendingTitle": "Pending invitations",
+    "loading": "Loading...",
+    "loadingList": "Loading member list...",
+    "cancelInvite": "Cancel invitation",
+    "expiresIn": "{{hours}}h left",
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "removeFromProject": "Remove from project",
+    "permissions": "Permissions:",
+    "canEditTask": "Edit tasks",
+    "canDragTask": "Drag & drop",
+    "canAssignSelf": "Assign self",
+    "canAssignOthers": "Assign others",
+    "grantAll": "Grant all",
+    "revokeAll": "Revoke all"
+  },
+  "issue": {
+    "delete": {
+      "title": "Are you sure you want to delete this issue?",
+      "warning": "This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "dueDate": {
+      "label": "Deadline",
+      "clearTitle": "Clear deadline",
+      "suggest": "✨ Suggest",
+      "popup": {
+        "title": "✨ AI Deadline Suggestion",
+        "analyzing": "Analyzing task...",
+        "workingDays": "~{{days}} working days",
+        "confidence": "Confidence:",
+        "alternatives": "Other options:",
+        "choose": "Choose",
+        "apply": "Apply suggestion",
+        "close": "Close"
+      },
+      "applied": "Applied deadline:",
+      "confidence": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      }
+    }
+  },
+  "feed": {
+    "tab": {
+      "all": "All",
+      "activity": "Activity",
+      "comments": "Comments"
+    },
+    "empty": {
+      "all": "No data yet",
+      "activity": "No activity yet",
+      "comments": "No comments yet. Be the first to comment!"
+    },
+    "comment": {
+      "placeholder": "Add a comment...",
+      "tip": "Ctrl+Enter to submit • Esc to cancel",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "edit": "✏️ Edit",
+      "delete": "🗑️ Delete",
+      "edited": "(edited)",
+      "save": "Save"
+    }
+  },
+  "activity": {
+    "someone": "Someone",
+    "noDate": "none",
+    "created": "{{name}} created this task",
+    "moved": "{{name}} moved task from \"{{from}}\" to \"{{to}}\"",
+    "assigned": "{{name}} assigned task to {{user}}",
+    "unassigned": "{{name}} unassigned task from {{user}}",
+    "changedAssignee": "{{name}} changed assignee",
+    "changedPriority": "{{name}} changed priority from \"{{from}}\" to \"{{to}}\"",
+    "changedDeadline": "{{name}} changed deadline from {{from}} to {{to}}",
+    "changedTitle": "{{name}} changed title from \"{{from}}\" to \"{{to}}\"",
+    "updatedDesc": "{{name}} updated description",
+    "updated": "{{name}} updated task",
+    "commented": "{{name}} added a comment",
+    "deleted": "{{name}} deleted task",
+    "performed": "{{name}} performed an action"
+  },
+  "switcher": {
+    "selectProject": "Select project",
+    "searchPlaceholder": "Search projects...",
+    "recent": "RECENTLY ACCESSED",
+    "myProjects": "MY PROJECTS",
+    "notFound": "No projects found",
+    "createNew": "Create new project",
+    "projectNamePlaceholder": "Project name...",
+    "create": "Create",
+    "cancel": "Cancel"
+  }
+}

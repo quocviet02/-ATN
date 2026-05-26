@@ -1,0 +1,182 @@
+{
+  "lang": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "auth": {
+    "signInTitle": "Đăng nhập tài khoản",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "signingIn": "Đang đăng nhập...",
+    "signIn": "Đăng nhập",
+    "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại."
+  },
+  "nav": {
+    "searchIssues": "Tìm kiếm task",
+    "createIssue": "Tạo task",
+    "about": "Giới thiệu"
+  },
+  "notification": {
+    "title": "Thông báo",
+    "markAllRead": "Đọc tất cả",
+    "empty": "Không có thông báo nào",
+    "seeAll": "Xem tất cả thông báo",
+    "unreadOnly": "Chưa đọc",
+    "all": "Tất cả",
+    "markAllReadAction": "Đánh dấu tất cả đã đọc",
+    "delete": "Xóa",
+    "prev": "← Trước",
+    "next": "Sau →",
+    "page": "Trang",
+    "of": "/"
+  },
+  "time": {
+    "justNow": "Vừa xong",
+    "minutesAgo": "{{value}} phút trước",
+    "hoursAgo": "{{value}} giờ trước",
+    "daysAgo": "{{value}} ngày trước",
+    "yesterday": "Hôm qua"
+  },
+  "board": {
+    "title": "Kanban Board",
+    "background": "Hình nền",
+    "changeBackground": "Đổi hình nền",
+    "colorLabel": "Màu",
+    "solidColors": "Màu đơn sắc",
+    "gradients": "Gradient",
+    "imageUrl": "Ảnh (URL)",
+    "apply": "Áp dụng",
+    "clearBackground": "Xóa hình nền",
+    "welcome": "Chào mừng bạn!",
+    "createFirstDesc": "Tạo project đầu tiên để bắt đầu quản lý công việc trên Kanban board.",
+    "projectName": "Tên project",
+    "required": "*",
+    "projectNamePlaceholder": "Ví dụ: Website Redesign",
+    "descriptionOptional": "Mô tả (tuỳ chọn)",
+    "descriptionPlaceholder": "Mô tả ngắn về project...",
+    "creating": "Đang tạo...",
+    "createProjectBoard": "Tạo Project & Board",
+    "boardHint": "Board sẽ tự động có 4 cột: Backlog · Selected · In Progress · Done"
+  },
+  "settings": {
+    "title": "Cài đặt dự án",
+    "nameLabel": "Tên",
+    "urlLabel": "URL",
+    "categoryLabel": "Danh mục",
+    "descriptionLabel": "Mô tả",
+    "projectNamePlaceholder": "Tên project",
+    "projectUrlPlaceholder": "URL project",
+    "projectDescPlaceholder": "Mô tả project",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "dangerZone": "Vùng nguy hiểm",
+    "deleteProjectTitle": "Xóa project này",
+    "deleteProjectDesc": "Toàn bộ board, column và task sẽ bị xóa vĩnh viễn.",
+    "deleteProjectBtn": "Xóa Project"
+  },
+  "member": {
+    "title": "Thành viên dự án",
+    "inviteTitle": "Gửi lời mời qua email",
+    "emailPlaceholder": "Email người được mời",
+    "sending": "Đang gửi...",
+    "invite": "Gửi lời mời",
+    "pendingTitle": "Lời mời đang chờ",
+    "loading": "Đang tải...",
+    "loadingList": "Đang tải danh sách thành viên...",
+    "cancelInvite": "Hủy lời mời",
+    "expiresIn": "còn {{hours}}h",
+    "status": {
+      "pending": "Đang chờ",
+      "accepted": "Đã chấp nhận",
+      "rejected": "Đã từ chối",
+      "expired": "Hết hạn"
+    },
+    "removeFromProject": "Xóa khỏi project",
+    "permissions": "Quyền:",
+    "canEditTask": "Sửa task",
+    "canDragTask": "Kéo thả",
+    "canAssignSelf": "Gán bản thân",
+    "canAssignOthers": "Gán người khác",
+    "grantAll": "Cấp tất cả",
+    "revokeAll": "Thu hồi tất cả"
+  },
+  "issue": {
+    "delete": {
+      "title": "Bạn có chắc muốn xóa task này?",
+      "warning": "Thao tác này không thể hoàn tác.",
+      "confirm": "Xóa",
+      "cancel": "Hủy"
+    },
+    "dueDate": {
+      "label": "Deadline",
+      "clearTitle": "Xóa deadline",
+      "suggest": "✨ Gợi ý",
+      "popup": {
+        "title": "✨ Gợi ý deadline AI",
+        "analyzing": "Đang phân tích task...",
+        "workingDays": "~{{days}} ngày làm việc",
+        "confidence": "Độ tin cậy:",
+        "alternatives": "Lựa chọn khác:",
+        "choose": "Chọn",
+        "apply": "Áp dụng gợi ý",
+        "close": "Đóng"
+      },
+      "applied": "Đã áp dụng deadline:",
+      "confidence": {
+        "high": "Cao",
+        "medium": "Trung bình",
+        "low": "Thấp"
+      }
+    }
+  },
+  "feed": {
+    "tab": {
+      "all": "Tất cả",
+      "activity": "Hoạt động",
+      "comments": "Bình luận"
+    },
+    "empty": {
+      "all": "Chưa có dữ liệu nào",
+      "activity": "Chưa có hoạt động nào",
+      "comments": "Chưa có bình luận nào. Hãy là người đầu tiên bình luận!"
+    },
+    "comment": {
+      "placeholder": "Nhập bình luận...",
+      "tip": "Ctrl+Enter để gửi • Esc để hủy",
+      "submit": "Gửi",
+      "cancel": "Hủy",
+      "edit": "✏️ Sửa",
+      "delete": "🗑️ Xóa",
+      "edited": "(đã chỉnh sửa)",
+      "save": "Lưu"
+    }
+  },
+  "activity": {
+    "someone": "Ai đó",
+    "noDate": "không có",
+    "created": "{{name}} đã tạo task này",
+    "moved": "{{name}} đã chuyển task từ \"{{from}}\" → \"{{to}}\"",
+    "assigned": "{{name}} đã giao task cho {{user}}",
+    "unassigned": "{{name}} đã hủy giao task của {{user}}",
+    "changedAssignee": "{{name}} đã thay đổi người thực hiện",
+    "changedPriority": "{{name}} đã đổi độ ưu tiên từ \"{{from}}\" → \"{{to}}\"",
+    "changedDeadline": "{{name}} đã đổi deadline từ {{from}} → {{to}}",
+    "changedTitle": "{{name}} đã đổi tên từ \"{{from}}\" → \"{{to}}\"",
+    "updatedDesc": "{{name}} đã cập nhật mô tả",
+    "updated": "{{name}} đã cập nhật task",
+    "commented": "{{name}} đã thêm bình luận",
+    "deleted": "{{name}} đã xóa task",
+    "performed": "{{name}} đã thực hiện thao tác"
+  },
+  "switcher": {
+    "selectProject": "Chọn dự án",
+    "searchPlaceholder": "Tìm kiếm dự án...",
+    "recent": "TRUY CẬP GẦN ĐÂY",
+    "myProjects": "DỰ ÁN CỦA TÔI",
+    "notFound": "Không tìm thấy dự án",
+    "createNew": "Tạo dự án mới",
+    "projectNamePlaceholder": "Tên dự án...",
+    "create": "Tạo",
+    "cancel": "Hủy"
+  }
+}

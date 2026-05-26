@@ -1,8 +1,11 @@
-import { enableProdMode, ErrorHandler, APP_INITIALIZER, importProvidersFrom } from '@angular/core';
+import { enableProdMode, ErrorHandler, inject, importProvidersFrom, provideAppInitializer } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { JwtInterceptor } from './app/core/interceptors/jwt.interceptor';
+import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { catchError, of } from 'rxjs';
 import { bootstrapApplication } from '@angular/platform-browser';
 import * as Sentry from '@sentry/angular';
 import { init, browserTracingIntegration } from '@sentry/angular';
@@ -15,6 +18,10 @@ import { NG_ENTITY_SERVICE_CONFIG } from '@datorama/akita-ng-entity-service';
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
 import { appRoutes } from './app/app.routes';
+
+function createTranslateLoader(http: HttpClient): TranslateLoader {
+  return new TranslateHttpLoader(http, '/assets/i18n/', '.json');
+}
 
 const initSentry = () => {
   init({
@@ -43,6 +50,18 @@ bootstrapApplication(AppComponent, {
             AkitaNgRouterStoreModule,
             QuillModule.forRoot()
         ),
+        provideTranslateService({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: createTranslateLoader,
+                deps: [HttpClient]
+            }
+        }),
+        provideAppInitializer(() => {
+            const translate = inject(TranslateService);
+            const lang = localStorage.getItem('language') || 'vi';
+            return translate.use(lang).pipe(catchError(() => of(null)));
+        }),
         {
             provide: NG_ENTITY_SERVICE_CONFIG,
             useValue: { baseUrl: 'https://jsonplaceholder.typicode.com' }
@@ -60,12 +79,7 @@ bootstrapApplication(AppComponent, {
             provide: Sentry.TraceService,
             deps: [Router],
         },
-        {
-            provide: APP_INITIALIZER,
-            useFactory: () => () => { },
-            deps: [Sentry.TraceService],
-            multi: true,
-        },
+        provideAppInitializer(() => { inject(Sentry.TraceService); }),
     ]
 })
   .catch((err) => console.error(err));

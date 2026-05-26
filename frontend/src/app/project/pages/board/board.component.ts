@@ -9,6 +9,7 @@ import { BoardFilterComponent } from '../../components/board/board-filter/board-
 import { BreadcrumbsComponent } from '../../../jira-control/breadcrumbs/breadcrumbs.component';
 import { NzSpinComponent } from 'ng-zorro-antd/spin';
 import { NzIconDirective } from 'ng-zorro-antd/icon';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface BgPreset {
   label: string;
@@ -22,7 +23,7 @@ export interface BgPreset {
     styleUrls: ['./board.component.scss'],
     imports: [BreadcrumbsComponent, BoardFilterComponent, BoardDndComponent,
               AsyncPipe, NgClass, NgIf, NgFor, UpperCasePipe, FormsModule,
-              NzSpinComponent, NzIconDirective]
+              NzSpinComponent, NzIconDirective, TranslateModule]
 })
 export class BoardComponent {
   breadcrumbs: string[] = ['Projects', 'Kanban Board'];
@@ -66,7 +67,8 @@ export class BoardComponent {
   constructor(
     public  projectQuery: ProjectQuery,
     public  permissionService: PermissionService,
-    private _projectService: ProjectService
+    private _projectService: ProjectService,
+    private _translate: TranslateService
   ) {}
 
   applyBackground(value: string): void {
@@ -97,7 +99,7 @@ export class BoardComponent {
       next:  () => { this.creating = false; },
       error: (err) => {
         this.creating = false;
-        this.createError = err.error?.message || 'Tạo project thất bại.';
+        this.createError = err.error?.message || this._translate.instant('board.createProjectBoard');
       }
     });
   }

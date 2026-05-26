@@ -8,6 +8,7 @@ import { ProjectQuery } from '@trungk18/project/state/project/project.query';
 import { ProjectService } from '@trungk18/project/state/project/project.service';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { environment } from 'src/environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface MyProject {
   id:             string;
@@ -24,7 +25,7 @@ const ROLE_PRIORITY: Record<string, number> = { owner: 0, admin: 1, member: 2 };
 @Component({
   selector: 'app-project-switcher',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './project-switcher.component.html',
   styleUrls: ['./project-switcher.component.scss']
 })

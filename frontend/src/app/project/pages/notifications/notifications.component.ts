@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { NotificationService, AppNotification } from '@trungk18/core/services/notification.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @UntilDestroy()
 @Component({
   selector: 'app-notifications-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss'],
 })
@@ -19,7 +20,10 @@ export class NotificationsComponent implements OnInit {
   total     = 0;
   unreadOnly = false;
 
-  constructor(private _notifService: NotificationService) {}
+  constructor(
+    private _notifService: NotificationService,
+    private _translate: TranslateService
+  ) {}
 
   ngOnInit(): void {
     this.load();
@@ -93,11 +97,11 @@ export class NotificationsComponent implements OnInit {
   relativeTime(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const m = Math.floor(diff / 60000);
-    if (m < 1)  return 'Vừa xong';
-    if (m < 60) return `${m} phút trước`;
+    if (m < 1)  return this._translate.instant('time.justNow');
+    if (m < 60) return this._translate.instant('time.minutesAgo', { value: m });
     const h = Math.floor(m / 60);
-    if (h < 24) return `${h} giờ trước`;
+    if (h < 24) return this._translate.instant('time.hoursAgo', { value: h });
     const d = Math.floor(h / 24);
-    return `${d} ngày trước`;
+    return this._translate.instant('time.daysAgo', { value: d });
   }
 }

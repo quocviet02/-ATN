@@ -57,7 +57,7 @@
     <div class="item" *ngIf="permissionService.canCreateTask$ | async">
       <div (click)="openCreateIssueModal()"
         nz-tooltip
-        nzTooltipTitle="Create issue"
+        [nzTooltipTitle]="'nav.createIssue' | translate"
         nzTooltipPlacement="right"
         class="itemIcon">
         <i class="text-xl text-white" nz-icon nzType="plus" nzTheme="outline"></i>
@@ -65,6 +65,11 @@
     </div>
 
     <div class="flex-auto"></div>
+
+    <!-- Language switcher -->
+    <div class="item">
+      <app-language-switcher></app-language-switcher>
+    </div>
 
     <!-- Notification bell -->
     <div class="item">
@@ -91,7 +96,7 @@
         [nzPopoverContent]="aboutPopoverTmpl"
         nzPopoverTrigger="click">
         <div nz-tooltip
-          nzTooltipTitle="About"
+          [nzTooltipTitle]="'nav.about' | translate"
           nzTooltipPlacement="right"
           class="itemIcon">
           <i class="text-xl text-white"

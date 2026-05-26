@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AuthQuery } from '@trungk18/project/auth/auth.query';
 import { PermissionService } from '@trungk18/core/services/permission.service';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';
@@ -12,26 +13,40 @@ import { NzIconDirective } from 'ng-zorro-antd/icon';
 import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
+import { LanguageSwitcherComponent } from '../language-switcher/language-switcher.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-navbar-left',
     templateUrl: './navbar-left.component.html',
     styleUrls: ['./navbar-left.component.scss'],
-    imports: [NzTooltipDirective, NzIconDirective, AvatarComponent, NzPopoverDirective, ButtonComponent, AsyncPipe, NgIf, NotificationBellComponent]
+    imports: [NzTooltipDirective, NzIconDirective, AvatarComponent, NzPopoverDirective, ButtonComponent, AsyncPipe, NgIf, NotificationBellComponent, LanguageSwitcherComponent, TranslateModule]
 })
-export class NavbarLeftComponent implements OnInit {
-  items: NavItem[];
+export class NavbarLeftComponent implements OnInit, OnDestroy {
+  items: NavItem[] = [];
+  private _langSub: Subscription;
 
   constructor(
     public authQuery: AuthQuery,
     public permissionService: PermissionService,
     private _drawerService: NzDrawerService,
-    private _modalService: NzModalService
+    private _modalService: NzModalService,
+    private _translate: TranslateService
   ) {}
 
   ngOnInit(): void {
+    this._buildNavItems();
+    this._langSub = this._translate.onTranslationChange.subscribe(() => this._buildNavItems());
+    this._langSub.add(this._translate.onLangChange.subscribe(() => this._buildNavItems()));
+  }
+
+  ngOnDestroy(): void {
+    this._langSub?.unsubscribe();
+  }
+
+  private _buildNavItems(): void {
     this.items = [
-      new NavItem('search', 'Search issues', this.openSearchDrawler.bind(this))
+      new NavItem('search', this._translate.instant('nav.searchIssues'), this.openSearchDrawler.bind(this))
     ];
   }
 

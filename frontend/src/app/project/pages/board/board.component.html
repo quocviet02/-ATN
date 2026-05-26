@@ -12,16 +12,16 @@
     <!-- Có project → hiển thị board bình thường -->
     <ng-container *ngIf="projectQuery.hasProject$ | async; else noProject">
       <header class="flex justify-between items-center mt-3 text-textDarkest">
-        <div class="text-2xl font-medium">Kanban Board</div>
+        <div class="text-2xl font-medium">{{ 'board.title' | translate }}</div>
 
         <div class="flex items-center gap-3">
           <!-- Background picker trigger — owner/admin only -->
           <div *ngIf="permissionService.canManageBoard$ | async" class="bg-picker-wrap">
             <button class="bg-picker-btn"
               (click)="showBgPicker = !showBgPicker"
-              title="Đổi hình nền">
+              [title]="'board.changeBackground' | translate">
               <i nz-icon nzType="bg-colors" nzTheme="outline"></i>
-              Hình nền
+              {{ 'board.background' | translate }}
             </button>
 
             <!-- Click-outside overlay -->
@@ -30,11 +30,11 @@
             <!-- Picker panel -->
             <div *ngIf="showBgPicker" class="bg-picker-panel">
               <div class="bg-picker-header">
-                <span>Màu</span>
+                <span>{{ 'board.colorLabel' | translate }}</span>
                 <button class="bg-close-btn" (click)="showBgPicker = false">✕</button>
               </div>
 
-              <div class="bg-section-label">Màu đơn sắc</div>
+              <div class="bg-section-label">{{ 'board.solidColors' | translate }}</div>
               <div class="bg-swatch-grid">
                 <button *ngFor="let p of BG_COLORS"
                   class="bg-swatch"
@@ -44,7 +44,7 @@
                 </button>
               </div>
 
-              <div class="bg-section-label">Gradient</div>
+              <div class="bg-section-label">{{ 'board.gradients' | translate }}</div>
               <div class="bg-swatch-grid">
                 <button *ngFor="let p of BG_GRADIENTS"
                   class="bg-swatch"
@@ -54,18 +54,18 @@
                 </button>
               </div>
 
-              <div class="bg-section-label">Ảnh (URL)</div>
+              <div class="bg-section-label">{{ 'board.imageUrl' | translate }}</div>
               <div class="bg-url-row">
                 <input class="bg-url-input"
                   [(ngModel)]="customBgUrl"
                   placeholder="https://..."
                   (keydown.enter)="applyCustomUrl()" />
-                <button class="bg-url-btn" (click)="applyCustomUrl()">Áp dụng</button>
+                <button class="bg-url-btn" (click)="applyCustomUrl()">{{ 'board.apply' | translate }}</button>
               </div>
 
               <button class="bg-clear-btn" (click)="clearBackground()">
                 <i nz-icon nzType="delete" nzTheme="outline"></i>
-                Xóa hình nền
+                {{ 'board.clearBackground' | translate }}
               </button>
             </div>
           </div>
@@ -84,23 +84,23 @@
       <div class="empty-state">
         <div class="empty-card">
           <div class="empty-icon">📋</div>
-          <h2 class="empty-title">Chào mừng bạn!</h2>
-          <p class="empty-desc">Tạo project đầu tiên để bắt đầu quản lý công việc trên Kanban board.</p>
+          <h2 class="empty-title">{{ 'board.welcome' | translate }}</h2>
+          <p class="empty-desc">{{ 'board.createFirstDesc' | translate }}</p>
 
           <div class="create-form">
             <div class="field">
-              <label>Tên project <span class="required">*</span></label>
+              <label>{{ 'board.projectName' | translate }} <span class="required">*</span></label>
               <input
                 [(ngModel)]="newProjectName"
-                placeholder="Ví dụ: Website Redesign"
+                [placeholder]="'board.projectNamePlaceholder' | translate"
                 (keydown.enter)="submitCreateProject()"
                 class="form-input" />
             </div>
             <div class="field mt-3">
-              <label>Mô tả (tuỳ chọn)</label>
+              <label>{{ 'board.descriptionOptional' | translate }}</label>
               <textarea
                 [(ngModel)]="newProjectDesc"
-                placeholder="Mô tả ngắn về project..."
+                [placeholder]="'board.descriptionPlaceholder' | translate"
                 rows="2"
                 class="form-input">
               </textarea>
@@ -110,9 +110,9 @@
               class="create-btn"
               [disabled]="creating || !newProjectName.trim()"
               (click)="submitCreateProject()">
-              {{ creating ? 'Đang tạo...' : 'Tạo Project & Board' }}
+              {{ (creating ? 'board.creating' : 'board.createProjectBoard') | translate }}
             </button>
-            <p class="empty-hint">Board sẽ tự động có 4 cột: Backlog · Selected · In Progress · Done</p>
+            <p class="empty-hint">{{ 'board.boardHint' | translate }}</p>
           </div>
         </div>
       </div>

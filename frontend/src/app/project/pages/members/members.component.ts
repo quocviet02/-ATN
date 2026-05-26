@@ -10,6 +10,7 @@ import { AvatarComponent } from '../../../jira-control/avatar/avatar.component';
 import { BreadcrumbsComponent } from '../../../jira-control/breadcrumbs/breadcrumbs.component';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { environment } from 'src/environments/environment';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface InvitationItem {
   id:         string;
@@ -38,7 +39,7 @@ export interface MemberItem {
   templateUrl: './members.component.html',
   styleUrls:  ['./members.component.scss'],
   standalone: true,
-  imports: [BreadcrumbsComponent, AvatarComponent, FormsModule, AsyncPipe, NgIf, NgFor, NgClass, UpperCasePipe, DatePipe]
+  imports: [BreadcrumbsComponent, AvatarComponent, FormsModule, AsyncPipe, NgIf, NgFor, NgClass, UpperCasePipe, DatePipe, TranslateModule]
 })
 export class MembersComponent implements OnInit {
   readonly breadcrumbs = ['Projects', 'Members'];
@@ -69,7 +70,8 @@ export class MembersComponent implements OnInit {
     private _projectQuery: ProjectQuery,
     private _projectStore: ProjectStore,
     public  permissionService: PermissionService,
-    private _notify: NzNotificationService
+    private _notify: NzNotificationService,
+    private _translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -160,13 +162,9 @@ export class MembersComponent implements OnInit {
   }
 
   statusLabel(status: string): string {
-    const map: Record<string, string> = {
-      pending:  'Đang chờ',
-      accepted: 'Đã chấp nhận',
-      rejected: 'Đã từ chối',
-      expired:  'Hết hạn'
-    };
-    return map[status] ?? status;
+    const key = `member.status.${status}`;
+    const translated = this._translate.instant(key);
+    return translated !== key ? translated : status;
   }
 
   changeRole(m: MemberItem, newRole: 'admin' | 'member'): void {

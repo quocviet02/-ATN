@@ -29,6 +29,8 @@
     "@datorama/akita-ng-entity-service": "^7.0.0",
     "@ngneat/content-loader": "^7.0.0",
     "@ngneat/until-destroy": "^8.0.3",
+    "@ngx-translate/core": "^17.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
     "@sentry/angular": "^9.30.0",
     "@sentry/tracing": "^6.18.1",
     "date-fns": "^2.14.0",

@@ -14,6 +14,7 @@ import { ProjectService } from '@trungk18/project/state/project/project.service'
 import { AuthQuery } from '@trungk18/project/auth/auth.query';
 import { AvatarComponent } from '../../../../jira-control/avatar/avatar.component';
 import { environment } from 'src/environments/environment';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface ActivityItem {
   id: string;
@@ -42,7 +43,7 @@ type Tab = 'all' | 'activity' | 'comments';
 @Component({
   selector: 'issue-feed',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvatarComponent],
+  imports: [CommonModule, FormsModule, AvatarComponent, TranslateModule],
   templateUrl: './issue-feed.component.html',
   styleUrls: ['./issue-feed.component.scss'],
 })
@@ -71,6 +72,7 @@ export class IssueFeedComponent implements OnInit, OnChanges, AfterViewChecked {
     private _projectQuery: ProjectQuery,
     private _projectService: ProjectService,
     private _authQuery: AuthQuery,
+    private _translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -211,37 +213,38 @@ export class IssueFeedComponent implements OnInit, OnChanges, AfterViewChecked {
   }
 
   activityText(act: any): string {
-    const name = act.user?.name || 'Ai đó';
+    const t = (key: string, params?: object) => this._translate.instant(key, params);
+    const name = act.user?.name || t('activity.someone');
     switch (act.action) {
       case 'created':
-        return `${name} đã tạo task này`;
+        return t('activity.created', { name });
       case 'moved': {
         const from = this.colName(act.oldValue?.columnId);
         const to   = this.colName(act.newValue?.columnId);
-        return `${name} đã chuyển task từ "${from}" → "${to}"`;
+        return t('activity.moved', { name, from, to });
       }
       case 'assigned': {
         const newId = act.newValue?.assigneeId;
         const oldId = act.oldValue?.assigneeId;
-        if (newId)  return `${name} đã giao task cho ${this.userName(newId)}`;
-        if (oldId)  return `${name} đã hủy giao task của ${this.userName(oldId)}`;
-        return `${name} đã thay đổi người thực hiện`;
+        if (newId)  return t('activity.assigned', { name, user: this.userName(newId) });
+        if (oldId)  return t('activity.unassigned', { name, user: this.userName(oldId) });
+        return t('activity.changedAssignee', { name });
       }
       case 'updated': {
         const nv = act.newValue || {};
         const ov = act.oldValue || {};
-        if ('priority' in nv)    return `${name} đã đổi độ ưu tiên từ "${ov.priority}" → "${nv.priority}"`;
-        if ('dueDate' in nv)     return `${name} đã đổi deadline từ ${this.fmtDate(ov.dueDate)} → ${this.fmtDate(nv.dueDate)}`;
-        if ('title' in nv)       return `${name} đã đổi tên từ "${ov.title}" → "${nv.title}"`;
-        if ('description' in nv) return `${name} đã cập nhật mô tả`;
-        return `${name} đã cập nhật task`;
+        if ('priority' in nv)    return t('activity.changedPriority', { name, from: ov.priority, to: nv.priority });
+        if ('dueDate' in nv)     return t('activity.changedDeadline', { name, from: this.fmtDate(ov.dueDate), to: this.fmtDate(nv.dueDate) });
+        if ('title' in nv)       return t('activity.changedTitle', { name, from: ov.title, to: nv.title });
+        if ('description' in nv) return t('activity.updatedDesc', { name });
+        return t('activity.updated', { name });
       }
       case 'commented':
-        return `${name} đã thêm bình luận`;
+        return t('activity.commented', { name });
       case 'deleted':
-        return `${name} đã xóa task`;
+        return t('activity.deleted', { name });
       default:
-        return `${name} đã thực hiện thao tác`;
+        return t('activity.performed', { name });
     }
   }
 
@@ -249,14 +252,15 @@ export class IssueFeedComponent implements OnInit, OnChanges, AfterViewChecked {
     if (!dateStr) return '';
     const diff = Date.now() - new Date(dateStr).getTime();
     const m = Math.floor(diff / 60000);
-    if (m < 1)  return 'Vừa xong';
-    if (m < 60) return `${m} phút trước`;
+    if (m < 1)  return this._translate.instant('time.justNow');
+    if (m < 60) return this._translate.instant('time.minutesAgo', { value: m });
     const h = Math.floor(m / 60);
-    if (h < 24) return `${h} giờ trước`;
+    if (h < 24) return this._translate.instant('time.hoursAgo', { value: h });
     const d = Math.floor(h / 24);
-    if (d === 1) return 'Hôm qua';
-    if (d < 7)   return `${d} ngày trước`;
-    return new Date(dateStr).toLocaleDateString('vi-VN');
+    if (d === 1) return this._translate.instant('time.yesterday');
+    if (d < 7)   return this._translate.instant('time.daysAgo', { value: d });
+    const locale = this._translate.currentLang === 'vi' ? 'vi-VN' : 'en-US';
+    return new Date(dateStr).toLocaleDateString(locale);
   }
 
   private colName(colId: string): string {
@@ -270,8 +274,9 @@ export class IssueFeedComponent implements OnInit, OnChanges, AfterViewChecked {
   }
 
   private fmtDate(d: string): string {
-    if (!d) return 'không có';
-    return new Date(d).toLocaleDateString('vi-VN');
+    if (!d) return this._translate.instant('activity.noDate');
+    const locale = this._translate.currentLang === 'vi' ? 'vi-VN' : 'en-US';
+    return new Date(d).toLocaleDateString(locale);
   }
 
   private scrollToBottom(): void {

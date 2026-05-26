@@ -1,17 +1,17 @@
 <div class="pr-6 py-8 pl-8 h-full w-full flex flex-col">
   <breadcrumbs [items]="breadcrumbs"></breadcrumbs>
-  <div class="mt-3 mb-6 text-2xl font-medium">Project Settings</div>
+  <div class="mt-3 mb-6 text-2xl font-medium">{{ 'settings.title' | translate }}</div>
   <form class="project-form" (ngSubmit)="submitForm()" [formGroup]="projectForm">
     <div class="form-group">
-      <label class="label">Name</label>
-      <input class="form-input" placeholder="Project Name" formControlName="name" jAutofocus />
+      <label class="label">{{ 'settings.nameLabel' | translate }}</label>
+      <input class="form-input" [placeholder]="'settings.projectNamePlaceholder' | translate" formControlName="name" jAutofocus />
     </div>
     <div class="form-group mt-3">
-      <label class="label">URL</label>
-      <input class="form-input" placeholder="Project URL" formControlName="url" />
+      <label class="label">{{ 'settings.urlLabel' | translate }}</label>
+      <input class="form-input" [placeholder]="'settings.projectUrlPlaceholder' | translate" formControlName="url" />
     </div>
     <div class="form-group mt-3">
-      <label class="label">Category</label>
+      <label class="label">{{ 'settings.categoryLabel' | translate }}</label>
       <select class="form-input" formControlName="category">
         @for (category of categories; track category) {
           <option>{{ category }}</option>
@@ -19,24 +19,24 @@
       </select>
     </div>
     <div class="form-group mt-3">
-      <label class="label">Description</label>
-      <textarea class="form-input" placeholder="Project Description" formControlName="description"></textarea>
+      <label class="label">{{ 'settings.descriptionLabel' | translate }}</label>
+      <textarea class="form-input" [placeholder]="'settings.projectDescPlaceholder' | translate" formControlName="description"></textarea>
     </div>
     <div class="form-group mt-3">
-      <j-button className="btn-primary mr-2" type="submit" [disabled]="projectForm.invalid">Save</j-button>
-      <j-button className="btn-empty" (click)="cancel()">Cancel</j-button>
+      <j-button className="btn-primary mr-2" type="submit" [disabled]="projectForm.invalid">{{ 'settings.save' | translate }}</j-button>
+      <j-button className="btn-empty" (click)="cancel()">{{ 'settings.cancel' | translate }}</j-button>
     </div>
   </form>
 
   <!-- Danger zone — chỉ owner -->
   <div *ngIf="permissionService.canDeleteProject$ | async" class="danger-zone mt-8">
-    <div class="danger-zone-title">Danger Zone</div>
+    <div class="danger-zone-title">{{ 'settings.dangerZone' | translate }}</div>
     <div class="danger-zone-body">
       <div>
-        <strong>Xóa project này</strong>
-        <p class="text-sm text-textMedium">Toàn bộ board, column và task sẽ bị xóa vĩnh viễn.</p>
+        <strong>{{ 'settings.deleteProjectTitle' | translate }}</strong>
+        <p class="text-sm text-textMedium">{{ 'settings.deleteProjectDesc' | translate }}</p>
       </div>
-      <j-button className="btn-danger" (click)="confirmDeleteProject()">Xóa Project</j-button>
+      <j-button className="btn-danger" (click)="confirmDeleteProject()">{{ 'settings.deleteProjectBtn' | translate }}</j-button>
     </div>
   </div>
 </div>
