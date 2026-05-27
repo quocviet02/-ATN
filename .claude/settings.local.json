@@ -23,7 +23,8 @@
       "Bash(xargs grep -l \"ai\\\\|suggest\\\\|gemini\\\\|claude\")",
       "Bash(cat)",
       "Bash(bash /tmp/extract_keys.sh)",
-      "Bash(xargs grep -l \"| *translate\")"
+      "Bash(xargs grep -l \"| *translate\")",
+      "Bash(node -e ' *)"
     ]
   }
 }
