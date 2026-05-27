@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { FormsModule } from '@angular/forms';
-import { AsyncPipe, DatePipe, NgClass, NgFor, NgIf, UpperCasePipe } from '@angular/common';
+import { AsyncPipe, NgClass, NgFor, NgIf, UpperCasePipe } from '@angular/common';
 import { ProjectQuery } from '@trungk18/project/state/project/project.query';
 import { ProjectStore } from '@trungk18/project/state/project/project.store';
 import { PermissionService } from '@trungk18/core/services/permission.service';
@@ -39,7 +39,7 @@ export interface MemberItem {
   templateUrl: './members.component.html',
   styleUrls:  ['./members.component.scss'],
   standalone: true,
-  imports: [BreadcrumbsComponent, AvatarComponent, FormsModule, AsyncPipe, NgIf, NgFor, NgClass, UpperCasePipe, DatePipe, TranslateModule]
+  imports: [BreadcrumbsComponent, AvatarComponent, FormsModule, AsyncPipe, NgIf, NgFor, NgClass, UpperCasePipe, TranslateModule]
 })
 export class MembersComponent implements OnInit {
   readonly breadcrumbs = ['Projects', 'Members'];

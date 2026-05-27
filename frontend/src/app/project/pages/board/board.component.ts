@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AsyncPipe, NgClass, NgFor, NgIf, UpperCasePipe } from '@angular/common';
+import { AsyncPipe, NgFor, NgIf, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProjectQuery } from '@trungk18/project/state/project/project.query';
 import { ProjectService } from '@trungk18/project/state/project/project.service';
@@ -22,7 +22,7 @@ export interface BgPreset {
     templateUrl: './board.component.html',
     styleUrls: ['./board.component.scss'],
     imports: [BreadcrumbsComponent, BoardFilterComponent, BoardDndComponent,
-              AsyncPipe, NgClass, NgIf, NgFor, UpperCasePipe, FormsModule,
+              AsyncPipe, NgIf, NgFor, UpperCasePipe, FormsModule,
               NzSpinComponent, NzIconDirective, TranslateModule]
 })
 export class BoardComponent {

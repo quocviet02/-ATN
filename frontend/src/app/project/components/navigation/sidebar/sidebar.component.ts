@@ -6,14 +6,13 @@ import { SideBarLinks } from '@trungk18/project/config/sidebar';
 import { ProjectQuery } from '@trungk18/project/state/project/project.query';
 import { SvgIconComponent } from '../../../../jira-control/svg-icon/svg-icon.component';
 import { RouterLinkActive, RouterLink } from '@angular/router';
-import { AvatarComponent } from '../../../../jira-control/avatar/avatar.component';
 import { ProjectSwitcherComponent } from '../project-switcher/project-switcher.component';
 
 @Component({
     selector: 'app-sidebar',
     templateUrl: './sidebar.component.html',
     styleUrls: ['./sidebar.component.scss'],
-    imports: [AvatarComponent, RouterLinkActive, RouterLink, SvgIconComponent, ProjectSwitcherComponent]
+    imports: [RouterLinkActive, RouterLink, SvgIconComponent, ProjectSwitcherComponent]
 })
 @UntilDestroy()
 export class SidebarComponent implements OnInit {

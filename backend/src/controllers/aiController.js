@@ -1,10 +1,10 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const { Board, Column, Task } = require('../models');
 
-// ─── Gemini client ────────────────────────────────────────────────────────────
+// ─── Groq client ─────────────────────────────────────────────────────────────
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const MODEL = 'gemini-2.0-flash';
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const MODEL = 'llama-3.3-70b-versatile';
 
 // ─── System instructions ──────────────────────────────────────────────────────
 
@@ -32,7 +32,8 @@ const SYS_DEADLINE =
   '- estimatedDays là số ngày làm việc thực tế kể từ hôm nay\n' +
   '- confidence: "high" nếu có dữ liệu lịch sử rõ ràng, "medium" nếu ước tính tương đối, "low" nếu thiếu dữ liệu\n' +
   '- alternatives: 2-3 lựa chọn (lạc quan và thận trọng hơn)\n' +
-  '- warnings: rủi ro nếu workload cao, priority cao, hoặc ước tính quá ngắn';
+  '- warnings: rủi ro nếu workload cao, priority cao, hoặc ước tính quá ngắn\n' +
+  '- Chỉ trả về JSON thuần túy, không có markdown hay text thêm.';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,25 +99,82 @@ function computeStats(columns, tasks) {
   return { total: tasks.length, byColumn, byPriority, byAssignee, overdue, doneTasks, completionRate };
 }
 
-function handleGeminiError(err, res) {
-  const msg = err.message || '';
-  console.error('[AI Module]', err.status ?? '', msg);
-
-  if (err.status === 429 || /quota|rate.?limit/i.test(msg)) {
-    return res.status(503).json({ statusCode: 503, message: 'Gemini API đang quá tải, vui lòng thử lại sau vài giây.', error: 'Service Unavailable' });
-  }
-  if (err.status === 403 || /api.?key|permission/i.test(msg)) {
-    return res.status(502).json({ statusCode: 502, message: 'GEMINI_API_KEY không hợp lệ hoặc đã hết hạn.', error: 'Bad Gateway' });
-  }
-  if (/timeout|timed.?out/i.test(msg)) {
-    return res.status(408).json({ statusCode: 408, message: 'Gemini API không phản hồi đúng hạn. Hãy thử lại.', error: 'Request Timeout' });
-  }
-  return res.status(502).json({ statusCode: 502, message: 'Lỗi từ Gemini API: ' + (msg || 'Không xác định.'), error: 'Bad Gateway' });
+async function callGroq(system, user, json = false) {
+  const params = {
+    model: MODEL,
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: user },
+    ],
+    temperature: 0.7,
+    max_tokens: 2048,
+  };
+  if (json) params.response_format = { type: 'json_object' };
+  const completion = await groq.chat.completions.create(params);
+  return completion.choices[0].message.content;
 }
 
-function geminiUsage(result) {
-  const u = result.response.usageMetadata ?? {};
-  return { input_tokens: u.promptTokenCount ?? 0, output_tokens: u.candidatesTokenCount ?? 0 };
+function handleGroqError(err, res) {
+  const msg    = err.message || '';
+  const status = err.status ?? err.statusCode ?? 0;
+  console.error('[AI Module]', status, msg);
+
+  if (status === 429 || /rate.?limit|too many/i.test(msg)) {
+    return res.status(503).json({ statusCode: 503, message: 'AI API đang bị giới hạn tốc độ, vui lòng thử lại sau vài giây.', error: 'Service Unavailable' });
+  }
+  if (status === 401 || /invalid.?key|api.?key|unauthorized/i.test(msg)) {
+    return res.status(502).json({ statusCode: 502, message: 'GROQ_API_KEY không hợp lệ hoặc chưa được cấu hình.', error: 'Bad Gateway' });
+  }
+  return res.status(502).json({ statusCode: 502, message: 'Lỗi từ AI API: ' + (msg || 'Không xác định.'), error: 'Bad Gateway' });
+}
+
+// ─── Rule-based deadline fallback ────────────────────────────────────────────
+
+function suggestDeadlineRuleBased(task, completedTasks, workloadCount, highPriorityCount) {
+  const today    = new Date();
+  const baseDays = { critical: 2, high: 5, medium: 10, low: 14 };
+  let estimatedDays = baseDays[task.priority] ?? 7;
+
+  estimatedDays += Math.floor(workloadCount * 0.5);
+  estimatedDays += Math.floor(highPriorityCount * 0.3);
+
+  const samePriority = completedTasks.filter(t => t.priority === task.priority);
+  if (samePriority.length > 0) {
+    const avgDays = samePriority.reduce(
+      (sum, t) => sum + Math.max(1, Math.ceil((new Date(t.updatedAt) - new Date(t.createdAt)) / 86_400_000)),
+      0
+    ) / samePriority.length;
+    estimatedDays = Math.round((estimatedDays + avgDays) / 2);
+  }
+
+  estimatedDays = Math.max(1, estimatedDays);
+
+  const addDays = (base, n) => {
+    const d = new Date(base);
+    d.setDate(d.getDate() + n);
+    return d.toISOString().split('T')[0];
+  };
+
+  const warnings = [];
+  if (workloadCount > 5)          warnings.push(`Người thực hiện có ${workloadCount} task đang mở, tiến độ có thể bị ảnh hưởng.`);
+  if (highPriorityCount > 2)      warnings.push(`Có ${highPriorityCount} task high/critical đang mở, cần cân nhắc ưu tiên.`);
+  if (['critical', 'high'].includes(task.priority)) warnings.push('Task độ ưu tiên cao, cần theo dõi chặt chẽ.');
+
+  return {
+    suggestedDeadline: addDays(today, estimatedDays),
+    estimatedDays,
+    confidence: samePriority.length >= 3 ? 'medium' : 'low',
+    reasoning:
+      `Ước tính tự động (AI không khả dụng): độ ưu tiên "${task.priority}" → ${baseDays[task.priority] ?? 7} ngày cơ bản` +
+      (workloadCount > 0 ? ` + ${Math.floor(workloadCount * 0.5)} ngày do workload (${workloadCount} task mở)` : '') +
+      (samePriority.length > 0 ? `, điều chỉnh theo ${samePriority.length} task lịch sử tương tự.` : '.'),
+    warnings,
+    alternatives: [
+      { date: addDays(today, Math.max(1, estimatedDays - 2)), label: 'Lạc quan' },
+      { date: addDays(today, estimatedDays + 3),              label: 'Thận trọng' },
+    ],
+    _fallback: true,
+  };
 }
 
 // ─── POST /api/tasks/:id/suggest-deadline ────────────────────────────────────
@@ -175,21 +233,18 @@ exports.suggestDeadline = async (req, res) => {
       `Trả về JSON với schema:\n` +
       `{"suggestedDeadline":"YYYY-MM-DD","estimatedDays":number,"confidence":"high|medium|low","reasoning":"string","warnings":["string"],"alternatives":[{"date":"YYYY-MM-DD","label":"string"}]}`;
 
-    const model  = genAI.getGenerativeModel({
-      model: MODEL,
-      systemInstruction: SYS_DEADLINE,
-      generationConfig:  { responseMimeType: 'application/json' },
-    });
-    const result = await model.generateContent(prompt);
-    const parsed = JSON.parse(result.response.text());
-
-    res.json({ ...parsed, generatedAt: new Date().toISOString() });
-  } catch (e) {
-    console.error('[suggestDeadline]', e.name, e.message);
-    if (e instanceof SyntaxError) {
-      return res.status(502).json({ statusCode: 502, message: 'AI trả về dữ liệu không hợp lệ, vui lòng thử lại.', error: 'Parse Error' });
+    try {
+      const text   = await callGroq(SYS_DEADLINE, prompt, true);
+      const parsed = JSON.parse(text);
+      return res.json({ ...parsed, generatedAt: new Date().toISOString() });
+    } catch (aiErr) {
+      console.warn('[suggestDeadline] AI không khả dụng, dùng rule-based fallback:', aiErr.message);
+      const fallback = suggestDeadlineRuleBased(task, completedTasks, workloadCount, highPriorityCount);
+      return res.json({ ...fallback, generatedAt: new Date().toISOString() });
     }
-    handleGeminiError(e, res);
+  } catch (e) {
+    console.error('[suggestDeadline]', e.message);
+    res.status(500).json({ statusCode: 500, message: e.message, error: 'Internal Server Error' });
   }
 };
 
@@ -202,7 +257,6 @@ exports.getSummary = async (req, res) => {
     const stats       = computeStats(columns, tasks);
     const taskContext = buildTaskContext(boards, columns, tasks);
 
-    const model  = genAI.getGenerativeModel({ model: MODEL, systemInstruction: SYS_ANALYST });
     const prompt =
       `Dự án: "${project.name}"\n` +
       `Mô tả: ${project.description || 'Không có'}\n\n` +
@@ -216,12 +270,10 @@ exports.getSummary = async (req, res) => {
       `3. **⚠️ Rủi ro / Vấn đề** (bullet list, ưu tiên task quá hạn và critical)\n` +
       `4. **🎯 Đề xuất hành động** (tối đa 3 điểm quan trọng nhất)`;
 
-    const result = await model.generateContent(prompt);
-    const text   = result.response.text();
-
-    res.json({ summary: text, stats, model: MODEL, usage: geminiUsage(result), generatedAt: new Date().toISOString() });
+    const text = await callGroq(SYS_ANALYST, prompt);
+    res.json({ summary: text, stats, model: MODEL, generatedAt: new Date().toISOString() });
   } catch (e) {
-    handleGeminiError(e, res);
+    handleGroqError(e, res);
   }
 };
 
@@ -255,7 +307,6 @@ exports.predict = async (req, res) => {
       ? `Deadline dự án: ${deadline} (còn ${Math.ceil((new Date(deadline) - new Date()) / 86_400_000)} ngày)`
       : 'Deadline: Chưa xác định';
 
-    const model  = genAI.getGenerativeModel({ model: MODEL, systemInstruction: SYS_ANALYST });
     const prompt =
       `Dự án: "${project.name}"\n` +
       `${deadlineInfo}\n\n` +
@@ -269,12 +320,10 @@ exports.predict = async (req, res) => {
       `3. **🔑 Yếu tố quyết định** (2-3 yếu tố chính)\n` +
       `4. **🚨 Hành động khẩn cấp** (nếu có nguy cơ trễ hạn)`;
 
-    const result = await model.generateContent(prompt);
-    const text   = result.response.text();
-
-    res.json({ prediction: text, deadline: deadline ?? null, stats, model: MODEL, usage: geminiUsage(result), generatedAt: new Date().toISOString() });
+    const text = await callGroq(SYS_ANALYST, prompt);
+    res.json({ prediction: text, deadline: deadline ?? null, stats, model: MODEL, generatedAt: new Date().toISOString() });
   } catch (e) {
-    handleGeminiError(e, res);
+    handleGroqError(e, res);
   }
 };
 
@@ -298,7 +347,6 @@ exports.generateReport = async (req, res) => {
         .map(([name, count]) => `| ${name} | ${count} |`)
         .join('\n');
 
-    const model  = genAI.getGenerativeModel({ model: MODEL, systemInstruction: SYS_REPORTER });
     const prompt =
       `**Tên dự án:** ${project.name}\n` +
       `**Mô tả:** ${project.description || 'Không có mô tả'}\n` +
@@ -313,11 +361,9 @@ exports.generateReport = async (req, res) => {
       `| Người phụ trách | Số task |\n|----------------|----------|\n${assigneeTable}\n\n` +
       `**Danh sách task đầy đủ:**\n${taskContext}`;
 
-    const result = await model.generateContent(prompt);
-    const text   = result.response.text();
-
-    res.json({ report: text, stats, model: MODEL, usage: geminiUsage(result), generatedAt: new Date().toISOString() });
+    const text = await callGroq(SYS_REPORTER, prompt);
+    res.json({ report: text, stats, model: MODEL, generatedAt: new Date().toISOString() });
   } catch (e) {
-    handleGeminiError(e, res);
+    handleGroqError(e, res);
   }
 };
