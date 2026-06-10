@@ -331,28 +331,35 @@ title Sơ đồ Use Case 3 — Board, Cột & Task
 left to right direction
 
 skinparam DefaultFontName Arial
-skinparam DefaultFontSize 10
+skinparam DefaultFontSize 16
+skinparam TitleFontSize 24
+
 skinparam BackgroundColor White
 skinparam ArrowColor #2C3E50
+skinparam linetype ortho
 
 skinparam actor {
-  BackgroundColor #FEF9E7
-  BorderColor #E67E22
-  FontStyle Bold
+ BackgroundColor #FEF9E7
+ BorderColor #E67E22
+ FontStyle Bold
+ FontSize 18
 }
+
 skinparam usecase {
-  BackgroundColor #EBF5FB
-  BorderColor #2980B9
+ BackgroundColor #EBF5FB
+ BorderColor #2980B9
+ FontSize 16
 }
+
 skinparam usecase<<System>> {
-  BackgroundColor #F2F3F4
-  BorderColor #95A5A6
-  FontColor #555555
+ BackgroundColor #F2F3F4
+ BorderColor #95A5A6
 }
+
 skinparam rectangle {
-  BorderColor #2C3E50
-  FontStyle Bold
-  BorderThickness 2
+ BorderColor #2C3E50
+ BorderThickness 2
+ FontSize 18
 }
 
 actor "Thành viên\n(Member)" as Member
@@ -362,57 +369,91 @@ actor "Chủ sở hữu\n(Owner)" as Owner
 Member <|-- Admin
 Admin <|-- Owner
 
+
 rectangle "Quản lý Board" {
-  usecase "UC-29\nXem danh sách board" as UC29
-  usecase "UC-30\nTạo board mới" as UC30
-  usecase "UC-31\nXem board với\ncột và task" as UC31
-  usecase "UC-32\nĐổi tên board" as UC32
-  usecase "UC-33\nXoá board (cascade:\ncột + task)" as UC33
+
+usecase UC29 as "Xem danh sách board"
+usecase UC31 as "Xem board với\ncột và task"
+
+usecase UC30 as "Tạo board mới"
+usecase UC32 as "Đổi tên board"
+usecase UC33 as "Xoá board\n(cascade)"
+
+UC29 -[hidden]-> UC31
+UC30 -[hidden]-> UC32
+UC32 -[hidden]-> UC33
 }
+
 
 rectangle "Quản lý Cột (Column)" {
-  usecase "UC-34\nXem danh sách cột" as UC34
-  usecase "UC-35\nTạo cột mới" as UC35
-  usecase "UC-36\nĐổi tên cột" as UC36
-  usecase "UC-37\nSắp xếp lại\nvị trí cột" as UC37
-  usecase "UC-38\nXoá cột\n(cascade: task)" as UC38
+
+usecase UC34 as "Xem danh sách cột"
+usecase UC37 as "Sắp xếp lại\nvị trí cột"
+
+usecase UC35 as "Tạo cột mới"
+usecase UC36 as "Đổi tên cột"
+usecase UC38 as "Xoá cột"
+
+UC34 -[hidden]-> UC37
+UC35 -[hidden]-> UC36
+UC36 -[hidden]-> UC38
 }
+
 
 rectangle "Quản lý Task" {
-  usecase "UC-39\nXem task của board" as UC39
-  usecase "UC-40\nLọc & tìm kiếm task\n(assignee, priority,\nngày, từ khoá)" as UC40
-  usecase "UC-41\nXem task theo cột" as UC41
-  usecase "UC-42\nTạo task mới" as UC42
-  usecase "UC-43\nXem chi tiết task" as UC43
-  usecase "UC-44\nChỉnh sửa task\n(tiêu đề, mô tả,\npriority, dueDate)" as UC44
-  usecase "UC-45\nKéo thả task\n(Drag & Drop)" as UC45
-  usecase "UC-46\nXoá task" as UC46
-  usecase "UC-47\nTự gán bản thân\nvào task" as UC47
-  usecase "UC-48\nGán người dùng\nkhác vào task" as UC48
 
-  usecase "Ghi ActivityLog" as SYS_Log <<System>>
-  usecase "Gửi thông báo\ncho assignee" as SYS_Notif <<System>>
-  usecase "AI gợi ý deadline\n(UC-61)" as UC61ref <<System>>
-  usecase "Gán assignee\n(tuỳ chọn)" as UC_AssignOpt <<System>>
+usecase UC39 as "Xem task"
+usecase UC40 as "Lọc & tìm kiếm"
+
+usecase UC41 as "Xem theo cột"
+
+usecase UC42 as "Tạo task"
+usecase UC43 as "Chi tiết task"
+usecase UC44 as "Chỉnh sửa task"
+
+usecase UC45 as "Drag & Drop"
+usecase UC46 as "Xoá task"
+
+usecase UC47 as "Tự gán"
+usecase UC48 as "Gán người khác"
+
+usecase SYS_Log as "ActivityLog" <<System>>
+usecase SYS_Notif as "Thông báo" <<System>>
+usecase UC61ref as "AI deadline" <<System>>
+usecase UC_AssignOpt as "Gán assignee" <<System>>
+
+UC39 -[hidden]-> UC40
+UC40 -[hidden]-> UC41
+
+UC42 -[hidden]-> UC43
+UC43 -[hidden]-> UC44
+
+UC45 -[hidden]-> UC46
+
+UC47 -[hidden]-> UC48
+
+SYS_Log -[hidden]-> SYS_Notif
+SYS_Notif -[hidden]-> UC61ref
+UC61ref -[hidden]-> UC_AssignOpt
 }
 
-' Member
+
 Member --> UC29
 Member --> UC31
 Member --> UC34
 Member --> UC37
+
 Member --> UC39
 Member --> UC40
 Member --> UC41
 Member --> UC42
 Member --> UC43
+Member --> UC44
+Member --> UC45
 Member --> UC46
-Member --> UC44 : canEditTask
-Member --> UC45 : canDragTask
-Member --> UC47 : canAssignSelf
-Member --> UC48 : canAssignOthers
+Member --> UC47
+Member --> UC48
 
-' Admin
 Admin --> UC30
 Admin --> UC32
 Admin --> UC33
@@ -420,11 +461,13 @@ Admin --> UC35
 Admin --> UC36
 Admin --> UC38
 
-' Include / Extend
+
 UC42 .> SYS_Log : <<include>>
 UC42 .> UC_AssignOpt : <<extend>>
+
 UC44 .> SYS_Log : <<include>>
 UC44 .> UC61ref : <<extend>>
+
 UC45 .> SYS_Log : <<include>>
 UC45 .> SYS_Notif : <<include>>
 

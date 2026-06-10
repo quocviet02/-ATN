@@ -1,0 +1,276 @@
+<div class="timeline-page">
+
+  <!-- ── HEADER ──────────────────────────────────────────────────────────── -->
+  <div class="tl-header">
+    <div class="tl-header-left">
+      <h2 class="tl-title">{{ 'timeline.title' | translate }}</h2>
+      <span class="tl-breadcrumb">
+        <a routerLink="/project/board">{{ 'timeline.home' | translate }}</a>
+        <span class="sep"> / </span>
+        {{ 'timeline.title' | translate }}
+      </span>
+    </div>
+    <button nz-button nzSize="small" (click)="_refresh()">
+      <i nz-icon nzType="reload"></i>
+    </button>
+  </div>
+
+  <!-- ── TOOLBAR ─────────────────────────────────────────────────────────── -->
+  <div class="tl-toolbar">
+
+    <!-- Search -->
+    <div class="toolbar-search">
+      <nz-input-group [nzPrefix]="searchIcon" nzSize="default">
+        <input nz-input
+          [placeholder]="'timeline.searchPlaceholder' | translate"
+          [ngModel]="searchText"
+          (ngModelChange)="onSearchChange($event)"
+          style="width: 200px;" />
+      </nz-input-group>
+      <ng-template #searchIcon><i nz-icon nzType="search"></i></ng-template>
+    </div>
+
+    <!-- Project selector -->
+    <div class="toolbar-projects">
+      <nz-select
+        nzMode="multiple"
+        [nzPlaceHolder]="'timeline.selectProjects' | translate"
+        [(ngModel)]="selectedProjectIds"
+        (ngModelChange)="onProjectSelectionChange()"
+        nzSize="default"
+        style="min-width: 220px;"
+        [nzMaxTagCount]="2">
+        <nz-option
+          *ngFor="let p of projects"
+          [nzValue]="p.id"
+          [nzLabel]="p.name">
+        </nz-option>
+      </nz-select>
+      <button nz-button nzSize="small" nzType="link" (click)="selectAllProjects()">{{ 'timeline.selectAll' | translate }}</button>
+      <button nz-button nzSize="small" nzType="link" (click)="clearAllProjects()">{{ 'timeline.clearAll' | translate }}</button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+
+    <!-- Critical path toggle -->
+    <button nz-button
+      [nzType]="criticalPathMode ? 'primary' : 'default'"
+      nzSize="default"
+      nz-tooltip
+      [nzTooltipTitle]="'timeline.criticalPath' | translate"
+      (click)="toggleCriticalPath()">
+      <i nz-icon nzType="fork"></i>
+      {{ 'timeline.criticalPath' | translate }}
+    </button>
+
+    <!-- Conflicts -->
+    <button nz-button nzSize="default"
+      [class.has-conflicts]="conflictCount > 0"
+      (click)="openConflictDrawer()">
+      <i nz-icon nzType="warning" [style.color]="conflictCount > 0 ? '#f97316' : undefined"></i>
+      {{ 'timeline.conflicts' | translate }}
+      <nz-badge *ngIf="conflictCount > 0" [nzCount]="conflictCount" nzSize="small" style="margin-left:4px;"></nz-badge>
+    </button>
+
+    <!-- View mode -->
+    <div class="view-mode-group">
+      <button *ngFor="let vm of viewModes"
+        nz-button
+        nzSize="default"
+        [nzType]="viewMode === vm.value ? 'primary' : 'default'"
+        (click)="setViewMode(vm.value)">
+        {{ vm.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── MAIN CONTENT ─────────────────────────────────────────────────────── -->
+  <div class="tl-body">
+
+    <!-- Left sidebar: project/task list -->
+    <div class="tl-sidebar">
+      <ng-container *ngIf="projectsLoading">
+        <nz-spin nzTip="Đang tải..." style="padding: 24px;"></nz-spin>
+      </ng-container>
+
+      <ng-container *ngIf="!projectsLoading && groups.length === 0">
+        <div class="tl-empty">
+          <i nz-icon nzType="calendar" nzTheme="outline" style="font-size:32px; color:#ccc;"></i>
+          <p>{{ 'timeline.noProjects' | translate }}</p>
+        </div>
+      </ng-container>
+
+      <div *ngFor="let g of groups; trackBy: trackByProjectId" class="project-group">
+        <!-- Project header -->
+        <div class="proj-header" (click)="toggleGroup(g)">
+          <i nz-icon
+            [nzType]="g.collapsed ? 'right' : 'down'"
+            style="font-size: 11px; margin-right: 4px;">
+          </i>
+          <span class="proj-name">{{ g.project.name }}</span>
+          <span class="proj-count">{{ g.tasks.length }}</span>
+          <span class="proj-role-badge" [class]="'role-' + g.project.role">{{ g.project.role }}</span>
+        </div>
+        <!-- Project deadline info -->
+        <div *ngIf="!g.collapsed && g.project.dueDate" class="proj-deadline"
+          [class.proj-deadline-overdue]="isOverdue(g.project.dueDate)">
+          <i nz-icon nzType="flag" style="font-size: 10px;"></i>
+          {{ 'settings.dueDateLabel' | translate }}: {{ formatDate(g.project.dueDate) }}
+        </div>
+
+        <!-- Task rows -->
+        <div *ngIf="!g.collapsed" class="task-list">
+          <div *ngFor="let t of g.tasks; trackBy: trackById"
+            class="task-row"
+            [class.task-critical]="isCritical(t.id)"
+            [class.task-overdue]="!t.isDone && t.dueDate && isOverdue(t.dueDate)">
+
+            <!-- Priority dot -->
+            <span class="priority-dot" [style.background]="getPriorityColor(t.priority)"></span>
+
+            <!-- Title -->
+            <span class="task-title" nz-tooltip [nzTooltipTitle]="t.title">{{ t.title }}</span>
+
+            <!-- Assignee avatar -->
+            <j-avatar *ngIf="t.assignee"
+              [avatarUrl]="t.assignee.avatar"
+              [size]="20"
+              class="task-avatar"
+              nz-tooltip [nzTooltipTitle]="t.assignee.name">
+            </j-avatar>
+
+            <!-- Due date -->
+            <span class="task-due" [class.overdue-text]="!t.isDone && t.dueDate && isOverdue(t.dueDate)">
+              {{ formatDate(t.dueDate) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Gantt chart -->
+    <div class="tl-gantt-area">
+      <nz-spin [nzSpinning]="loading">
+        <div *ngIf="ganttTasks.length > 0; else emptyGantt">
+          <app-gantt-chart
+            [tasks]="ganttTasks"
+            [viewMode]="viewMode"
+            (taskDateChange)="onTaskDateChange($event)">
+          </app-gantt-chart>
+        </div>
+        <ng-template #emptyGantt>
+          <div class="gantt-empty" *ngIf="!loading">
+            <i nz-icon nzType="bar-chart" nzTheme="outline" style="font-size:48px; color:#e0e0e0;"></i>
+            <p>{{ 'timeline.noTasks' | translate }}</p>
+          </div>
+        </ng-template>
+      </nz-spin>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFLICT DRAWER ──────────────────────────────────────────────────── -->
+<nz-drawer
+  [nzVisible]="conflictDrawerOpen"
+  nzPlacement="right"
+  nzWidth="380"
+  [nzTitle]="'timeline.conflicts' | translate"
+  (nzOnClose)="closeConflictDrawer()">
+
+  <ng-container *nzDrawerContent>
+    <div *ngIf="!conflicts" class="conflict-loading">
+      <nz-spin nzTip="Đang phân tích..."></nz-spin>
+    </div>
+
+    <div *ngIf="conflicts">
+
+      <!-- Overdue -->
+      <div class="conflict-section">
+        <div class="conflict-section-title overdue-title">
+          <i nz-icon nzType="clock-circle" style="color: #ef4444;"></i>
+          {{ 'timeline.overdue' | translate }} ({{ conflicts.overdue.length }})
+        </div>
+        <div *ngFor="let t of conflicts.overdue" class="conflict-item">
+          <span class="conflict-task-name">{{ t.title }}</span>
+          <span class="conflict-task-proj">{{ t.projectName }}</span>
+          <span class="conflict-task-date">{{ formatDate(t.dueDate) }}</span>
+          <button nz-button nzSize="small" nzType="link"
+            (click)="openAiResolve('overdue', [t])">
+            ✨ {{ 'timeline.aiResolve' | translate }}
+          </button>
+        </div>
+        <div *ngIf="!conflicts.overdue.length" class="no-conflict">
+          ✓ {{ 'timeline.noOverdue' | translate }}
+        </div>
+      </div>
+
+      <!-- Overlaps -->
+      <div class="conflict-section">
+        <div class="conflict-section-title overlap-title">
+          <i nz-icon nzType="swap" style="color: #f97316;"></i>
+          {{ 'timeline.overlap' | translate }} ({{ conflicts.overlaps.length }})
+        </div>
+        <div *ngFor="let o of conflicts.overlaps" class="conflict-group">
+          <div class="assignee-name">{{ o.assigneeName }}</div>
+          <div *ngFor="let t of o.tasks" class="conflict-item">
+            <span class="conflict-task-name">{{ t.title }}</span>
+            <span class="conflict-task-date">{{ formatDate(t.startDate) }} → {{ formatDate(t.dueDate) }}</span>
+          </div>
+          <button nz-button nzSize="small"
+            (click)="openAiResolve('overlap', o.tasks)">
+            ✨ {{ 'timeline.aiResolve' | translate }}
+          </button>
+        </div>
+        <div *ngIf="!conflicts.overlaps.length" class="no-conflict">
+          ✓ {{ 'timeline.noOverlap' | translate }}
+        </div>
+      </div>
+
+      <!-- Blocked -->
+      <div class="conflict-section">
+        <div class="conflict-section-title blocked-title">
+          <i nz-icon nzType="stop" style="color: #8b5cf6;"></i>
+          {{ 'timeline.blocked' | translate }} ({{ conflicts.blocked.length }})
+        </div>
+        <div *ngFor="let b of conflicts.blocked" class="conflict-item">
+          <span class="conflict-task-name">{{ b.task.title }}</span>
+          <div class="blocked-by">
+            <span>{{ 'timeline.blockedBy' | translate }}:</span>
+            <span *ngFor="let dep of b.blockedBy" class="blocked-task">{{ dep.title }}</span>
+          </div>
+        </div>
+        <div *ngIf="!conflicts.blocked.length" class="no-conflict">
+          ✓ {{ 'timeline.noBlocked' | translate }}
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</nz-drawer>
+
+<!-- ── AI DRAWER ────────────────────────────────────────────────────────── -->
+<nz-drawer
+  [nzVisible]="aiDrawerOpen"
+  nzPlacement="right"
+  nzWidth="400"
+  [nzTitle]="'timeline.aiTitle' | translate"
+  (nzOnClose)="closeAiDrawer()">
+
+  <ng-container *nzDrawerContent>
+    <div *ngIf="aiLoading" class="ai-loading">
+      <nz-spin [nzTip]="'timeline.aiAnalyzing' | translate"></nz-spin>
+    </div>
+
+    <div *ngIf="!aiLoading">
+      <div *ngFor="let s of aiSuggestions; let i = index" class="ai-suggestion">
+        <div class="ai-suggestion-num">{{ i + 1 }}</div>
+        <div class="ai-suggestion-body">
+          <div class="ai-suggestion-title">{{ s.title }}</div>
+          <div class="ai-suggestion-desc">{{ s.description }}</div>
+        </div>
+      </div>
+      <div *ngIf="!aiSuggestions.length" class="no-conflict">
+        {{ 'timeline.aiNoResult' | translate }}
+      </div>
+    </div>
+  </ng-container>
+</nz-drawer>

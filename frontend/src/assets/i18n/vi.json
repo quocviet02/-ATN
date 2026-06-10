@@ -14,7 +14,16 @@
   "nav": {
     "searchIssues": "Tìm kiếm task",
     "createIssue": "Tạo task",
-    "about": "Giới thiệu"
+    "about": "Giới thiệu",
+    "logout": "Đăng xuất"
+  },
+  "logout": {
+    "title": "Xác nhận đăng xuất",
+    "message": "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?",
+    "cancel": "Hủy",
+    "confirm": "Đăng xuất",
+    "success": "Đã đăng xuất thành công",
+    "offlineSuccess": "Đã đăng xuất (chưa đồng bộ với server)"
   },
   "notification": {
     "title": "Thông báo",
@@ -72,7 +81,12 @@
     "dangerZone": "Vùng nguy hiểm",
     "deleteProjectTitle": "Xóa project này",
     "deleteProjectDesc": "Toàn bộ board, column và task sẽ bị xóa vĩnh viễn.",
-    "deleteProjectBtn": "Xóa Project"
+    "deleteProjectBtn": "Xóa Project",
+    "startDateLabel": "Ngày bắt đầu",
+    "startDatePlaceholder": "Ngày bắt đầu dự án",
+    "dueDateLabel": "Deadline dự án",
+    "dueDatePlaceholder": "Deadline của dự án",
+    "dueDateHint": "Deadline của toàn bộ dự án (độc lập với deadline từng task)"
   },
   "member": {
     "title": "Thành viên dự án",
@@ -102,10 +116,17 @@
   },
   "issue": {
     "delete": {
-      "title": "Bạn có chắc muốn xóa task này?",
-      "warning": "Thao tác này không thể hoàn tác.",
-      "confirm": "Xóa",
-      "cancel": "Hủy"
+      "title": "Xác nhận xóa task",
+      "warning": "Hành động này sẽ xóa toàn bộ comment trong task và không thể khôi phục lại.",
+      "typeConfirm": "Vui lòng nhập \"XÓA\" để xác nhận:",
+      "placeholder": "Nhập XÓA",
+      "confirm": "Xóa task",
+      "cancel": "Hủy",
+      "success": "Đã xóa task",
+      "errorForbidden": "Bạn không có quyền xóa task này",
+      "errorNotFound": "Task không tồn tại hoặc đã bị xóa trước đó",
+      "errorNetwork": "Lỗi kết nối, vui lòng thử lại",
+      "deletedByOther": "Task này đã bị {{name}} xóa"
     },
     "dueDate": {
       "label": "Deadline",
@@ -168,6 +189,29 @@
     "deleted": "{{name}} đã xóa task",
     "performed": "{{name}} đã thực hiện thao tác"
   },
+  "timeline": {
+    "title": "Timeline đa dự án",
+    "home": "Trang chủ",
+    "searchPlaceholder": "Tìm task...",
+    "selectProjects": "Chọn dự án",
+    "selectAll": "Chọn tất cả",
+    "clearAll": "Bỏ chọn",
+    "criticalPath": "Đường găng",
+    "conflicts": "Xung đột",
+    "noProjects": "Chọn ít nhất một dự án",
+    "noTasks": "Không có task trong khoảng thời gian đã chọn",
+    "overdue": "Quá hạn",
+    "overlap": "Trùng lịch",
+    "blocked": "Bị block",
+    "blockedBy": "Phụ thuộc vào",
+    "noOverdue": "Không có task quá hạn",
+    "noOverlap": "Không có xung đột lịch",
+    "noBlocked": "Không có task bị block",
+    "aiResolve": "Đề xuất AI",
+    "aiTitle": "AI Giải quyết xung đột",
+    "aiAnalyzing": "Đang phân tích...",
+    "aiNoResult": "Không có gợi ý"
+  },
   "switcher": {
     "selectProject": "Chọn dự án",
     "searchPlaceholder": "Tìm kiếm dự án...",
@@ -178,5 +222,47 @@
     "projectNamePlaceholder": "Tên dự án...",
     "create": "Tạo",
     "cancel": "Hủy"
+  },
+  "workflow": {
+    "nav": "Workflow",
+    "list": {
+      "title": "Workflow của dự án",
+      "default": "Mặc định",
+      "states": "trạng thái",
+      "transitions": "transitions",
+      "design": "Thiết kế",
+      "clone": "Sao chép",
+      "empty": "Chưa có workflow nào. Tạo mới để bắt đầu.",
+      "createNew": "Tạo workflow mới",
+      "createBlank": "Tạo trống",
+      "namePlaceholder": "Tên workflow...",
+      "templates": "Tạo từ mẫu có sẵn"
+    },
+    "designer": {
+      "save": "Lưu",
+      "stateProps": "Thuộc tính trạng thái",
+      "transitionProps": "Thuộc tính transition"
+    }
+  },
+  "releases": {
+    "nav": "Releases",
+    "title": "Quản lý Releases",
+    "subtitle": "Tổng quan tiến độ các dự án và lịch sử phát hành",
+    "createRelease": "Tạo Release",
+    "changeStatus": "Đổi trạng thái",
+    "version": "Phiên bản",
+    "releaseDate": "Ngày phát hành",
+    "releaseNotes": "Release Notes",
+    "type": "Loại",
+    "status": "Trạng thái",
+    "tasks": "Tasks",
+    "noReleases": "Chưa có release nào",
+    "filterByStatus": "Lọc theo trạng thái",
+    "sortBy": "Sắp xếp",
+    "byRecent": "Mới nhất",
+    "byProgress": "Tiến độ",
+    "byName": "Tên A→Z",
+    "gridView": "Dạng lưới",
+    "listView": "Dạng danh sách"
   }
 }

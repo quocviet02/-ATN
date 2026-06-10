@@ -12,6 +12,8 @@ export interface JProject {
   issues: JIssue[];
   users: JUser[];
   background: string;
+  startDate?: string | null;
+  dueDate?: string | null;
 }
 
 export enum ProjectCategory {

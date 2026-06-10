@@ -1,0 +1,81 @@
+<div class="wf-list-page">
+  <breadcrumbs [items]="breadcrumbs"></breadcrumbs>
+  <div class="wf-list-header">
+    <h2>{{ 'workflow.list.title' | translate }}</h2>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+
+    <!-- Existing workflows -->
+    <div class="wf-cards" *ngIf="workflows.length > 0">
+      <div class="wf-card" *ngFor="let wf of workflows">
+        <div class="wf-card-header">
+          <span class="wf-name">{{ wf.name }}</span>
+          <nz-tag *ngIf="wf.isDefault" nzColor="blue">{{ 'workflow.list.default' | translate }}</nz-tag>
+        </div>
+        <div class="wf-card-meta">
+          <span>{{ wf.states.length }} {{ 'workflow.list.states' | translate }}</span>
+          <span class="dot">•</span>
+          <span>{{ wf.transitions.length }} {{ 'workflow.list.transitions' | translate }}</span>
+          <span class="dot">•</span>
+          <span>{{ wf.taskCount || 0 }} task đang dùng</span>
+        </div>
+        <div class="wf-state-dots">
+          <span *ngFor="let s of wf.states" class="state-dot"
+            [style.background]="s.color"
+            nz-tooltip [nzTooltipTitle]="s.name">
+          </span>
+        </div>
+        <div class="wf-card-actions">
+          <a [routerLink]="['/project/workflows', wf.id, 'design']">
+            <button nz-button nzSize="small">
+              <i nz-icon nzType="edit"></i> {{ 'workflow.list.design' | translate }}
+            </button>
+          </a>
+          <button nz-button nzSize="small" (click)="clone(wf)">
+            <i nz-icon nzType="copy"></i> {{ 'workflow.list.clone' | translate }}
+          </button>
+          <button nz-button nzSize="small" nzDanger
+            *ngIf="!wf.isDefault && isOwner"
+            (click)="delete(wf)">
+            <i nz-icon nzType="delete"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wf-empty" *ngIf="!loading && workflows.length === 0">
+      <i nz-icon nzType="apartment" style="font-size:48px; color:#d9d9d9;"></i>
+      <p>{{ 'workflow.list.empty' | translate }}</p>
+    </div>
+
+    <!-- Create new -->
+    <div class="wf-create-section" *ngIf="isOwner">
+      <h3>{{ 'workflow.list.createNew' | translate }}</h3>
+
+      <div class="wf-blank-form">
+        <input nz-input [(ngModel)]="newName"
+          [placeholder]="'workflow.list.namePlaceholder' | translate"
+          style="width:260px; margin-right:8px;"
+          (keyup.enter)="createBlank()" />
+        <button nz-button nzType="primary" (click)="createBlank()"
+          [nzLoading]="creating" [disabled]="!newName.trim()">
+          <i nz-icon nzType="plus"></i> {{ 'workflow.list.createBlank' | translate }}
+        </button>
+      </div>
+
+      <h3 class="mt-4">{{ 'workflow.list.templates' | translate }}</h3>
+      <div class="wf-templates">
+        <div class="wf-template-card" *ngFor="let tpl of templates" (click)="createFromTemplate(tpl)">
+          <div class="tpl-name">{{ tpl.name }}</div>
+          <div class="tpl-desc">{{ tpl.description }}</div>
+          <div class="tpl-states">
+            <span *ngFor="let s of tpl.states" class="state-dot" [style.background]="s.color"
+              nz-tooltip [nzTooltipTitle]="s.name"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </nz-spin>
+</div>

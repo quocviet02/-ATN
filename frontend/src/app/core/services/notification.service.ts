@@ -15,12 +15,19 @@ export interface AppNotification {
   createdAt: string;
 }
 
+export interface TaskDeletedEvent {
+  taskId:    string;
+  deletedBy: { id: string; name: string };
+  title:     string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NotificationService implements OnDestroy {
   private _socket: Socket | null = null;
 
-  readonly unreadCount$ = new BehaviorSubject<number>(0);
-  readonly toast$       = new Subject<AppNotification>();
+  readonly unreadCount$  = new BehaviorSubject<number>(0);
+  readonly toast$        = new Subject<AppNotification>();
+  readonly taskDeleted$  = new Subject<TaskDeletedEvent>();
 
   private _baseUrl = environment.apiUrl;
 
@@ -42,6 +49,10 @@ export class NotificationService implements OnDestroy {
     this._socket.on('notification', (notif: AppNotification) => {
       this.unreadCount$.next(this.unreadCount$.value + 1);
       this.toast$.next(notif);
+    });
+
+    this._socket.on('task_deleted', (event: TaskDeletedEvent) => {
+      this.taskDeleted$.next(event);
     });
 
     this.fetchUnreadCount();

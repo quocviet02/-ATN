@@ -34,6 +34,7 @@
     "@sentry/angular": "^9.30.0",
     "@sentry/tracing": "^6.18.1",
     "date-fns": "^2.14.0",
+    "frappe-gantt": "^1.2.2",
     "ng-zorro-antd": "^20.4.4",
     "ngx-quill": "^28.0.2",
     "quill": "^2.0.3",

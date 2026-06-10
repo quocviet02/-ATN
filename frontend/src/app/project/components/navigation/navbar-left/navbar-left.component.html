@@ -53,6 +53,42 @@
       </div>
     }
 
+    <!-- Releases -->
+    <div class="item">
+      <a routerLink="/project/releases"
+        routerLinkActive="active-nav"
+        nz-tooltip
+        nzTooltipTitle="Releases"
+        nzTooltipPlacement="right"
+        class="itemIcon">
+        <i class="text-xl text-white" nz-icon nzType="rocket" nzTheme="outline"></i>
+      </a>
+    </div>
+
+    <!-- Workflow — chỉ owner/admin -->
+    <div class="item" *ngIf="canViewTimeline$ | async">
+      <a routerLink="/project/workflows"
+        routerLinkActive="active-nav"
+        nz-tooltip
+        [nzTooltipTitle]="'workflow.nav' | translate"
+        nzTooltipPlacement="right"
+        class="itemIcon">
+        <i class="text-xl text-white" nz-icon nzType="apartment" nzTheme="outline"></i>
+      </a>
+    </div>
+
+    <!-- Timeline — chỉ owner/admin -->
+    <div class="item" *ngIf="canViewTimeline$ | async">
+      <a routerLink="/project/timeline"
+        routerLinkActive="active-nav"
+        nz-tooltip
+        [nzTooltipTitle]="'timeline.title' | translate"
+        nzTooltipPlacement="right"
+        class="itemIcon">
+        <i class="text-xl text-white" nz-icon nzType="calendar" nzTheme="outline"></i>
+      </a>
+    </div>
+
     <!-- Create issue — chỉ owner/admin -->
     <div class="item" *ngIf="permissionService.canCreateTask$ | async">
       <div (click)="openCreateIssueModal()"
@@ -76,20 +112,40 @@
       <app-notification-bell></app-notification-bell>
     </div>
 
+    <!-- User avatar with dropdown -->
     @if (authQuery.user$ | async; as user) {
-      <div class="item"
-        >
-        <div nz-tooltip
+      <div class="item">
+        <div nz-dropdown
+          [nzDropdownMenu]="userMenu"
+          nzPlacement="rightBottom"
+          nzTrigger="click"
+          nz-tooltip
           [nzTooltipTitle]="user.name"
           nzTooltipPlacement="right"
-          class="itemIcon">
+          class="itemIcon cursor-pointer">
           <j-avatar class="flex"
             [avatarUrl]="user.avatarUrl"
             [size]="26">
           </j-avatar>
         </div>
       </div>
+
+      <nz-dropdown-menu #userMenu="nzDropdownMenu">
+        <ul nz-menu class="user-dropdown-menu">
+          <li nz-menu-item class="user-info-item" [nzDisabled]="true">
+            <div class="user-name">{{ user.name }}</div>
+            <div class="user-email">{{ user.email }}</div>
+          </li>
+          <li nz-menu-divider></li>
+          <li nz-menu-item class="logout-item" (click)="confirmLogout()">
+            <i nz-icon nzType="logout" nzTheme="outline" class="mr-2"></i>
+            {{ 'nav.logout' | translate }}
+          </li>
+        </ul>
+      </nz-dropdown-menu>
     }
+
+    <!-- About -->
     <div class="item">
       <a nz-popover
         nzPopoverPlacement="rightBottom"

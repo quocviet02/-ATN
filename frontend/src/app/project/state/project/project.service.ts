@@ -5,7 +5,7 @@ import { JComment } from '@trungk18/interface/comment';
 import { IssueStatus, IssuePriority, IssueType, JIssue } from '@trungk18/interface/issue';
 import { JProject, ProjectCategory } from '@trungk18/interface/project';
 import { JUser } from '@trungk18/interface/user';
-import { forkJoin, of, Observable } from 'rxjs';
+import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { catchError, switchMap, tap, concatMap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { MyPermissions, ProjectColumn, ProjectStore } from './project.store';
@@ -69,11 +69,14 @@ function mapTask(task: any, columnIdToStatus: Record<string, IssueStatus>, proje
     timeRemaining: 0,
     createdAt:     task.createdAt || '',
     updatedAt:     task.updatedAt || '',
-    reporterId:    '',
+    reporterId:    task.createdBy?.id || '',
     userIds:       task.assignee ? [task.assignee.id] : [],
     comments:      [],
     projectId,
-    dueDate:       task.dueDate ? task.dueDate.split('T')[0] : undefined
+    dueDate:        task.dueDate ? task.dueDate.split('T')[0] : undefined,
+    workflowId:     task.workflowId     ?? null,
+    currentStateId: task.currentStateId ?? null,
+    slaBreached:    task.slaBreached    ?? false,
   };
 }
 
@@ -82,6 +85,9 @@ const STORAGE_KEY = 'selectedProjectId';
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
   baseUrl: string;
+
+  /** Emits the issueId after a successful deletion (local or remote). */
+  readonly issueDeleted$ = new Subject<string>();
 
   constructor(private _http: HttpClient, private _store: ProjectStore) {
     this.baseUrl = environment.apiUrl;
@@ -203,6 +209,8 @@ export class ProjectService {
       createdAt:   proj.createdAt,
       updateAt:    proj.updatedAt,
       background:  proj.background || '',
+      startDate:   proj.startDate  || null,
+      dueDate:     proj.dueDate    || null,
       issues,
       users
     };
@@ -267,7 +275,13 @@ export class ProjectService {
   updateProject(project: Partial<JProject>) {
     const state = this._store.getValue();
     if (!state.id) return;
-    this._http.put(`${this.baseUrl}/projects/${state.id}`, project).pipe(
+    this._http.put(`${this.baseUrl}/projects/${state.id}`, {
+      name:        project.name,
+      description: project.description,
+      background:  project.background,
+      startDate:   (project as any).startDate ?? undefined,
+      dueDate:     (project as any).dueDate   ?? undefined,
+    }).pipe(
       tap(() => this._store.update((s) => ({ ...s, ...project })))
     ).subscribe();
   }
@@ -323,9 +337,18 @@ export class ProjectService {
     }
   }
 
-  deleteIssue(issueId: string) {
+  deleteIssue(issueId: string): Observable<{ message: string; taskId: string }> {
+    return this._http.delete<{ message: string; taskId: string }>(`${this.baseUrl}/tasks/${issueId}`).pipe(
+      tap(({ taskId }) => {
+        this.removeIssueFromStore(taskId);
+      })
+    );
+  }
+
+  /** Remove task from local store and notify subscribers (e.g. open modals). */
+  removeIssueFromStore(issueId: string): void {
     this._store.update((state) => ({ ...state, issues: arrayRemove(state.issues, issueId) }));
-    this._http.delete(`${this.baseUrl}/tasks/${issueId}`).subscribe();
+    this.issueDeleted$.next(issueId);
   }
 
   updateIssueComment(issueId: string, comment: JComment) {

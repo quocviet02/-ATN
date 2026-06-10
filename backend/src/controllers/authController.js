@@ -1,6 +1,7 @@
-const bcrypt = require('bcryptjs');
-const jwt    = require('jsonwebtoken');
+const bcrypt     = require('bcryptjs');
+const jwt        = require('jsonwebtoken');
 const { User, RefreshToken } = require('../models');
+const ioInstance = require('../utils/ioInstance');
 
 const SALT_ROUNDS = 10;
 
@@ -80,9 +81,30 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
   try {
     const { refreshToken } = req.body;
+
+    // Revoke the refresh token from database
     if (refreshToken) {
       await RefreshToken.deleteOne({ token: refreshToken });
     }
+
+    // Force-disconnect all active socket connections for this user (if JWT was valid)
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        const token   = authHeader.slice(7);
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const io      = ioInstance.getIO();
+        if (io && decoded?.userId) {
+          const sockets = await io.in(`user_${decoded.userId}`).fetchSockets();
+          for (const socket of sockets) {
+            socket.disconnect(true);
+          }
+        }
+      }
+    } catch {
+      // Token may be expired — still allow logout
+    }
+
     res.json({ statusCode: 200, message: 'Logged out successfully' });
   } catch (e) {
     err(res, 500, e.message, 'Internal Server Error');

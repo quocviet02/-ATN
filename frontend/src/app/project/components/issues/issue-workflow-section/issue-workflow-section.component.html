@@ -1,0 +1,64 @@
+<div class="wf-section" *ngIf="workflowId">
+  <div class="wf-section-title">
+    <i nz-icon nzType="apartment"></i>
+    Workflow
+    <nz-spin *ngIf="loading" nzSimple [nzSize]="'small'" style="margin-left:8px;"></nz-spin>
+  </div>
+
+  <!-- Current State -->
+  <div class="current-state" *ngIf="currentState">
+    <span class="state-badge" [style.background]="currentState.color + '22'"
+      [style.border-color]="currentState.color" [style.color]="currentState.color">
+      {{ currentState.name }}
+    </span>
+
+    <span class="time-in" *ngIf="timeInCurrentState">
+      <i nz-icon nzType="clock-circle"></i> {{ timeInCurrentState }}
+    </span>
+
+    <nz-tag *ngIf="currentState.slaHours" nzColor="orange" style="font-size:11px;">
+      SLA {{ currentState.slaHours }}h
+    </nz-tag>
+  </div>
+
+  <!-- Available transitions -->
+  <div class="transitions-row" *ngIf="availableResult?.transitions?.length">
+    <div class="trans-label">Chuyển sang:</div>
+    <div class="trans-btns">
+      <button *ngFor="let t of availableResult.transitions"
+        nz-button nzSize="small"
+        [class.approval-btn]="t.requireApproval"
+        [nzLoading]="processingTransitionId === t.id"
+        (click)="executeTransition(t)"
+        nz-tooltip [nzTooltipTitle]="t.requireApproval ? 'Yêu cầu phê duyệt' : ''">
+        {{ t.name }}
+        <i *ngIf="t.requireApproval" nz-icon nzType="check-circle" style="margin-left:4px;"></i>
+        <i *ngIf="!t.requireApproval" nz-icon nzType="arrow-right" style="margin-left:4px;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- No transitions -->
+  <div class="no-trans" *ngIf="availableResult && !availableResult.transitions?.length && !loading">
+    <span *ngIf="currentState?.isFinal">✅ Đã hoàn thành</span>
+    <span *ngIf="!currentState?.isFinal">Không có transition khả dụng</span>
+  </div>
+
+  <!-- History toggle -->
+  <button nz-button nzType="link" nzSize="small" class="history-btn" (click)="loadHistory()">
+    <i nz-icon [nzType]="showHistory ? 'up' : 'down'"></i>
+    Lịch sử trạng thái
+  </button>
+
+  <div class="state-history" *ngIf="showHistory && history.length">
+    <div *ngFor="let h of history; let i = index" class="history-row">
+      <span class="hist-dot" [style.background]="h.stateColor"></span>
+      <span class="hist-name">{{ h.stateName }}</span>
+      <span class="hist-dur">{{ formatDuration(h) }}</span>
+    </div>
+  </div>
+
+  <div class="no-history" *ngIf="showHistory && !history.length">
+    Chưa có lịch sử trạng thái
+  </div>
+</div>

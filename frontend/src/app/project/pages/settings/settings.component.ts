@@ -11,6 +11,7 @@ import { PermissionService } from '@trungk18/core/services/permission.service';
 import { NoWhitespaceValidator } from '@trungk18/core/validators/no-whitespace.validator';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { ButtonComponent } from '../../../jira-control/button/button.component';
 import { AutofocusDirective } from '../../../core/directives/autofocus.directive';
 import { BreadcrumbsComponent } from '../../../jira-control/breadcrumbs/breadcrumbs.component';
@@ -20,7 +21,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 @Component({
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.scss'],
-    imports: [BreadcrumbsComponent, ReactiveFormsModule, AutofocusDirective, ButtonComponent, AsyncPipe, NgIf, TranslateModule]
+    imports: [BreadcrumbsComponent, ReactiveFormsModule, AutofocusDirective, ButtonComponent,
+              AsyncPipe, NgIf, TranslateModule, NzDatePickerModule]
 })
 export class SettingsComponent implements OnInit {
   project: JProject;
@@ -57,7 +59,9 @@ export class SettingsComponent implements OnInit {
       name:        ['', NoWhitespaceValidator()],
       url:         [''],
       description: [''],
-      category:    [ProjectCategory.SOFTWARE]
+      category:    [ProjectCategory.SOFTWARE],
+      startDate:   [null],
+      dueDate:     [null],
     });
   }
 
@@ -66,13 +70,23 @@ export class SettingsComponent implements OnInit {
       name:        project.name,
       url:         project.url,
       description: project.description,
-      category:    project.category
+      category:    project.category,
+      startDate:   project.startDate ? new Date(project.startDate) : null,
+      dueDate:     project.dueDate   ? new Date(project.dueDate)   : null,
     });
   }
 
   submitForm() {
-    const formValue: Partial<JProject> = this.projectForm.getRawValue();
-    this._projectService.updateProject(formValue);
+    const raw = this.projectForm.getRawValue();
+    const formValue: Partial<JProject> & { startDate?: string | null; dueDate?: string | null } = {
+      name:        raw.name,
+      url:         raw.url,
+      description: raw.description,
+      category:    raw.category,
+      startDate:   raw.startDate ? (raw.startDate as Date).toISOString() : null,
+      dueDate:     raw.dueDate   ? (raw.dueDate   as Date).toISOString() : null,
+    };
+    this._projectService.updateProject(formValue as any);
     this._notification.create('success', this._translate.instant('settings.save'), '');
   }
 

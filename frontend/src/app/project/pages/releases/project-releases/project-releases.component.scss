@@ -1,0 +1,143 @@
+.project-releases-page {
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #595959;
+    font-size: 13px;
+    text-decoration: none;
+
+    &:hover { color: #1890ff; }
+  }
+
+  .header-title { flex: 1; h2 { margin: 0; font-size: 20px; font-weight: 700; } }
+}
+
+.releases-timeline {
+  max-width: 800px;
+}
+
+.release-entry {
+  display: flex;
+  gap: 16px;
+}
+
+.tl-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 16px;
+
+  .tl-dot {
+    width: 14px;
+    height: 14px;
+    background: #1890ff;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #1890ff;
+    flex-shrink: 0;
+
+    &.rollback { background: #ff4d4f; box-shadow: 0 0 0 2px #ff4d4f; }
+  }
+
+  .tl-line {
+    flex: 1;
+    width: 2px;
+    background: #f0f0f0;
+    min-height: 20px;
+  }
+}
+
+.release-card {
+  flex: 1;
+  margin-bottom: 16px;
+  border-radius: 8px;
+
+  ::ng-deep .ant-card-body { padding: 16px; }
+}
+
+.release-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+
+  .release-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .version { font-size: 17px; font-weight: 700; color: #262626; }
+  }
+
+  .release-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .date { font-size: 12px; color: #8c8c8c; }
+  }
+}
+
+.release-notes {
+  margin-bottom: 10px;
+
+  p { margin: 0; color: #595959; font-size: 13px; white-space: pre-wrap; line-height: 1.6; }
+  .empty-notes { color: #bfbfbf; font-style: italic; }
+}
+
+.notes-edit {
+  margin-bottom: 10px;
+
+  .edit-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+}
+
+.release-tasks {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+
+  .tasks-label { font-size: 12px; color: #52c41a; font-weight: 500; }
+
+  .task-chip {
+    background: #f5f5f5;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #595959;
+    cursor: default;
+  }
+
+  .more-tasks { font-size: 12px; color: #8c8c8c; }
+}
+
+.release-footer {
+  border-top: 1px solid #f5f5f5;
+  padding-top: 8px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}

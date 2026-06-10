@@ -29,7 +29,8 @@ export class PermissionService {
 
   canDeleteIssue(issue: JIssue, currentUserId: string | null, role: string): boolean {
     if (role === 'owner' || role === 'admin') return true;
-    return !!currentUserId && issue.userIds.includes(currentUserId);
+    // Member can only delete tasks they created (reporterId = createdBy)
+    return !!currentUserId && issue.reporterId === currentUserId;
   }
 
   canDragIssue(_issue: JIssue, _currentUserId: string | null, role: string): boolean {

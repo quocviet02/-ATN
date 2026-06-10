@@ -20,10 +20,11 @@
     "importHelpers": true,
     "target": "ES2022",
     "lib": [
-      "es2018",
+      "es2020",
       "dom"
     ],
     "useDefineForClassFields": false,
+    "allowSyntheticDefaultImports": true,
     "types": [
       "vitest/globals"
     ]

@@ -11,11 +11,13 @@ const Task              = require('./Task');
 const Comment           = require('./Comment');
 const ActivityLog       = require('./ActivityLog');
 const Notification      = require('./Notification');
+const Workflow          = require('./Workflow');
+const Release           = require('./Release');
 
 module.exports = {
   User, RefreshToken,
   Project, ProjectMember, ProjectInvitation,
   Board, Column, Task,
   Comment, ActivityLog,
-  Notification,
+  Notification, Workflow, Release,
 };

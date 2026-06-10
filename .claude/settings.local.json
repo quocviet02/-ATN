@@ -24,7 +24,22 @@
       "Bash(cat)",
       "Bash(bash /tmp/extract_keys.sh)",
       "Bash(xargs grep -l \"| *translate\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\đatn\" -Recurse -Depth 2 | ForEach-Object { if \\($_.PSIsContainer\\) { Write-Output \"DIR: $\\($_.FullName\\)\" } else { Write-Output \"FILE: $\\($_.FullName\\)\" } } | Sort-Object)",
+      "Bash(node -e \"const pkg = require\\('./node_modules/ng-zorro-antd/package.json'\\); console.log\\(pkg.version\\)\")",
+      "Bash(node --check src/controllers/taskController.js)",
+      "Bash(node --check src/controllers/authController.js)",
+      "Bash(node -e \"require\\('./src/controllers/timelineController'\\)\")",
+      "Bash(node -e \"require\\('./src/routes/timeline'\\)\")",
+      "Bash(node -e \"require\\('./src/models/Task'\\)\")",
+      "Bash(node -e \"require\\('./src/models/Project'\\); require\\('./src/controllers/projectController'\\); require\\('./src/controllers/timelineController'\\)\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Select-Object Name, Length)",
+      "Bash(powershell *)",
+      "Bash(node --check src/controllers/releasesController.js)",
+      "Bash(node --check src/routes/releases.js)",
+      "PowerShell(Get-ChildItem -Recurse -File \"D:\\\\đatn\\\\backend\\\\src\" | Where-Object { $_.Extension -match '\\\\.\\(js\\)$' } | Select-Object -ExpandProperty FullName)",
+      "PowerShell(Get-ChildItem -Recurse -File \"D:\\\\đatn\\\\frontend\\\\src\\\\app\" | Where-Object { $_.Extension -match '\\\\.\\(ts\\)$' -and $_.Name -notmatch '\\\\.spec\\\\.' } | Select-Object -ExpandProperty FullName)"
     ]
   }
 }

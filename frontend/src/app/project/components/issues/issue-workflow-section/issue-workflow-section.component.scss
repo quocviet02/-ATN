@@ -1,0 +1,109 @@
+.wf-section {
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.wf-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 10px;
+}
+
+.current-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.state-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1.5px solid;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.time-in {
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.transitions-row { margin-bottom: 8px; }
+
+.trans-label {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.trans-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.approval-btn {
+  border-color: #8b5cf6 !important;
+  color: #8b5cf6 !important;
+  &:hover { background: #f5f3ff !important; }
+}
+
+.no-trans {
+  font-size: 12px;
+  color: #10b981;
+  margin-bottom: 8px;
+  padding: 6px 0;
+}
+
+.history-btn {
+  padding: 0;
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.state-history {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.hist-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.hist-name { flex: 1; font-weight: 500; }
+.hist-dur  { color: #888; font-size: 11px; }
+
+.no-history { font-size: 12px; color: #ccc; padding: 8px 0; }

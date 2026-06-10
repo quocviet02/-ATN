@@ -25,6 +25,52 @@ $light-blue: rgb(28, 99, 206);
   background: $light-blue;
 }
 
+.active-nav.itemIcon {
+  background: $light-blue;
+}
+
 .about-popover {
   max-width: 270px;
+}
+
+// User dropdown styles (applied via ::ng-deep since nz-menu renders outside component)
+:host ::ng-deep {
+  .user-dropdown-menu {
+    min-width: 200px;
+  }
+
+  .user-info-item {
+    cursor: default !important;
+    padding: 10px 16px !important;
+
+    &:hover {
+      background: transparent !important;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #172b4d;
+      line-height: 1.4;
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: #8993a4;
+      margin-top: 2px;
+    }
+  }
+
+  .logout-item {
+    color: #de350b !important;
+    font-weight: 500;
+
+    &:hover {
+      background: #ffebe6 !important;
+    }
+
+    i {
+      color: #de350b !important;
+    }
+  }
 }

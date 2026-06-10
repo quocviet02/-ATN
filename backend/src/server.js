@@ -41,9 +41,12 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {});
 });
 
-// Wire io into notification service
-const notifService = require('./services/notificationService');
+// Wire io into notification service and shared io instance
+const notifService   = require('./services/notificationService');
+const ioInstance     = require('./utils/ioInstance');
+const activityLogger = require('./utils/activityLogger');
 notifService.setIO(io);
+ioInstance.setIO(io);
 
 // ─── Express middleware ───────────────────────────────────────────────────────
 
@@ -71,6 +74,16 @@ app.use('/api/columns',       require('./routes/columnTasks'));
 app.use('/api/tasks',         require('./routes/tasks'));
 app.use('/api/comments',      require('./routes/comments'));
 app.use('/api/invite',        require('./routes/invite'));
+app.use('/api/timeline',      require('./routes/timeline'));
+
+const { projectWorkflowRouter, workflowRouter, taskWorkflowRouter } = require('./routes/workflows');
+app.use('/api/projects',  projectWorkflowRouter);
+app.use('/api/workflows', workflowRouter);
+app.use('/api/tasks',     taskWorkflowRouter);
+
+const { releasesRouter, projectReleasesRouter } = require('./routes/releases');
+app.use('/api/releases',  releasesRouter);
+app.use('/api/projects',  projectReleasesRouter);
 
 // ─── 404 ──────────────────────────────────────────────────────────────────────
 
@@ -87,7 +100,8 @@ app.use((err, req, res, next) => {
 
 // ─── Cron: expire pending invitations every hour ──────────────────────────────
 
-const { ProjectInvitation, Task, ProjectMember } = require('./models');
+const { ProjectInvitation, Task, ProjectMember, Workflow } = require('./models');
+const workflowEngine = require('./services/workflowEngine');
 
 function scheduleInvitationExpiry() {
   const ONE_HOUR = 60 * 60 * 1000;
@@ -159,6 +173,69 @@ function scheduleDeadlineNotifications() {
   setInterval(run, ONE_HOUR);
 }
 
+// ─── Cron: SLA breach check every hour ───────────────────────────────────────
+
+function scheduleSlaCheck() {
+  const ONE_HOUR = 60 * 60 * 1000;
+  const run = async () => {
+    try {
+      const tasks = await Task.find({
+        workflowId:  { $ne: null },
+        deletedAt:   null,
+        slaBreached: false,
+      }).populate('assignee', 'id name email');
+
+      const workflowCache = {};
+      for (const task of tasks) {
+        const wfId = task.workflowId.toString();
+        if (!workflowCache[wfId]) {
+          workflowCache[wfId] = await Workflow.findById(wfId);
+        }
+        const workflow = workflowCache[wfId];
+        if (!workflow) continue;
+
+        if (workflowEngine.isSlaBreach(task, workflow)) {
+          task.slaBreached = true;
+          await task.save();
+
+          activityLogger.log(task.id, null, 'sla_breached',
+            null,
+            { stateId: task.currentStateId }
+          );
+
+          const board   = await require('./models').Board.findById(task.boardId);
+          const members = await ProjectMember.find({ projectId: board?.projectId });
+          const owners  = members.filter(m => m.role === 'owner');
+
+          for (const m of owners) {
+            notifService.create({
+              recipient: m.user,
+              type:      'task_updated',
+              title:     'Vi phạm SLA',
+              body:      `Task "${task.title}" đã vượt quá thời gian SLA`,
+              link:      '/project/board',
+              meta:      { taskId: task.id },
+            });
+          }
+          if (task.assignee) {
+            notifService.create({
+              recipient: task.assignee._id || task.assignee,
+              type:      'task_updated',
+              title:     'Task của bạn đã vượt SLA',
+              body:      `"${task.title}" đã ở trạng thái hiện tại quá lâu`,
+              link:      '/project/board',
+              meta:      { taskId: task.id },
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[Cron] SLA check error:', e.message);
+    }
+  };
+  setInterval(run, ONE_HOUR);
+}
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 
 const PORT = process.env.PORT || 3000;
@@ -167,6 +244,7 @@ connectDB()
   .then(() => {
     scheduleInvitationExpiry();
     scheduleDeadlineNotifications();
+    scheduleSlaCheck();
     server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
   })
   .catch((err) => {

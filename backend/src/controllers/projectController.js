@@ -11,7 +11,7 @@ function err(res, status, message, error) {
 exports.getMyProjects = async (req, res) => {
   try {
     const memberships = await ProjectMember.find({ user: req.user._id })
-      .populate({ path: 'projectId', select: 'id name description background' })
+      .populate({ path: 'projectId', select: 'id name description background startDate dueDate' })
       .sort({ lastAccessedAt: -1, createdAt: -1 });
 
     const validMemberships = memberships.filter(m => m.projectId != null);
@@ -31,6 +31,8 @@ exports.getMyProjects = async (req, res) => {
       role:           m.role,
       memberCount:    countMap[m.projectId._id.toString()] || 1,
       lastAccessedAt: m.lastAccessedAt || null,
+      startDate:      m.projectId.startDate || null,
+      dueDate:        m.projectId.dueDate   || null,
     }));
 
     res.json({ projects });
@@ -60,13 +62,15 @@ exports.getProjects = async (req, res) => {
 
 exports.createProject = async (req, res) => {
   try {
-    const { name, description = '' } = req.body;
+    const { name, description = '', startDate, dueDate } = req.body;
     if (!name?.trim()) return err(res, 400, 'Name is required', 'Bad Request');
 
     const project = await Project.create({
       name:        name.trim(),
       description: description.trim(),
       owner:       req.user._id,
+      startDate:   startDate || null,
+      dueDate:     dueDate   || null,
     });
 
     await ProjectMember.create({ projectId: project._id, user: req.user._id, role: 'owner' });
@@ -123,12 +127,14 @@ exports.getProject = async (req, res) => {
 
 exports.updateProject = async (req, res) => {
   try {
-    const { name, description, background } = req.body;
+    const { name, description, background, startDate, dueDate } = req.body;
     const project = req.project;
 
     if (name        !== undefined) project.name        = name.trim();
     if (description !== undefined) project.description = description.trim();
     if (background  !== undefined) project.background  = background;
+    if (startDate   !== undefined) project.startDate   = startDate || null;
+    if (dueDate     !== undefined) project.dueDate     = dueDate   || null;
     await project.save();
 
     res.json({ project });

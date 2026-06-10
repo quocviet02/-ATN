@@ -1,0 +1,254 @@
+<div class="releases-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h2>Quản lý Releases</h2>
+      <p class="subtitle">Tổng quan tiến độ các dự án và lịch sử phát hành</p>
+    </div>
+    <div class="header-filters">
+      <nz-select [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()" nzPlaceHolder="Trạng thái" nzAllowClear style="width:150px">
+        <nz-option *ngFor="let s of statuses" [nzValue]="s" [nzLabel]="statusLabels[s]"></nz-option>
+      </nz-select>
+      <nz-select [(ngModel)]="filterRole" (ngModelChange)="onFilterChange()" nzPlaceHolder="Vai trò" nzAllowClear style="width:130px">
+        <nz-option nzValue="owner"  nzLabel="Owner"></nz-option>
+        <nz-option nzValue="admin"  nzLabel="Admin"></nz-option>
+        <nz-option nzValue="member" nzLabel="Member"></nz-option>
+      </nz-select>
+      <nz-select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()" style="width:140px">
+        <nz-option nzValue="recent"   nzLabel="Mới nhất"></nz-option>
+        <nz-option nzValue="progress" nzLabel="Tiến độ"></nz-option>
+        <nz-option nzValue="name"     nzLabel="Tên A→Z"></nz-option>
+      </nz-select>
+      <div class="view-toggle">
+        <button nz-button [nzType]="viewMode==='grid'?'primary':'default'" nzShape="circle" (click)="viewMode='grid'">
+          <span nz-icon nzType="appstore"></span>
+        </button>
+        <button nz-button [nzType]="viewMode==='list'?'primary':'default'" nzShape="circle" (click)="viewMode='list'">
+          <span nz-icon nzType="unordered-list"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="summary-bar" *ngIf="summary">
+    <div class="stat-item">
+      <span class="stat-num">{{ summary.total }}</span>
+      <span class="stat-lbl">Dự án</span>
+    </div>
+    <div class="stat-item" *ngFor="let s of statuses">
+      <span class="stat-num">{{ summary.byStatus[s] || 0 }}</span>
+      <span class="stat-lbl">{{ statusLabels[s] }}</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">{{ summary.totalReleases }}</span>
+      <span class="stat-lbl">Releases</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <nz-tabset [nzSelectedIndex]="activeTab" (nzSelectedIndexChange)="onTabChange($event)" class="main-tabs">
+
+    <!-- Tab 0: Projects -->
+    <nz-tab nzTitle="Dự án">
+      <nz-spin [nzSpinning]="loading">
+        <ng-container *ngIf="!loading && projects.length === 0">
+          <nz-empty nzNotFoundContent="Không có dự án nào"></nz-empty>
+        </ng-container>
+
+        <!-- Grid view -->
+        <div class="projects-grid" *ngIf="viewMode === 'grid' && projects.length">
+          <div class="project-card" *ngFor="let p of projects; trackBy: trackById">
+            <div class="card-header">
+              <div class="project-title">
+                <span class="name">{{ p.name }}</span>
+                <nz-tag [nzColor]="statusColors[p.status]">{{ statusLabels[p.status] }}</nz-tag>
+              </div>
+              <div class="card-actions">
+                <button nz-button nzType="text" nzSize="small" nzShape="circle"
+                  nz-tooltip="Thêm release" (click)="openCreateRelease(p)">
+                  <span nz-icon nzType="plus-circle"></span>
+                </button>
+                <button nz-button nzType="text" nzSize="small" nzShape="circle"
+                  nz-tooltip="Đổi trạng thái" (click)="openChangeStatus(p)"
+                  *ngIf="p.role === 'owner'">
+                  <span nz-icon nzType="edit"></span>
+                </button>
+                <a nz-button nzType="text" nzSize="small" nzShape="circle"
+                  [routerLink]="['/project', p.id, 'releases']"
+                  nz-tooltip="Xem chi tiết">
+                  <span nz-icon nzType="right-circle"></span>
+                </a>
+              </div>
+            </div>
+
+            <p class="description" *ngIf="p.description">{{ p.description }}</p>
+
+            <div class="progress-row">
+              <span>Tiến độ</span>
+              <nz-progress
+                [nzPercent]="p.progress"
+                nzSize="small"
+                [nzStrokeColor]="progressColor(p.progress)"
+                style="flex:1;margin:0 8px">
+              </nz-progress>
+              <span>{{ p.progress }}%</span>
+            </div>
+
+            <div class="meta-row">
+              <div class="meta-item" nz-tooltip="Phiên bản">
+                <span nz-icon nzType="tag"></span> {{ p.version }}
+              </div>
+              <div class="meta-item" nz-tooltip="Thành viên">
+                <span nz-icon nzType="team"></span> {{ p.memberCount }}
+              </div>
+              <div class="meta-item" nz-tooltip="Tasks">
+                <span nz-icon nzType="check-circle"></span>
+                {{ p.taskStats.completed }}/{{ p.taskStats.total }}
+              </div>
+              <div class="meta-item overdue" *ngIf="p.taskStats.overdue > 0"
+                nz-tooltip="Tasks quá hạn">
+                <span nz-icon nzType="warning"></span> {{ p.taskStats.overdue }}
+              </div>
+            </div>
+
+            <div class="tech-stack" *ngIf="p.techStack?.length">
+              <nz-tag *ngFor="let t of p.techStack.slice(0,4)" nzColor="default">{{ t }}</nz-tag>
+              <span *ngIf="p.techStack.length > 4" class="more-tech">+{{ p.techStack.length - 4 }}</span>
+            </div>
+
+            <div class="card-footer">
+              <div class="latest-release" *ngIf="p.latestRelease">
+                <span nz-icon nzType="rocket"></span>
+                <span>{{ p.latestRelease.version }}</span>
+                <span class="date">{{ p.latestRelease.releaseDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="no-release" *ngIf="!p.latestRelease">
+                <span>Chưa có release</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- List view -->
+        <div class="projects-list" *ngIf="viewMode === 'list' && projects.length">
+          <div class="list-row" *ngFor="let p of projects; trackBy: trackById">
+            <div class="list-main">
+              <span class="name">{{ p.name }}</span>
+              <nz-tag [nzColor]="statusColors[p.status]">{{ statusLabels[p.status] }}</nz-tag>
+              <nz-tag nzColor="default">{{ p.version }}</nz-tag>
+            </div>
+            <div class="list-progress">
+              <nz-progress [nzPercent]="p.progress" nzSize="small" [nzStrokeColor]="progressColor(p.progress)" style="width:120px"></nz-progress>
+            </div>
+            <div class="list-stats">
+              <span><span nz-icon nzType="check-circle"></span> {{ p.taskStats.completed }}/{{ p.taskStats.total }}</span>
+              <span *ngIf="p.taskStats.overdue" class="overdue"><span nz-icon nzType="warning"></span> {{ p.taskStats.overdue }}</span>
+              <span><span nz-icon nzType="team"></span> {{ p.memberCount }}</span>
+            </div>
+            <div class="list-actions">
+              <button nz-button nzType="default" nzSize="small" (click)="openCreateRelease(p)">+ Release</button>
+              <a nz-button nzType="primary" nzSize="small" [routerLink]="['/project', p.id, 'releases']">Chi tiết</a>
+            </div>
+          </div>
+        </div>
+      </nz-spin>
+    </nz-tab>
+
+    <!-- Tab 1: Statistics -->
+    <nz-tab nzTitle="Thống kê">
+      <div class="stats-section" *ngIf="stats; else statSpin">
+        <div nz-row [nzGutter]="16" class="stats-cards">
+          <div nz-col [nzSpan]="6">
+            <nz-card>
+              <nz-statistic nzTitle="Releases năm này" [nzValue]="stats.releasedThisYear"
+                [nzPrefix]="rocketTpl">
+              </nz-statistic>
+              <ng-template #rocketTpl><span nz-icon nzType="rocket" style="color:#1890ff"></span></ng-template>
+            </nz-card>
+          </div>
+          <div nz-col [nzSpan]="6">
+            <nz-card>
+              <nz-statistic nzTitle="Tổng releases" [nzValue]="stats.totalReleases"
+                [nzPrefix]="tagTpl">
+              </nz-statistic>
+              <ng-template #tagTpl><span nz-icon nzType="tag" style="color:#52c41a"></span></ng-template>
+            </nz-card>
+          </div>
+          <div nz-col [nzSpan]="6">
+            <nz-card>
+              <nz-statistic nzTitle="Tháng này" [nzValue]="stats.thisMonth"
+                [nzSuffix]="growthTpl">
+              </nz-statistic>
+              <ng-template #growthTpl>
+                <span [style.color]="stats.monthGrowth >= 0 ? '#52c41a' : '#ff4d4f'">
+                  ({{ stats.monthGrowth >= 0 ? '+' : '' }}{{ stats.monthGrowth }}%)
+                </span>
+              </ng-template>
+            </nz-card>
+          </div>
+          <div nz-col [nzSpan]="6">
+            <nz-card>
+              <nz-statistic nzTitle="Dự án nhiều nhất" [nzValue]="stats.topProject || '—'">
+              </nz-statistic>
+              <small *ngIf="stats.topProjectCount">{{ stats.topProjectCount }} releases</small>
+            </nz-card>
+          </div>
+        </div>
+
+        <!-- Bar chart: releases by month -->
+        <nz-card nzTitle="Releases theo tháng (năm nay)" class="chart-card" *ngIf="stats.byMonth?.length">
+          <div class="bar-chart">
+            <div class="bar-item" *ngFor="let m of stats.byMonth">
+              <div class="bar"
+                [style.height.%]="(m.count / maxBarCount) * 100"
+                nz-tooltip="{{ m.count }} releases">
+              </div>
+              <div class="bar-label">{{ byMonthLabel(m._id) }}</div>
+            </div>
+          </div>
+        </nz-card>
+      </div>
+      <ng-template #statSpin>
+        <nz-spin nzSimple style="display:flex;justify-content:center;padding:60px"></nz-spin>
+      </ng-template>
+    </nz-tab>
+
+    <!-- Tab 2: Timeline -->
+    <nz-tab nzTitle="Timeline">
+      <div class="timeline-section" *ngIf="timeline.length; else emptyTimeline">
+        <div class="timeline-entry" *ngFor="let r of timeline">
+          <div class="tl-dot" [style.background]="releaseTypeColors[r.type]"></div>
+          <div class="tl-content">
+            <div class="tl-header">
+              <span class="version">{{ r.version }}</span>
+              <nz-tag [nzColor]="releaseTypeColors[r.type]">{{ r.type }}</nz-tag>
+              <span class="project-name">{{ releaseProjectName(r) }}</span>
+            </div>
+            <div class="tl-date">{{ r.releaseDate | date:'dd/MM/yyyy HH:mm' }}</div>
+            <p class="tl-notes" *ngIf="r.releaseNotes">{{ r.releaseNotes }}</p>
+          </div>
+        </div>
+      </div>
+      <ng-template #emptyTimeline>
+        <nz-empty nzNotFoundContent="Chưa có release nào"></nz-empty>
+      </ng-template>
+    </nz-tab>
+
+  </nz-tabset>
+</div>
+
+<!-- Dialogs -->
+<app-create-release-dialog
+  *ngIf="showCreateRelease && selectedProject"
+  [project]="selectedProject"
+  (created)="onReleaseCreated()"
+  (cancelled)="showCreateRelease = false">
+</app-create-release-dialog>
+
+<app-change-status-dialog
+  *ngIf="showChangeStatus && selectedProject"
+  [project]="selectedProject"
+  (changed)="onStatusChanged()"
+  (cancelled)="showChangeStatus = false">
+</app-change-status-dialog>

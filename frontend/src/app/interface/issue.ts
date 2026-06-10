@@ -55,5 +55,8 @@ export interface JIssue {
   comments: JComment[];
   projectId: string;
   dueDate?: string;
+  workflowId?: string | null;
+  currentStateId?: string | null;
+  slaBreached?: boolean;
 }
 

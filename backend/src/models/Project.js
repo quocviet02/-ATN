@@ -17,7 +17,21 @@ const projectSchema = new mongoose.Schema(
     description: { type: String, default: '' },
     background:  { type: String, default: '' },
     owner:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    startDate:   { type: Date, default: null },
+    dueDate:     { type: Date, default: null },
     deletedAt:   { type: Date, default: null },
+    status:      {
+      type:    String,
+      enum:    ['planning','in_development','testing','released','maintenance','paused','cancelled'],
+      default: 'in_development',
+    },
+    version:     { type: String, default: '1.0.0' },
+    releaseDate: { type: Date, default: null },
+    endDate:     { type: Date, default: null },
+    progress:    { type: Number, default: 0, min: 0, max: 100 },
+    techStack:   [{ type: String }],
+    repository:  { type: String, default: '' },
+    demoUrl:     { type: String, default: '' },
   },
   { timestamps: true, toJSON: JSON_OPTS }
 );

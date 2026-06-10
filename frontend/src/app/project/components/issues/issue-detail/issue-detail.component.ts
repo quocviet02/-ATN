@@ -7,7 +7,6 @@ import { AuthQuery } from '@trungk18/project/auth/auth.query';
 import { PermissionService } from '@trungk18/core/services/permission.service';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { IssueDeleteModalComponent } from '../issue-delete-modal/issue-delete-modal.component';
-import { DeleteIssueModel } from '@trungk18/interface/ui-model/delete-issue-model';
 import { IssueLoaderComponent } from '../issue-loader/issue-loader.component';
 import { IssuePriorityComponent } from '../issue-priority/issue-priority.component';
 import { IssueAssigneesComponent } from '../issue-assignees/issue-assignees.component';
@@ -20,6 +19,8 @@ import { ButtonComponent } from '../../../../jira-control/button/button.componen
 import { IssueTypeComponent } from '../issue-type/issue-type.component';
 import { IssueDueDateComponent } from '../issue-due-date/issue-due-date.component';
 import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
+import { NzTooltipDirective } from 'ng-zorro-antd/tooltip';
+import { IssueWorkflowSectionComponent } from '../issue-workflow-section/issue-workflow-section.component';
 
 @UntilDestroy()
 @Component({
@@ -31,7 +32,8 @@ import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
       IssueDescriptionComponent, IssueFeedComponent,
       IssueStatusComponent, IssueReporterComponent, IssueAssigneesComponent,
       IssuePriorityComponent, IssueDueDateComponent, IssueLoaderComponent,
-      AsyncPipe, DatePipe, NgIf
+      AsyncPipe, DatePipe, NgIf, NzTooltipDirective,
+      IssueWorkflowSectionComponent
     ]
 })
 export class IssueDetailComponent implements OnInit, OnChanges {
@@ -40,7 +42,6 @@ export class IssueDetailComponent implements OnInit, OnChanges {
   @Input() isShowCloseButton: boolean;
   @Output() onClosed    = new EventEmitter();
   @Output() onOpenIssue = new EventEmitter<string>();
-  @Output() onDelete    = new EventEmitter<DeleteIssueModel>();
 
   canDelete = false;
   currentUserId: string | null = null;
@@ -82,16 +83,22 @@ export class IssueDetailComponent implements OnInit, OnChanges {
     }
   }
 
-  openDeleteIssueModal() {
+  openDeleteIssueModal(): void {
     this._modalService.create({
       nzContent: IssueDeleteModalComponent,
       nzClosable: false,
       nzFooter: null,
       nzStyle: { top: '140px' },
-      nzData: { issueId: this.issue.id, onDelete: this.onDelete }
+      nzData: { issueId: this.issue.id, issueName: this.issue.title }
     });
   }
 
-  closeModal()   { this.onClosed.emit(); }
+  closeModal()    { this.onClosed.emit(); }
   openIssuePage() { this.onOpenIssue.emit(this.issue.id); }
+
+  onWorkflowStateChanged(ev: { stateId: string; task: any }): void {
+    if (this.issue) {
+      this.issue = { ...this.issue, currentStateId: ev.stateId } as any;
+    }
+  }
 }

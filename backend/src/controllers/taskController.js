@@ -1,6 +1,7 @@
-const { Task, Column, User, ProjectMember } = require('../models');
+const { Task, Column, User, ProjectMember, Comment, Board, Project } = require('../models');
 const activityLogger   = require('../utils/activityLogger');
 const notifService     = require('../services/notificationService');
+const ioInstance       = require('../utils/ioInstance');
 
 const USER_SELECT = 'id name email avatar';
 
@@ -76,6 +77,7 @@ exports.createTask = async (req, res) => {
       priority,
       dueDate:     dueDate ?? null,
       position,
+      createdBy:   req.user._id,
     });
 
     await task.populate('assignee', USER_SELECT);
@@ -190,10 +192,28 @@ exports.updateTask = async (req, res) => {
 
 exports.deleteTask = async (req, res) => {
   try {
-    const task = req.task;
+    const task       = req.task;
+    const membership = req.membership;
+
+    // Permission: owner/admin can delete any; member can only delete their own task
+    const isOwnerOrAdmin = ['owner', 'admin'].includes(membership.role);
+    if (!isOwnerOrAdmin) {
+      const createdById = task.createdBy?.toString();
+      if (!createdById || createdById !== req.user.id) {
+        return err(res, 403, 'Bạn không có quyền xóa task này', 'Forbidden');
+      }
+    }
+
     const { columnId, position, title } = task;
 
+    // Populate assignee for notification
+    await task.populate('assignee', 'id name email');
+
+    // Soft delete task and all its comments
     await task.softDelete();
+    await Comment.updateMany({ taskId: task._id, deletedAt: null }, { $set: { deletedAt: new Date() } });
+
+    // Reorder remaining tasks in the column
     await Task.updateMany(
       { columnId, position: { $gt: position }, deletedAt: null },
       { $inc: { position: -1 } }
@@ -201,7 +221,39 @@ exports.deleteTask = async (req, res) => {
 
     activityLogger.log(task.id, req.user.id, 'deleted', { title }, null);
 
-    res.json({ statusCode: 200, message: 'Task deleted' });
+    // Get board and project info for notification and socket
+    const board = await Board.findById(task.boardId).populate('projectId');
+    const projectName = board?.projectId?.name || '';
+
+    // Notify assignee if different from deleter
+    if (task.assignee) {
+      const assigneeId = task.assignee._id?.toString() || task.assignee.toString();
+      if (assigneeId !== req.user.id) {
+        notifService.create({
+          recipient: task.assignee._id || task.assignee,
+          type:      'task_deleted',
+          title:     'Task của bạn đã bị xóa',
+          body:      `${req.user.name} đã xóa task "${title}" trong project "${projectName}"`,
+          link:      '/project/board',
+          meta:      { taskId: task.id },
+        });
+      }
+    }
+
+    // Emit socket event to all project members so their boards update in realtime
+    const io = ioInstance.getIO();
+    if (io && board) {
+      const members = await ProjectMember.find({ projectId: board.projectId });
+      for (const member of members) {
+        io.to(`user_${member.user.toString()}`).emit('task_deleted', {
+          taskId:    task.id,
+          deletedBy: { id: req.user.id, name: req.user.name },
+          title,
+        });
+      }
+    }
+
+    res.json({ statusCode: 200, message: 'Đã xóa task', taskId: task.id });
   } catch (e) {
     err(res, 500, e.message, 'Internal Server Error');
   }

@@ -47,6 +47,7 @@ export class NotificationToastComponent implements OnInit, OnDestroy {
       member_joined:  '👋',
       task_moved:     '➡️',
       task_updated:   '✏️',
+      task_deleted:   '🗑️',
     };
     return map[type] ?? '🔔';
   }

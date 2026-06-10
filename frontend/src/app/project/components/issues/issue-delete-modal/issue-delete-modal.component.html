@@ -1,12 +1,50 @@
 <div class="px-10 py-8">
-    <div class="pb-4 text-2xl font-medium leading-normal text-textDarkest">
-        {{ 'issue.delete.title' | translate }}
-    </div>
-    <p class="pb-4 whitespace-pre-wrap text-15">{{ 'issue.delete.warning' | translate }}</p>
-    <div class="flex pt-3">
-        <j-button className="btn-primary mr-2" (click)="deleteIssue()">{{ 'issue.delete.confirm' | translate }}</j-button>
-        <j-button className="'btn-empty'"
-                  (click)="closeModal()">
-            {{ 'issue.delete.cancel' | translate }}</j-button>
-    </div>
+  <div class="pb-3 text-xl font-semibold leading-normal text-textDarkest flex items-center gap-2">
+    <span class="text-red-500">⚠️</span>
+    {{ 'issue.delete.title' | translate }}
+  </div>
+
+  <p class="pb-3 text-15 text-textMedium whitespace-pre-wrap">
+    {{ 'issue.delete.warning' | translate }}
+  </p>
+
+  <div class="mb-3 p-3 bg-gray-50 rounded border border-borderLightest text-13 text-textMedium">
+    <div class="font-medium text-textDark mb-1">Task sẽ bị xóa:</div>
+    <div class="font-semibold text-textDarkest truncate">"{{ issueName }}"</div>
+  </div>
+
+  <div class="mb-4">
+    <label class="block text-13 font-medium text-textMedium mb-1">
+      {{ 'issue.delete.typeConfirm' | translate }}
+    </label>
+    <input
+      class="w-full px-3 py-2 border rounded text-14 focus:outline-none"
+      [class.border-red-400]="confirmText && !canConfirm"
+      [class.border-green-400]="canConfirm"
+      [class.border-borderLight]="!confirmText"
+      [(ngModel)]="confirmText"
+      [placeholder]="'issue.delete.placeholder' | translate"
+      [disabled]="isLoading"
+      (keyup.enter)="deleteIssue()">
+  </div>
+
+  <div *ngIf="errorMsg" class="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded text-13 text-red-600">
+    {{ errorMsg }}
+  </div>
+
+  <div class="flex items-center gap-3 pt-1">
+    <button
+      class="px-4 py-2 rounded text-14 font-medium text-white transition-opacity flex items-center gap-2"
+      [class.bg-red-500]="canConfirm"
+      [class.bg-red-300]="!canConfirm"
+      [class.cursor-not-allowed]="!canConfirm"
+      [disabled]="!canConfirm || isLoading"
+      (click)="deleteIssue()">
+      <span *ngIf="isLoading" class="loading-spinner mr-1"></span>
+      {{ isLoading ? 'Đang xóa...' : ('issue.delete.confirm' | translate) }}
+    </button>
+    <j-button className="'btn-empty'" (click)="closeModal()" [disabled]="isLoading">
+      {{ 'issue.delete.cancel' | translate }}
+    </j-button>
+  </div>
 </div>

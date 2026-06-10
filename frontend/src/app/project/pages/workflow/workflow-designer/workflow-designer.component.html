@@ -1,0 +1,246 @@
+<div class="designer-page" *ngIf="!loading; else loadingTpl">
+
+  <!-- ── TOOLBAR ────────────────────────────────────────────────────────── -->
+  <div class="designer-toolbar">
+    <div class="toolbar-left">
+      <a routerLink="/project/workflows" class="back-link">
+        <i nz-icon nzType="arrow-left"></i>
+      </a>
+      <input nz-input [(ngModel)]="workflowName" class="wf-name-input"
+        placeholder="Tên workflow..." />
+    </div>
+    <div class="toolbar-right">
+      <button nz-button nzType="default" (click)="openAiAnalysis()" nz-tooltip nzTooltipTitle="Phân tích AI">
+        <i nz-icon nzType="robot"></i> Phân tích AI
+      </button>
+      <button nz-button nzType="primary" [nzLoading]="saving" (click)="save()">
+        <i nz-icon nzType="save"></i> {{ 'workflow.designer.save' | translate }}
+      </button>
+      <button nz-button nzDanger (click)="delete()" *ngIf="workflow && !workflow.isDefault" nz-tooltip nzTooltipTitle="Xóa workflow">
+        <i nz-icon nzType="delete"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Validation errors -->
+  <div class="validation-errors" *ngIf="validationErrors.length">
+    <div class="err-item" *ngFor="let e of validationErrors">
+      <i nz-icon nzType="exclamation-circle" style="color:#ef4444;"></i> {{ e }}
+    </div>
+  </div>
+
+  <div class="designer-body" *ngIf="workflow">
+    <!-- ── LEFT PANEL ─────────────────────────────────────────────────── -->
+    <div class="designer-left">
+
+      <!-- Properties panel -->
+      <div class="prop-panel" *ngIf="selectedState as s">
+        <div class="prop-title">
+          <i nz-icon nzType="border-outer"></i> {{ 'workflow.designer.stateProps' | translate }}
+          <button class="close-btn" (click)="clearSelection()"><i nz-icon nzType="close"></i></button>
+        </div>
+
+        <label class="prop-label">Tên</label>
+        <input nz-input [(ngModel)]="s.name" />
+
+        <label class="prop-label">Màu</label>
+        <div class="color-row">
+          <input type="color" [(ngModel)]="s.color" class="color-picker" />
+          <input nz-input [(ngModel)]="s.color" style="width:90px; font-size:12px;" />
+        </div>
+
+        <label class="prop-label">SLA (giờ)</label>
+        <nz-input-number [(ngModel)]="s.slaHours" [nzMin]="0" [nzStep]="1"
+          nzPlaceHolder="Không giới hạn" style="width:100%;"></nz-input-number>
+
+        <div class="checkbox-row">
+          <label nz-checkbox [nzChecked]="s.isInitial"
+            (nzCheckedChange)="s.isInitial=$event; s.isInitial && setInitial(s)">
+            Trạng thái bắt đầu ▶
+          </label>
+        </div>
+        <div class="checkbox-row">
+          <label nz-checkbox [(ngModel)]="s.isFinal">Trạng thái kết thúc ■</label>
+        </div>
+
+        <button nz-button nzDanger nzSize="small" class="mt-2" (click)="removeState(s)">
+          <i nz-icon nzType="delete"></i> Xóa trạng thái
+        </button>
+      </div>
+
+      <div class="prop-panel" *ngIf="selectedTransition as t">
+        <div class="prop-title">
+          <i nz-icon nzType="node-index"></i> {{ 'workflow.designer.transitionProps' | translate }}
+          <button class="close-btn" (click)="clearSelection()"><i nz-icon nzType="close"></i></button>
+        </div>
+
+        <label class="prop-label">Tên</label>
+        <input nz-input [(ngModel)]="t.name" />
+
+        <label class="prop-label">Từ trạng thái</label>
+        <nz-select [(ngModel)]="t.fromStateId" style="width:100%">
+          <nz-option *ngFor="let s of workflow.states" [nzValue]="s.id" [nzLabel]="s.name"></nz-option>
+        </nz-select>
+
+        <label class="prop-label">Đến trạng thái</label>
+        <nz-select [(ngModel)]="t.toStateId" style="width:100%">
+          <nz-option *ngFor="let s of workflow.states" [nzValue]="s.id" [nzLabel]="s.name"></nz-option>
+        </nz-select>
+
+        <label class="prop-label">Quyền thực hiện</label>
+        <nz-select nzMode="multiple" [(ngModel)]="t.allowedRoles" style="width:100%">
+          <nz-option *ngFor="let r of ROLE_OPTIONS" [nzValue]="r.value" [nzLabel]="r.label"></nz-option>
+        </nz-select>
+
+        <label class="prop-label">Trường bắt buộc</label>
+        <nz-select nzMode="multiple" [(ngModel)]="t.requiredFields" style="width:100%">
+          <nz-option *ngFor="let f of REQUIRED_FIELD_OPTIONS" [nzValue]="f.value" [nzLabel]="f.label"></nz-option>
+        </nz-select>
+
+        <div class="checkbox-row mt-2">
+          <label nz-checkbox [(ngModel)]="t.requireApproval">Yêu cầu phê duyệt</label>
+        </div>
+
+        <div *ngIf="t.requireApproval">
+          <label class="prop-label">Số người cần duyệt</label>
+          <nz-input-number [(ngModel)]="t.approvalCount" [nzMin]="1" style="width:100%;"></nz-input-number>
+        </div>
+
+        <button nz-button nzDanger nzSize="small" class="mt-2" (click)="removeTransition(t)">
+          <i nz-icon nzType="delete"></i> Xóa transition
+        </button>
+      </div>
+
+      <!-- State list -->
+      <div class="section-title">
+        <span>Trạng thái ({{ workflow.states.length }})</span>
+        <button nz-button nzSize="small" nzType="dashed" (click)="addState()">
+          <i nz-icon nzType="plus"></i>
+        </button>
+      </div>
+
+      <div class="state-list">
+        <div *ngFor="let s of workflow.states" class="state-item"
+          [class.selected]="selectedState?.id === s.id"
+          (click)="selectState(s)">
+          <span class="state-dot-sm" [style.background]="s.color"></span>
+          <span class="state-label">{{ s.name }}</span>
+          <span class="state-badges">
+            <nz-tag *ngIf="s.isInitial" nzColor="blue" style="font-size:10px;padding:0 4px;">▶</nz-tag>
+            <nz-tag *ngIf="s.isFinal"   nzColor="green" style="font-size:10px;padding:0 4px;">■</nz-tag>
+            <nz-tag *ngIf="s.slaHours"  nzColor="orange" style="font-size:10px;padding:0 4px;">SLA {{s.slaHours}}h</nz-tag>
+          </span>
+        </div>
+      </div>
+
+      <nz-divider></nz-divider>
+
+      <!-- Transition list -->
+      <div class="section-title">
+        <span>Transitions ({{ workflow.transitions.length }})</span>
+        <button nz-button nzSize="small" nzType="dashed" (click)="addTransition()">
+          <i nz-icon nzType="plus"></i>
+        </button>
+      </div>
+
+      <div class="trans-list">
+        <div *ngFor="let t of workflow.transitions" class="trans-item"
+          [class.selected]="selectedTransition?.id === t.id"
+          (click)="selectTransition(t)">
+          <span class="trans-from">{{ stateName(t.fromStateId) }}</span>
+          <i nz-icon nzType="arrow-right" style="margin:0 4px; color:#888;"></i>
+          <span class="trans-to">{{ stateName(t.toStateId) }}</span>
+          <span class="trans-name">{{ t.name }}</span>
+          <nz-tag *ngIf="t.requireApproval" nzColor="purple" style="font-size:10px;padding:0 4px; margin-left:4px;">
+            <i nz-icon nzType="check-circle"></i>
+          </nz-tag>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <nz-divider *ngIf="stats && stats.taskCount > 0"></nz-divider>
+      <div class="stats-section" *ngIf="stats && stats.taskCount > 0">
+        <div class="section-title"><span>Thống kê ({{ stats.taskCount }} task)</span></div>
+        <div *ngFor="let s of workflow.states" class="stat-row">
+          <span class="state-dot-sm" [style.background]="s.color"></span>
+          <span class="stat-name">{{ s.name }}</span>
+          <nz-tag nzColor="default">{{ stats.byState[s.id] || 0 }} task</nz-tag>
+          <span class="stat-avg" *ngIf="stats.avgHoursByState[s.id]">
+            ⌀ {{ stats.avgHoursByState[s.id] }}h
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CANVAS ──────────────────────────────────────────────────────── -->
+    <div class="designer-canvas">
+      <svg [attr.height]="svgHeight()" width="100%" class="wf-svg">
+        <defs>
+          <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#6366f1" />
+          </marker>
+        </defs>
+
+        <!-- Transition arrows -->
+        <g *ngFor="let t of workflow.transitions">
+          <path *ngIf="arrowPath(t)"
+            [attr.d]="arrowPath(t)"
+            fill="none" stroke="#6366f1" stroke-width="1.5"
+            stroke-dasharray="5,3"
+            marker-end="url(#arrowhead)"
+            [class.selected-arrow]="selectedTransition?.id === t.id"
+            (click)="selectTransition(t)" style="cursor:pointer;">
+          </path>
+          <text *ngIf="arrowPath(t)"
+            [attr.x]="arrowLabelX(t)"
+            [attr.y]="arrowLabelY(t)"
+            text-anchor="middle"
+            class="arrow-label"
+            (click)="selectTransition(t)" style="cursor:pointer;">
+            {{ t.name }}
+          </text>
+        </g>
+
+        <!-- State nodes -->
+        <g *ngFor="let s of workflow.states; let i = index"
+          (click)="selectState(s)" style="cursor:pointer;"
+          [class.selected-node]="selectedState?.id === s.id">
+
+          <rect [attr.x]="stateX(i) - 55" [attr.y]="stateY(i) - 20"
+            width="110" height="40" rx="8"
+            [attr.fill]="s.color + '22'"
+            [attr.stroke]="selectedState?.id === s.id ? '#4f46e5' : s.color"
+            [attr.stroke-width]="selectedState?.id === s.id ? 2.5 : 1.5">
+          </rect>
+
+          <text [attr.x]="stateX(i)" [attr.y]="stateY(i) + 5"
+            text-anchor="middle" class="state-node-label">
+            {{ s.isInitial ? '▶ ' : s.isFinal ? '■ ' : '' }}{{ s.name }}
+          </text>
+
+          <text *ngIf="s.slaHours" [attr.x]="stateX(i)" [attr.y]="stateY(i) + 20"
+            text-anchor="middle" class="sla-label">
+            SLA {{ s.slaHours }}h
+          </text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-center">
+    <nz-spin nzTip="Đang tải workflow..."></nz-spin>
+  </div>
+</ng-template>
+
+<!-- AI Insights Drawer -->
+<nz-drawer [nzVisible]="aiDrawerOpen" nzPlacement="right" nzWidth="420"
+  nzTitle="🤖 Phân tích AI - Workflow Insights"
+  (nzOnClose)="aiDrawerOpen = false">
+  <ng-container *nzDrawerContent>
+    <app-workflow-ai-insights [loading]="aiLoading" [result]="aiResult"
+      [workflow]="workflow">
+    </app-workflow-ai-insights>
+  </ng-container>
+</nz-drawer>

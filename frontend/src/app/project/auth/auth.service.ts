@@ -3,7 +3,8 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { JUser } from '@trungk18/interface/user';
 import { TokenService } from '@trungk18/core/services/token.service';
-import { finalize, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, finalize, map, tap } from 'rxjs/operators';
 import { AuthStore } from './auth.store';
 import { environment } from 'src/environments/environment';
 
@@ -70,11 +71,27 @@ export class AuthService {
     );
   }
 
-  logout() {
+  /** Returns an Observable<boolean>: true = server confirmed, false = offline fallback.
+   *  Always clears local state — even if the API call fails. */
+  logout(): Observable<boolean> {
     const refreshToken = this._token.getRefreshToken();
-    this._http.post(`${this.base}/auth/logout`, { refreshToken }).subscribe();
+    return this._http.post<void>(`${this.base}/auth/logout`, { refreshToken }).pipe(
+      tap(() => this._clearLocalState()),
+      map(() => true as boolean),
+      catchError(() => {
+        this._clearLocalState();
+        return of(false as boolean);
+      })
+    );
+  }
+
+  private _clearLocalState(): void {
     this._token.clearTokens();
     this._store.reset();
+    localStorage.removeItem('selectedProjectId');
+  }
+
+  navigateToLogin(): void {
     this._router.navigate(['/login']);
   }
 

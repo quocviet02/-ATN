@@ -29,7 +29,8 @@ exports.getBoard = async (req, res) => {
     const columns = await Column.find({ boardId: board._id }).sort('position');
     const tasks   = await Task.find({ columnId: { $in: columns.map((c) => c._id) } })
       .sort('position')
-      .populate('assignee', 'name email avatar');
+      .populate('assignee',   'name email avatar')
+      .populate('createdBy',  'id name');
 
     const tasksByColumn = {};
     tasks.forEach((t) => {

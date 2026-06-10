@@ -1,0 +1,108 @@
+<div class="project-releases-page">
+  <div class="page-header">
+    <a routerLink="/project/releases" class="back-link">
+      <span nz-icon nzType="arrow-left"></span> Quay lại Releases
+    </a>
+    <div class="header-title">
+      <h2>{{ projectName || 'Dự án' }} — Lịch sử Release</h2>
+    </div>
+    <button nz-button nzType="primary" (click)="showCreate = true">
+      <span nz-icon nzType="plus"></span> Tạo Release
+    </button>
+  </div>
+
+  <nz-spin [nzSpinning]="loading">
+    <ng-container *ngIf="!loading && releases.length === 0">
+      <nz-empty nzNotFoundContent="Chưa có release nào cho dự án này">
+        <ng-template #nzNotFoundFooter>
+          <button nz-button nzType="primary" (click)="showCreate = true">Tạo Release đầu tiên</button>
+        </ng-template>
+      </nz-empty>
+    </ng-container>
+
+    <div class="releases-timeline" *ngIf="releases.length">
+      <div class="release-entry" *ngFor="let r of releases">
+        <!-- Timeline dot -->
+        <div class="tl-left">
+          <div class="tl-dot" [class.rollback]="r.status === 'rollback'"></div>
+          <div class="tl-line"></div>
+        </div>
+
+        <nz-card class="release-card">
+          <div class="release-header">
+            <div class="release-title">
+              <span class="version">{{ r.version }}</span>
+              <nz-tag [nzColor]="releaseTypeColors[r.type]">{{ r.type }}</nz-tag>
+              <nz-tag [nzColor]="statusColor(r.status)">
+                {{ r.status === 'released' ? 'Đã phát hành' : r.status === 'rollback' ? 'Rollback' : 'Nháp' }}
+              </nz-tag>
+            </div>
+            <div class="release-actions">
+              <span class="date">{{ r.releaseDate | date:'dd/MM/yyyy' }}</span>
+              <button nz-button nzType="text" nzSize="small" (click)="startEdit(r)"
+                *ngIf="editingId !== r.id" nz-tooltip="Sửa release notes">
+                <span nz-icon nzType="edit"></span>
+              </button>
+              <button nz-button nzType="text" nzSize="small" nzDanger (click)="markRollback(r)"
+                *ngIf="r.status === 'released'" nz-tooltip="Đánh dấu rollback">
+                <span nz-icon nzType="rollback"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Notes (view) -->
+          <div class="release-notes" *ngIf="editingId !== r.id">
+            <p *ngIf="r.releaseNotes; else noNotes">{{ r.releaseNotes }}</p>
+            <ng-template #noNotes>
+              <p class="empty-notes">Chưa có release notes</p>
+            </ng-template>
+          </div>
+
+          <!-- Notes (edit) -->
+          <div class="notes-edit" *ngIf="editingId === r.id">
+            <textarea nz-input [(ngModel)]="editNotes"
+              [nzAutosize]="{ minRows: 2, maxRows: 8 }"
+              placeholder="Nhập release notes...">
+            </textarea>
+            <div class="edit-actions">
+              <button nz-button nzType="primary" nzSize="small" [nzLoading]="saving" (click)="saveNotes(r)">Lưu</button>
+              <button nz-button nzSize="small" (click)="cancelEdit()">Huỷ</button>
+            </div>
+          </div>
+
+          <!-- Tasks -->
+          <div class="release-tasks" *ngIf="r.tasks?.length">
+            <span class="tasks-label"><span nz-icon nzType="check-circle"></span> {{ r.tasks?.length }} tasks</span>
+            <span *ngFor="let t of r.tasks?.slice(0, 5)" class="task-chip" nz-tooltip="{{ t.title }}">
+              {{ t.title | slice:0:30 }}{{ t.title.length > 30 ? '...' : '' }}
+            </span>
+            <span *ngIf="(r.tasks?.length ?? 0) > 5" class="more-tasks">+{{ (r.tasks?.length ?? 0) - 5 }}</span>
+          </div>
+
+          <div class="release-footer">
+            <span class="creator" *ngIf="r.createdBy">
+              Bởi <strong>{{ r.createdBy.name }}</strong>
+            </span>
+          </div>
+        </nz-card>
+      </div>
+    </div>
+
+    <div class="pagination" *ngIf="total > limit">
+      <nz-pagination
+        [nzPageIndex]="page"
+        [nzTotal]="total"
+        [nzPageSize]="limit"
+        (nzPageIndexChange)="onPageChange($event)">
+      </nz-pagination>
+    </div>
+  </nz-spin>
+</div>
+
+<!-- Create dialog -->
+<app-create-release-dialog
+  *ngIf="showCreate"
+  [project]="mockProject"
+  (created)="onReleaseCreated()"
+  (cancelled)="showCreate = false">
+</app-create-release-dialog>

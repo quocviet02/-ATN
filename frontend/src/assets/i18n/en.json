@@ -14,7 +14,16 @@
   "nav": {
     "searchIssues": "Search issues",
     "createIssue": "Create issue",
-    "about": "About"
+    "about": "About",
+    "logout": "Sign out"
+  },
+  "logout": {
+    "title": "Confirm sign out",
+    "message": "Are you sure you want to sign out of the system?",
+    "cancel": "Cancel",
+    "confirm": "Sign out",
+    "success": "Signed out successfully",
+    "offlineSuccess": "Signed out (not synced with server)"
   },
   "notification": {
     "title": "Notifications",
@@ -72,7 +81,12 @@
     "dangerZone": "Danger Zone",
     "deleteProjectTitle": "Delete this project",
     "deleteProjectDesc": "All boards, columns and tasks will be permanently deleted.",
-    "deleteProjectBtn": "Delete Project"
+    "deleteProjectBtn": "Delete Project",
+    "startDateLabel": "Start Date",
+    "startDatePlaceholder": "Project start date",
+    "dueDateLabel": "Deadline",
+    "dueDatePlaceholder": "Project deadline",
+    "dueDateHint": "Deadline of the entire project (independent of individual task deadlines)"
   },
   "member": {
     "title": "Project Members",
@@ -102,10 +116,17 @@
   },
   "issue": {
     "delete": {
-      "title": "Are you sure you want to delete this issue?",
-      "warning": "This action cannot be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
+      "title": "Confirm delete task",
+      "warning": "This will delete all comments in the task and cannot be undone.",
+      "typeConfirm": "Please type \"DELETE\" to confirm:",
+      "placeholder": "Type DELETE",
+      "confirm": "Delete task",
+      "cancel": "Cancel",
+      "success": "Task deleted",
+      "errorForbidden": "You do not have permission to delete this task",
+      "errorNotFound": "Task not found or already deleted",
+      "errorNetwork": "Connection error, please try again",
+      "deletedByOther": "This task was deleted by {{name}}"
     },
     "dueDate": {
       "label": "Deadline",
@@ -168,6 +189,29 @@
     "deleted": "{{name}} deleted task",
     "performed": "{{name}} performed an action"
   },
+  "timeline": {
+    "title": "Multi-Project Timeline",
+    "home": "Home",
+    "searchPlaceholder": "Search tasks...",
+    "selectProjects": "Select projects",
+    "selectAll": "Select all",
+    "clearAll": "Clear all",
+    "criticalPath": "Critical Path",
+    "conflicts": "Conflicts",
+    "noProjects": "Select at least one project",
+    "noTasks": "No tasks in the selected time range",
+    "overdue": "Overdue",
+    "overlap": "Scheduling conflict",
+    "blocked": "Blocked",
+    "blockedBy": "Blocked by",
+    "noOverdue": "No overdue tasks",
+    "noOverlap": "No scheduling conflicts",
+    "noBlocked": "No blocked tasks",
+    "aiResolve": "AI Suggest",
+    "aiTitle": "AI Conflict Resolution",
+    "aiAnalyzing": "Analyzing conflict...",
+    "aiNoResult": "No suggestions available"
+  },
   "switcher": {
     "selectProject": "Select project",
     "searchPlaceholder": "Search projects...",
@@ -178,5 +222,47 @@
     "projectNamePlaceholder": "Project name...",
     "create": "Create",
     "cancel": "Cancel"
+  },
+  "workflow": {
+    "nav": "Workflow",
+    "list": {
+      "title": "Project Workflows",
+      "default": "Default",
+      "states": "states",
+      "transitions": "transitions",
+      "design": "Design",
+      "clone": "Clone",
+      "empty": "No workflows yet. Create one to get started.",
+      "createNew": "Create new workflow",
+      "createBlank": "Create blank",
+      "namePlaceholder": "Workflow name...",
+      "templates": "Start from a template"
+    },
+    "designer": {
+      "save": "Save",
+      "stateProps": "State properties",
+      "transitionProps": "Transition properties"
+    }
+  },
+  "releases": {
+    "nav": "Releases",
+    "title": "Release Management",
+    "subtitle": "Overview of project progress and release history",
+    "createRelease": "Create Release",
+    "changeStatus": "Change Status",
+    "version": "Version",
+    "releaseDate": "Release Date",
+    "releaseNotes": "Release Notes",
+    "type": "Type",
+    "status": "Status",
+    "tasks": "Tasks",
+    "noReleases": "No releases yet",
+    "filterByStatus": "Filter by status",
+    "sortBy": "Sort by",
+    "byRecent": "Most Recent",
+    "byProgress": "Progress",
+    "byName": "Name A→Z",
+    "gridView": "Grid View",
+    "listView": "List View"
   }
 }

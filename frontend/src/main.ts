@@ -7,6 +7,9 @@ import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { catchError, firstValueFrom, of } from 'rxjs';
 import { bootstrapApplication } from '@angular/platform-browser';
+import { NZ_I18N, vi_VN } from 'ng-zorro-antd/i18n';
+import { registerLocaleData } from '@angular/common';
+import vi from '@angular/common/locales/vi';
 import * as Sentry from '@sentry/angular';
 import { init, browserTracingIntegration } from '@sentry/angular';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -36,6 +39,8 @@ if (environment.production) {
   initSentry();
 }
 
+registerLocaleData(vi);
+
 bootstrapApplication(AppComponent, {
     providers: [
         provideRouter(appRoutes),
@@ -58,6 +63,7 @@ bootstrapApplication(AppComponent, {
             provide: NG_ENTITY_SERVICE_CONFIG,
             useValue: { baseUrl: 'https://jsonplaceholder.typicode.com' }
         },
+        { provide: NZ_I18N, useValue: vi_VN },
         {
             provide: HTTP_INTERCEPTORS,
             useClass: JwtInterceptor,

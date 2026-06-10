@@ -10,6 +10,11 @@ import { SettingsComponent } from './pages/settings/settings.component';
 import { MembersComponent } from './pages/members/members.component';
 import { FullIssueDetailComponent } from './pages/full-issue-detail/full-issue-detail.component';
 import { NotificationsComponent } from './pages/notifications/notifications.component';
+import { TimelineComponent } from './pages/timeline/timeline.component';
+import { WorkflowListComponent } from './pages/workflow/workflow-list/workflow-list.component';
+import { WorkflowDesignerComponent } from './pages/workflow/workflow-designer/workflow-designer.component';
+import { ReleasesOverviewComponent } from './pages/releases/releases-overview/releases-overview.component';
+import { ProjectReleasesComponent } from './pages/releases/project-releases/project-releases.component';
 import { ProjectConst } from './config/const';
 
 export const PROJECT_ROUTES: Routes = [
@@ -43,6 +48,26 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: 'notifications',
         component: NotificationsComponent
+      },
+      {
+        path: 'timeline',
+        component: TimelineComponent
+      },
+      {
+        path: 'workflows',
+        component: WorkflowListComponent
+      },
+      {
+        path: 'workflows/:workflowId/design',
+        component: WorkflowDesignerComponent
+      },
+      {
+        path: 'releases',
+        component: ReleasesOverviewComponent
+      },
+      {
+        path: 'releases/:id',
+        component: ProjectReleasesComponent
       },
       {
         path: '',

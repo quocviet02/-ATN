@@ -1,10 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthQuery } from '@trungk18/project/auth/auth.query';
+import { AuthService } from '@trungk18/project/auth/auth.service';
+import { NotificationService } from '@trungk18/core/services/notification.service';
 import { PermissionService } from '@trungk18/core/services/permission.service';
 import { NzDrawerService } from 'ng-zorro-antd/drawer';
 import { SearchDrawerComponent } from '../../search/search-drawer/search-drawer.component';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { AddIssueModalComponent } from '../../add-issue-modal/add-issue-modal.component';
 import { ButtonComponent } from '../../../../jira-control/button/button.component';
 import { NzPopoverDirective } from 'ng-zorro-antd/popover';
@@ -15,23 +19,36 @@ import { AsyncPipe, NgIf } from '@angular/common';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { LanguageSwitcherComponent } from '../language-switcher/language-switcher.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NzDropDownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
+import { NzMenuDirective, NzMenuItemComponent, NzMenuDividerDirective } from 'ng-zorro-antd/menu';
 
 @Component({
-    selector: 'app-navbar-left',
-    templateUrl: './navbar-left.component.html',
-    styleUrls: ['./navbar-left.component.scss'],
-    imports: [NzTooltipDirective, NzIconDirective, AvatarComponent, NzPopoverDirective, ButtonComponent, AsyncPipe, NgIf, NotificationBellComponent, LanguageSwitcherComponent, TranslateModule]
+  selector: 'app-navbar-left',
+  templateUrl: './navbar-left.component.html',
+  styleUrls: ['./navbar-left.component.scss'],
+  imports: [
+    NzTooltipDirective, NzIconDirective, AvatarComponent, NzPopoverDirective,
+    ButtonComponent, AsyncPipe, NgIf, NotificationBellComponent,
+    LanguageSwitcherComponent, TranslateModule,
+    NzDropDownDirective, NzDropdownMenuComponent,
+    NzMenuDirective, NzMenuItemComponent, NzMenuDividerDirective,
+    RouterLink, RouterLinkActive,
+  ]
 })
 export class NavbarLeftComponent implements OnInit, OnDestroy {
   items: NavItem[] = [];
+  readonly canViewTimeline$ = this.permissionService.canManageBoard$;
   private _langSub: Subscription;
 
   constructor(
     public authQuery: AuthQuery,
     public permissionService: PermissionService,
+    private _authService: AuthService,
+    private _notifService: NotificationService,
     private _drawerService: NzDrawerService,
     private _modalService: NzModalService,
-    private _translate: TranslateService
+    private _message: NzMessageService,
+    private _translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -50,7 +67,7 @@ export class NavbarLeftComponent implements OnInit, OnDestroy {
     ];
   }
 
-  openCreateIssueModal() {
+  openCreateIssueModal(): void {
     this._modalService.create({
       nzContent: AddIssueModalComponent,
       nzClosable: false,
@@ -59,13 +76,40 @@ export class NavbarLeftComponent implements OnInit, OnDestroy {
     });
   }
 
-  openSearchDrawler() {
+  openSearchDrawler(): void {
     this._drawerService.create({
       nzContent: SearchDrawerComponent,
       nzTitle: null,
       nzPlacement: 'left',
       nzClosable: false,
       nzWidth: 500
+    });
+  }
+
+  confirmLogout(): void {
+    this._modalService.confirm({
+      nzTitle:   this._translate.instant('logout.title'),
+      nzContent: this._translate.instant('logout.message'),
+      nzOkText:  this._translate.instant('logout.confirm'),
+      nzCancelText: this._translate.instant('logout.cancel'),
+      nzOkDanger: true,
+      nzOnOk: () => this._doLogout()
+    });
+  }
+
+  private _doLogout(): void {
+    this._notifService.disconnect();
+
+    this._authService.logout().subscribe({
+      next: (result) => {
+        const key = result === false ? 'logout.offlineSuccess' : 'logout.success';
+        this._message.success(this._translate.instant(key));
+        this._authService.navigateToLogin();
+      },
+      error: () => {
+        this._message.warning(this._translate.instant('logout.offlineSuccess'));
+        this._authService.navigateToLogin();
+      }
     });
   }
 }

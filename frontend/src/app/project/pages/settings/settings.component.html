@@ -23,6 +23,27 @@
       <textarea class="form-input" [placeholder]="'settings.projectDescPlaceholder' | translate" formControlName="description"></textarea>
     </div>
     <div class="form-group mt-3">
+      <label class="label">{{ 'settings.startDateLabel' | translate }}</label>
+      <nz-date-picker
+        formControlName="startDate"
+        nzFormat="dd/MM/yyyy"
+        [nzPlaceHolder]="'settings.startDatePlaceholder' | translate"
+        [nzAllowClear]="true"
+        style="width: 100%;">
+      </nz-date-picker>
+    </div>
+    <div class="form-group mt-3">
+      <label class="label">{{ 'settings.dueDateLabel' | translate }}</label>
+      <nz-date-picker
+        formControlName="dueDate"
+        nzFormat="dd/MM/yyyy"
+        [nzPlaceHolder]="'settings.dueDatePlaceholder' | translate"
+        [nzAllowClear]="true"
+        style="width: 100%;">
+      </nz-date-picker>
+      <p class="text-xs text-textMedium mt-1">{{ 'settings.dueDateHint' | translate }}</p>
+    </div>
+    <div class="form-group mt-3">
       <j-button className="btn-primary mr-2" type="submit" [disabled]="projectForm.invalid">{{ 'settings.save' | translate }}</j-button>
       <j-button className="btn-empty" (click)="cancel()">{{ 'settings.cancel' | translate }}</j-button>
     </div>
