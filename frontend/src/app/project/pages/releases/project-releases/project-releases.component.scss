@@ -2,12 +2,15 @@
   padding: 24px;
   height: 100%;
   overflow-y: auto;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .page-header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 24px;
 
   .back-link {
@@ -25,7 +28,9 @@
 }
 
 .releases-timeline {
-  max-width: 800px;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .release-entry {
@@ -70,7 +75,9 @@
 .release-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 10px;
 
   .release-title {

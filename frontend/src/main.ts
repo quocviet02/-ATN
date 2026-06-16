@@ -13,6 +13,20 @@ import vi from '@angular/common/locales/vi';
 import * as Sentry from '@sentry/angular';
 import { init, browserTracingIntegration } from '@sentry/angular';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import {
+  SearchOutline, RocketOutline, ApartmentOutline, CalendarOutline, PlusOutline,
+  LogoutOutline, QuestionCircleFill, EditOutline, CopyOutline, DeleteOutline,
+  ArrowLeftOutline, RobotOutline, SaveOutline, ExclamationCircleOutline,
+  BorderOuterOutline, CloseOutline, NodeIndexOutline, CheckCircleOutline,
+  ArrowRightOutline, ReloadOutline, ForkOutline, WarningOutline, FlagOutline,
+  BarChartOutline, ClockCircleOutline, SwapOutline, StopOutline, AppstoreOutline,
+  UnorderedListOutline, PlusCircleOutline, RightCircleOutline, TagOutline,
+  TeamOutline, RollbackOutline, BgColorsOutline,
+  // Organization feature icons
+  BankOutline, DownOutline, CheckOutline, CaretDownOutline, CaretRightOutline,
+  CrownOutline, UserAddOutline, ProjectOutline, CheckCircleFill,
+  UserOutline, SettingOutline, InfoCircleOutline,
+} from '@ant-design/icons-angular/icons';
 import { AkitaNgRouterStoreModule } from '@datorama/akita-ng-router-store';
 import { AkitaNgDevtools } from '@datorama/akita-ngdevtools';
 import { QuillModule } from 'ngx-quill';
@@ -47,7 +61,19 @@ bootstrapApplication(AppComponent, {
         provideAnimations(),
         provideHttpClient(withInterceptorsFromDi()),
         importProvidersFrom(
-            NzIconModule.forRoot([]),
+            NzIconModule.forRoot([
+              SearchOutline, RocketOutline, ApartmentOutline, CalendarOutline, PlusOutline,
+              LogoutOutline, QuestionCircleFill, EditOutline, CopyOutline, DeleteOutline,
+              ArrowLeftOutline, RobotOutline, SaveOutline, ExclamationCircleOutline,
+              BorderOuterOutline, CloseOutline, NodeIndexOutline, CheckCircleOutline,
+              ArrowRightOutline, ReloadOutline, ForkOutline, WarningOutline, FlagOutline,
+              BarChartOutline, ClockCircleOutline, SwapOutline, StopOutline, AppstoreOutline,
+              UnorderedListOutline, PlusCircleOutline, RightCircleOutline, TagOutline,
+              TeamOutline, RollbackOutline, BgColorsOutline,
+              BankOutline, DownOutline, CheckOutline, CaretDownOutline, CaretRightOutline,
+              CrownOutline, UserAddOutline, ProjectOutline, CheckCircleFill,
+              UserOutline, SettingOutline, InfoCircleOutline,
+            ]),
             environment.production ? [] : AkitaNgDevtools,
             AkitaNgRouterStoreModule,
             QuillModule.forRoot()

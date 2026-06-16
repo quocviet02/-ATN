@@ -1,5 +1,10 @@
 <aside class="navbarLeft">
   <div class="navbarLeft-content">
+    <!-- Organization Switcher -->
+    <div class="item">
+      <app-org-switcher></app-org-switcher>
+    </div>
+
     <div class="logoLink"
       title="Angular Jira Clone by trungk18">
       <svg class="w-8 h-8 text-textLogo"
@@ -99,6 +104,20 @@
         <i class="text-xl text-white" nz-icon nzType="plus" nzTheme="outline"></i>
       </div>
     </div>
+
+    <!-- Organization Settings -->
+    @if (orgService.currentOrgId) {
+      <div class="item">
+        <a [routerLink]="['/organizations', orgService.currentOrgId, 'settings']"
+          routerLinkActive="active-nav"
+          nz-tooltip
+          nzTooltipTitle="Quản lý Organization"
+          nzTooltipPlacement="right"
+          class="itemIcon">
+          <i class="text-xl text-white" nz-icon nzType="bank" nzTheme="outline"></i>
+        </a>
+      </div>
+    }
 
     <div class="flex-auto"></div>
 

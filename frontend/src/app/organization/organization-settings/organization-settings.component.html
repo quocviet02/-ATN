@@ -1,0 +1,124 @@
+<div class="org-settings-page">
+  <nz-spin [nzSpinning]="loading">
+    @if (org) {
+      <div class="org-settings-header">
+        <div class="org-logo">
+          @if (org.logo) {
+            <img [src]="org.logo" [alt]="org.name" class="org-logo-img" />
+          } @else {
+            <div class="org-logo-placeholder">
+              <i nz-icon nzType="bank" nzTheme="outline"></i>
+            </div>
+          }
+        </div>
+        <div class="org-header-info">
+          <h1 class="org-title">{{ org.name }}</h1>
+          <div class="org-meta">
+            <nz-tag [nzColor]="'blue'">{{ org.plan | uppercase }}</nz-tag>
+            <span class="org-stat">
+              <i nz-icon nzType="team"></i> {{ org.stats?.memberCount || 0 }} thành viên
+            </span>
+            <span class="org-stat">
+              <i nz-icon nzType="project"></i> {{ org.stats?.projectCount || 0 }} dự án
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <nz-tabset class="org-tabs">
+        <!-- General Tab -->
+        <nz-tab nzTitle="Thông tin chung">
+          <nz-card class="settings-card">
+            <form nz-form [formGroup]="generalForm" nzLayout="vertical">
+              <nz-form-item>
+                <nz-form-label nzRequired>Tên tổ chức</nz-form-label>
+                <nz-form-control>
+                  <input nz-input formControlName="name" [disabled]="!isOwnerOrAdmin" />
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label>Mô tả</nz-form-label>
+                <nz-form-control>
+                  <textarea nz-input formControlName="description" [disabled]="!isOwnerOrAdmin"
+                    [nzAutosize]="{minRows:2,maxRows:5}"></textarea>
+                </nz-form-control>
+              </nz-form-item>
+              <div class="form-row">
+                <nz-form-item class="form-col">
+                  <nz-form-label>Ngành nghề</nz-form-label>
+                  <nz-form-control>
+                    <nz-select formControlName="industry" [nzDisabled]="!isOwnerOrAdmin">
+                      @for (ind of industries; track ind.value) {
+                        <nz-option [nzValue]="ind.value" [nzLabel]="ind.label"></nz-option>
+                      }
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item class="form-col">
+                  <nz-form-label>Quy mô</nz-form-label>
+                  <nz-form-control>
+                    <nz-select formControlName="size" [nzDisabled]="!isOwnerOrAdmin">
+                      @for (s of sizes; track s) {
+                        <nz-option [nzValue]="s" [nzLabel]="s + ' nhân viên'"></nz-option>
+                      }
+                    </nz-select>
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              <div class="form-row">
+                <nz-form-item class="form-col">
+                  <nz-form-label>Quốc gia</nz-form-label>
+                  <nz-form-control>
+                    <input nz-input formControlName="country" [disabled]="!isOwnerOrAdmin" />
+                  </nz-form-control>
+                </nz-form-item>
+                <nz-form-item class="form-col">
+                  <nz-form-label>Website</nz-form-label>
+                  <nz-form-control>
+                    <input nz-input formControlName="website" [disabled]="!isOwnerOrAdmin" placeholder="https://..." />
+                  </nz-form-control>
+                </nz-form-item>
+              </div>
+              @if (isOwnerOrAdmin) {
+                <button nz-button nzType="primary" (click)="saveGeneral()" [nzLoading]="saving">
+                  Lưu thay đổi
+                </button>
+              }
+            </form>
+          </nz-card>
+        </nz-tab>
+
+        <!-- Departments Tab -->
+        <nz-tab nzTitle="Phòng ban">
+          <app-org-departments [orgId]="orgId" [myRole]="myRole!"></app-org-departments>
+        </nz-tab>
+
+        <!-- Members Tab -->
+        <nz-tab nzTitle="Thành viên">
+          <app-org-members [orgId]="orgId" [myRole]="myRole!"></app-org-members>
+        </nz-tab>
+
+        <!-- Danger Zone -->
+        @if (isOwner) {
+          <nz-tab nzTitle="Danger Zone">
+            <nz-card class="settings-card danger-zone">
+              <h3 class="danger-title">
+                <i nz-icon nzType="warning" nzTheme="fill" style="color:#ff4d4f"></i>
+                Vùng nguy hiểm
+              </h3>
+              <div class="danger-item">
+                <div class="danger-item-info">
+                  <strong>Xóa tổ chức</strong>
+                  <p>Xóa vĩnh viễn tổ chức và tất cả dữ liệu liên quan. Không thể hoàn tác.</p>
+                </div>
+                <button nz-button nzDanger (click)="confirmDelete()">
+                  <i nz-icon nzType="delete"></i> Xóa tổ chức
+                </button>
+              </div>
+            </nz-card>
+          </nz-tab>
+        }
+      </nz-tabset>
+    }
+  </nz-spin>
+</div>

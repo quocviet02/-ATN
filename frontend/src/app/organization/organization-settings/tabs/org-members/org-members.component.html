@@ -1,0 +1,182 @@
+<div class="members-section">
+  <!-- Toolbar -->
+  <div class="members-toolbar">
+    <div class="members-filters">
+      <input nz-input
+        placeholder="Tìm theo tên, email..."
+        [(ngModel)]="searchText"
+        (ngModelChange)="onSearch()"
+        class="search-input" />
+
+      <select class="filter-select"
+        [(ngModel)]="filterRole"
+        (ngModelChange)="onFilter()">
+        <option value="">Tất cả role</option>
+        @for (r of roles; track r.value) {
+          <option [value]="r.value">{{ r.label }}</option>
+        }
+      </select>
+
+      <select class="filter-select"
+        [(ngModel)]="filterDeptId"
+        (ngModelChange)="onFilter()">
+        <option value="">Tất cả phòng ban</option>
+        @for (d of departments; track d.id) {
+          <option [value]="d.id">{{ d.name }}</option>
+        }
+      </select>
+    </div>
+
+    @if (canManage) {
+      <button nz-button nzType="primary" (click)="openInvite()">
+        <i nz-icon nzType="user-add"></i> Mời thành viên
+      </button>
+    }
+  </div>
+
+  <!-- Table -->
+  <nz-table
+    [nzData]="members"
+    [nzLoading]="loading"
+    [nzTotal]="total"
+    [nzPageIndex]="page"
+    [nzPageSize]="limit"
+    (nzPageIndexChange)="onPageChange($event)"
+    [nzFrontPagination]="false"
+    nzSize="small"
+    class="members-table">
+    <thead>
+      <tr>
+        <th>Thành viên</th>
+        <th>Phòng ban</th>
+        <th>Chức danh</th>
+        <th>Role</th>
+        <th>Trạng thái</th>
+        <th>Ngày tham gia</th>
+        @if (canManage) { <th>Thao tác</th> }
+      </tr>
+    </thead>
+    <tbody>
+      @for (m of members; track m.id) {
+        <tr>
+          <td>
+            <div class="member-cell">
+              <nz-avatar
+                [nzSrc]="m.userId?.['avatar'] || ''"
+                [nzText]="m.userId?.name?.charAt(0)?.toUpperCase()"
+                nzSize="small"
+                class="member-avatar">
+              </nz-avatar>
+              <div class="member-info">
+                <span class="member-name">{{ m.userId?.name }}</span>
+                <span class="member-email">{{ m.userId?.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            @if (m.departmentId && m.departmentId['name']) {
+              <span class="dept-tag" [style.border-color]="m.departmentId['color']">
+                {{ m.departmentId['name'] }}
+              </span>
+            } @else {
+              <span class="no-dept">—</span>
+            }
+          </td>
+          <td>
+            <span class="job-title">{{ m.jobTitle || '—' }}</span>
+          </td>
+          <td>
+            <nz-tag [nzColor]="getRoleInfo(m.orgRole).color">
+              {{ getRoleInfo(m.orgRole).label }}
+            </nz-tag>
+          </td>
+          <td>
+            <nz-tag [nzColor]="statusColors[m.status]">
+              {{ statusLabels[m.status] }}
+            </nz-tag>
+          </td>
+          <td>
+            <span class="join-date">
+              {{ m.joinedAt | date:'dd/MM/yyyy' }}
+            </span>
+          </td>
+          @if (canManage) {
+            <td>
+              <div class="action-btns">
+                @if (m.status === 'active' && m.orgRole !== 'owner') {
+                  <button nz-button nzSize="small" nzType="text" nzDanger
+                    (click)="suspendMember(m)"
+                    nz-tooltip nzTooltipTitle="Khóa">
+                    <i nz-icon nzType="stop"></i>
+                  </button>
+                }
+                @if (m.status === 'suspended') {
+                  <button nz-button nzSize="small" nzType="text"
+                    (click)="activateMember(m)"
+                    nz-tooltip nzTooltipTitle="Kích hoạt">
+                    <i nz-icon nzType="check-circle"></i>
+                  </button>
+                }
+                @if (m.orgRole !== 'owner') {
+                  <button nz-button nzSize="small" nzType="text" nzDanger
+                    (click)="removeMember(m)"
+                    nz-tooltip nzTooltipTitle="Xóa khỏi tổ chức">
+                    <i nz-icon nzType="delete"></i>
+                  </button>
+                }
+              </div>
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </nz-table>
+</div>
+
+<!-- Invite Modal -->
+<nz-modal
+  [(nzVisible)]="inviteVisible"
+  nzTitle="Mời thành viên"
+  (nzOnCancel)="inviteVisible = false"
+  (nzOnOk)="submitInvite()"
+  [nzOkLoading]="inviteLoading"
+  nzOkText="Gửi lời mời">
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="inviteForm" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Email</nz-form-label>
+        <nz-form-control nzErrorTip="Email không hợp lệ">
+          <input nz-input formControlName="email" placeholder="email@example.com" type="email" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Role</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="orgRole">
+            @for (r of roles; track r.value) {
+              @if (r.value !== 'owner') {
+                <nz-option [nzValue]="r.value" [nzLabel]="r.label"></nz-option>
+              }
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Phòng ban</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="departmentId" nzPlaceHolder="Chưa chọn" nzAllowClear>
+            @for (d of departments; track d.id) {
+              <nz-option [nzValue]="d.id" [nzLabel]="d.name"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Chức danh</nz-form-label>
+        <nz-form-control>
+          <input nz-input formControlName="jobTitle" placeholder="VD: Senior Developer" />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>

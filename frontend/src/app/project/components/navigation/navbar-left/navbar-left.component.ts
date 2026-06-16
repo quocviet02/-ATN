@@ -21,6 +21,8 @@ import { LanguageSwitcherComponent } from '../language-switcher/language-switche
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzDropDownDirective, NzDropdownMenuComponent } from 'ng-zorro-antd/dropdown';
 import { NzMenuDirective, NzMenuItemComponent, NzMenuDividerDirective } from 'ng-zorro-antd/menu';
+import { OrgSwitcherComponent } from '../../../../organization/org-switcher/org-switcher.component';
+import { OrganizationService } from '../../../../organization/organization.service';
 
 @Component({
   selector: 'app-navbar-left',
@@ -33,6 +35,7 @@ import { NzMenuDirective, NzMenuItemComponent, NzMenuDividerDirective } from 'ng
     NzDropDownDirective, NzDropdownMenuComponent,
     NzMenuDirective, NzMenuItemComponent, NzMenuDividerDirective,
     RouterLink, RouterLinkActive,
+    OrgSwitcherComponent,
   ]
 })
 export class NavbarLeftComponent implements OnInit, OnDestroy {
@@ -43,6 +46,7 @@ export class NavbarLeftComponent implements OnInit, OnDestroy {
   constructor(
     public authQuery: AuthQuery,
     public permissionService: PermissionService,
+    public orgService: OrganizationService,
     private _authService: AuthService,
     private _notifService: NotificationService,
     private _drawerService: NzDrawerService,

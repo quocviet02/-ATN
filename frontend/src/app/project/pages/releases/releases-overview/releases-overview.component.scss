@@ -2,12 +2,16 @@
   padding: 24px;
   height: 100%;
   overflow-y: auto;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 20px;
 
   h2 { margin: 0; font-size: 22px; font-weight: 700; }
@@ -17,6 +21,7 @@
 .header-filters {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -27,20 +32,21 @@
 
 .summary-bar {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 20px;
   padding: 12px 16px;
   background: #fafafa;
   border-radius: 8px;
   border: 1px solid #f0f0f0;
+  overflow-x: auto;
 
   .stat-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 64px;
-    padding: 0 12px;
+    min-width: 56px;
+    padding: 0 8px;
     border-right: 1px solid #e8e8e8;
 
     &:last-child { border-right: none; }
@@ -174,7 +180,8 @@
 .list-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
   padding: 12px 16px;
   background: #fff;
   border: 1px solid #f0f0f0;
@@ -184,12 +191,12 @@
 
   &:hover { box-shadow: 0 2px 8px rgba(0,0,0,.07); }
 
-  .list-main { flex: 1; display: flex; align-items: center; gap: 8px; }
+  .list-main { flex: 1; min-width: 160px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .name { font-weight: 600; }
-  .list-progress { flex: 0 0 180px; }
-  .list-stats { flex: 0 0 160px; display: flex; gap: 12px; font-size: 12px; align-items: center; }
+  .list-progress { flex: 0 1 160px; min-width: 120px; }
+  .list-stats { flex: 0 1 140px; min-width: 100px; display: flex; gap: 8px; font-size: 12px; align-items: center; flex-wrap: wrap; }
   .overdue { color: #ff4d4f; }
-  .list-actions { display: flex; gap: 6px; }
+  .list-actions { display: flex; gap: 6px; flex-shrink: 0; }
 }
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
@@ -290,4 +297,26 @@
   font-size: 13px;
   color: #595959;
   margin: 0;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .releases-page { padding: 16px; }
+
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .header-filters { width: 100%; }
+
+  .projects-grid { grid-template-columns: 1fr; }
+
+  .list-row {
+    .list-progress { flex: 0 0 100%; }
+    .list-stats    { flex: 0 0 100%; }
+  }
+
+  .stats-cards ::ng-deep .ant-col { width: 50% !important; flex: 0 0 50% !important; max-width: 50% !important; }
+}
+
+@media (max-width: 600px) {
+  .stats-cards ::ng-deep .ant-col { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; }
 }

@@ -9,9 +9,11 @@
 /* ── Header ─────────────────────────────────────────────────── */
 .tl-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 16px 24px 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 24px 8px;
   background: #fff;
   border-bottom: 1px solid #e8e8e8;
 }
@@ -341,12 +343,16 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .tl-sidebar { width: 200px; min-width: 160px; }
+  .tl-toolbar { gap: 6px; padding: 8px 16px; }
+  .toolbar-spacer { display: none; }
+}
+
 @media (max-width: 768px) {
   .tl-sidebar { width: 100%; max-width: 100%; border-right: none; border-bottom: 1px solid #e8e8e8; }
   .tl-body { flex-direction: column; }
   .tl-gantt-area { display: none; }
-}
-
-@media (max-width: 1024px) {
-  .tl-sidebar { width: 220px; min-width: 180px; }
+  .tl-header { padding: 10px 16px 8px; }
+  .tl-toolbar { padding: 8px 16px; }
 }

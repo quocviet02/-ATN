@@ -244,6 +244,13 @@
       "transitionProps": "Transition properties"
     }
   },
+  "org": {
+    "myOrganizations": "My Organizations",
+    "createNew": "Create Organization",
+    "noOrg": "Select organization",
+    "switchSuccess": "Switched to {{name}}",
+    "switchError": "Cannot switch organization"
+  },
   "releases": {
     "nav": "Releases",
     "title": "Release Management",

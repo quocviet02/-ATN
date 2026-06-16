@@ -39,7 +39,19 @@
       "Bash(node --check src/controllers/releasesController.js)",
       "Bash(node --check src/routes/releases.js)",
       "PowerShell(Get-ChildItem -Recurse -File \"D:\\\\đatn\\\\backend\\\\src\" | Where-Object { $_.Extension -match '\\\\.\\(js\\)$' } | Select-Object -ExpandProperty FullName)",
-      "PowerShell(Get-ChildItem -Recurse -File \"D:\\\\đatn\\\\frontend\\\\src\\\\app\" | Where-Object { $_.Extension -match '\\\\.\\(ts\\)$' -and $_.Name -notmatch '\\\\.spec\\\\.' } | Select-Object -ExpandProperty FullName)"
+      "PowerShell(Get-ChildItem -Recurse -File \"D:\\\\đatn\\\\frontend\\\\src\\\\app\" | Where-Object { $_.Extension -match '\\\\.\\(ts\\)$' -and $_.Name -notmatch '\\\\.spec\\\\.' } | Select-Object -ExpandProperty FullName)",
+      "Bash(Select-Object FullName)",
+      "Bash(node -e \"const p = require\\('./node_modules/ng-zorro-antd/steps/package.json'\\); console.log\\(p.name, p.version\\)\")",
+      "Bash(dir \"D:\\\\đatn\\\\frontend\\\\node_modules\\\\ng-zorro-antd\" /b)",
+      "Bash(findstr \"step\")",
+      "Bash(findstr /i \"switch\\\\|avatar\\\\|empty\\\\|steps\\\\|spin\\\\|tabs\")",
+      "PowerShell(Get-ChildItem \"D:\\\\đatn\\\\frontend\\\\node_modules\\\\ng-zorro-antd\" -Directory | Select-Object -ExpandProperty Name | Where-Object { $_ -match \"switch|avatar|empty|steps|spin|tabs|table\" })",
+      "Bash(node -e \"require\\('./src/models/Organization'\\); require\\('./src/models/Department'\\); require\\('./src/models/OrganizationMember'\\); console.log\\('Models OK'\\)\")",
+      "Bash(node -e \"require\\('./src/models'\\); console.log\\('All models OK'\\)\")",
+      "Bash(node -e \"require\\('./src/routes/organizations'\\); console.log\\('Routes OK'\\)\")",
+      "Bash(node -e \"require\\('./src/routes/departments'\\); console.log\\('Dept routes OK'\\)\")",
+      "Bash(findstr \"organization\\\\|org-switcher\\\\|org-members\\\\|org-departments\")",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $result = npx tsc --noEmit --project tsconfig.json 2>&1; $result | Where-Object { $_ -match \"organization|org-switch|org-member|org-depart\" })"
     ]
   }
 }

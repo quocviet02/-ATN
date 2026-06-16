@@ -63,8 +63,10 @@ app.get('/api/docs.json', (req, res) => res.json(swaggerSpec));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-app.use('/api/auth',          require('./routes/auth'));
-app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/auth',           require('./routes/auth'));
+app.use('/api/notifications',  require('./routes/notifications'));
+app.use('/api/organizations',  require('./routes/organizations'));
+app.use('/api/departments',    require('./routes/departments'));
 app.use('/api/projects',      require('./routes/projects'));
 app.use('/api/projects',      require('./routes/ai'));
 app.use('/api/projects/:projectId/boards',                        require('./routes/boards'));

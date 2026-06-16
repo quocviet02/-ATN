@@ -1,0 +1,209 @@
+// ─── Trigger button (icon-only, fits in 64px sidebar) ────────────────────────
+
+.org-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.org-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.15s;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+}
+
+.org-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.org-initial {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.org-icon-default {
+  font-size: 16px;
+  color: #fff;
+}
+
+// ─── Dropdown panel ───────────────────────────────────────────────────────────
+
+.org-dropdown {
+  min-width: 260px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+}
+
+.org-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 6px;
+  border-bottom: 1px solid #f0f0f0;
+
+  .org-search-icon {
+    color: #bbb;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .org-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    background: transparent;
+    color: #333;
+
+    &::placeholder {
+      color: #bbb;
+    }
+  }
+}
+
+.org-section-label {
+  padding: 8px 12px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #aaa;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.org-list {
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+
+.org-item {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px !important;
+  cursor: pointer;
+  transition: background 0.12s;
+  min-height: unset !important;
+  line-height: 1 !important;
+
+  &:hover {
+    background: #f5f8ff !important;
+  }
+
+  &--active {
+    background: #e8f0ff !important;
+  }
+}
+
+.org-item-logo {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8e8e8;
+}
+
+.org-item-img {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+}
+
+.org-item-initial {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+}
+
+.org-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.org-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.org-item-role {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.org-item-check {
+  flex-shrink: 0;
+  color: #1890ff;
+  font-size: 12px;
+}
+
+.org-empty {
+  text-align: center;
+  color: #bbb;
+  padding: 14px 12px;
+  font-size: 13px;
+}
+
+.org-divider {
+  height: 1px;
+  background: #f0f0f0;
+}
+
+.org-actions {
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+
+.org-action-item {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px !important;
+  font-size: 13px;
+  color: #1890ff;
+  cursor: pointer;
+  min-height: unset !important;
+  line-height: 1 !important;
+
+  &:hover {
+    background: #f0f7ff !important;
+  }
+
+  i {
+    font-size: 14px;
+  }
+}

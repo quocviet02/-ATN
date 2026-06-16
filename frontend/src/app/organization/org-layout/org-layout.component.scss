@@ -1,0 +1,140 @@
+.org-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+}
+
+// ─── Top Navigation ───────────────────────────────────────────────────────────
+
+.org-topnav {
+  height: 52px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+.org-topnav-left {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: #f0f5ff;
+    color: #1890ff;
+  }
+
+  i {
+    font-size: 13px;
+  }
+}
+
+.back-label {
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+.topnav-divider {
+  width: 1px;
+  height: 20px;
+  background: #e8e8e8;
+  margin: 0 12px;
+}
+
+.topnav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+
+  &:hover .topnav-app-name {
+    color: #1890ff;
+  }
+}
+
+.logo-svg {
+  width: 24px;
+  height: 24px;
+}
+
+.topnav-app-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  transition: color 0.15s;
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+// ─── Right side ───────────────────────────────────────────────────────────────
+
+.org-topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topnav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+.topnav-avatar {
+  flex-shrink: 0;
+}
+
+.topnav-username {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+}
+
+// ─── Content area ─────────────────────────────────────────────────────────────
+
+.org-content {
+  flex: 1;
+  overflow-y: auto;
+}

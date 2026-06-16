@@ -1,0 +1,132 @@
+<div class="dept-section">
+  <div class="dept-toolbar">
+    <h3 class="dept-heading">
+      <i nz-icon nzType="apartment" nzTheme="outline"></i>
+      Cấu trúc phòng ban
+    </h3>
+    @if (canManage) {
+      <button nz-button nzType="primary" (click)="openCreate()">
+        <i nz-icon nzType="plus"></i> Thêm phòng ban
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="dept-loading">
+      <i nz-icon nzType="loading" nzTheme="outline" class="loading-icon"></i>
+      Đang tải...
+    </div>
+  } @else if (tree.length === 0) {
+    <nz-empty nzNotFoundContent="Chưa có phòng ban nào" class="dept-empty"></nz-empty>
+  } @else {
+    <div class="dept-tree">
+      <ng-container *ngTemplateOutlet="deptTree; context: {nodes: tree, level: 0}"></ng-container>
+    </div>
+  }
+</div>
+
+<ng-template #deptTree let-nodes="nodes" let-level="level">
+  @for (dept of nodes; track dept.id) {
+    <div class="dept-node" [style.padding-left.px]="level * 24">
+      <div class="dept-node-row">
+        <!-- Expand toggle -->
+        <button class="dept-expand-btn"
+          *ngIf="dept.children && dept.children.length > 0"
+          (click)="toggleExpand(dept.id)">
+          <i nz-icon [nzType]="isExpanded(dept.id) ? 'caret-down' : 'caret-right'" nzTheme="outline"></i>
+        </button>
+        <span class="dept-expand-placeholder" *ngIf="!dept.children || dept.children.length === 0"></span>
+
+        <!-- Color dot -->
+        <span class="dept-color-dot" [style.background]="dept.color"></span>
+
+        <!-- Icon -->
+        <i nz-icon [nzType]="dept.icon || 'team'" nzTheme="outline" class="dept-icon"></i>
+
+        <!-- Name & meta -->
+        <div class="dept-info">
+          <span class="dept-name">{{ dept.name }}</span>
+          @if (dept.memberCount) {
+            <span class="dept-member-count">{{ dept.memberCount }} người</span>
+          }
+        </div>
+
+        <!-- Head -->
+        @if (dept.headId && dept.headId['name']) {
+          <span class="dept-head">
+            <i nz-icon nzType="crown" nzTheme="outline"></i>
+            {{ dept.headId['name'] }}
+          </span>
+        }
+
+        <!-- Actions -->
+        @if (canManage) {
+          <div class="dept-actions">
+            <button nz-button nzSize="small" nzType="text" (click)="openCreate(dept)"
+              nz-tooltip nzTooltipTitle="Thêm phòng ban con">
+              <i nz-icon nzType="plus"></i>
+            </button>
+            <button nz-button nzSize="small" nzType="text" (click)="openEdit(dept)"
+              nz-tooltip nzTooltipTitle="Chỉnh sửa">
+              <i nz-icon nzType="edit"></i>
+            </button>
+            <button nz-button nzSize="small" nzType="text" nzDanger (click)="confirmDelete(dept)"
+              nz-tooltip nzTooltipTitle="Xóa">
+              <i nz-icon nzType="delete"></i>
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Children -->
+      @if (dept.children && dept.children.length > 0 && isExpanded(dept.id)) {
+        <ng-container *ngTemplateOutlet="deptTree; context: {nodes: dept.children, level: level+1}"></ng-container>
+      }
+    </div>
+  }
+</ng-template>
+
+<!-- Create/Edit Modal -->
+<nz-modal
+  [(nzVisible)]="modalVisible"
+  [nzTitle]="modalTitle"
+  (nzOnCancel)="modalVisible = false"
+  (nzOnOk)="saveModal()"
+  [nzOkLoading]="modalLoading"
+  nzOkText="Lưu">
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="deptForm" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Tên phòng ban</nz-form-label>
+        <nz-form-control nzErrorTip="Tên phòng ban là bắt buộc">
+          <input nz-input formControlName="name" placeholder="VD: Khối CNTT" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Mô tả</nz-form-label>
+        <nz-form-control>
+          <textarea nz-input formControlName="description"
+            [nzAutosize]="{minRows:2,maxRows:4}"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Phòng ban cha</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="parentDepartmentId" nzPlaceHolder="Không có (cấp gốc)" nzAllowClear>
+            @for (d of departments; track d.id) {
+              <nz-option [nzValue]="d.id" [nzLabel]="d.name"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <div class="form-row">
+        <nz-form-item class="form-col">
+          <nz-form-label>Màu sắc</nz-form-label>
+          <nz-form-control>
+            <input type="color" formControlName="color" class="color-picker" />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>

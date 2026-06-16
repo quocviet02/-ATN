@@ -1,0 +1,159 @@
+.dept-section {
+  padding: 16px 0;
+}
+
+.dept-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.dept-heading {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dept-loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loading-icon {
+  font-size: 18px;
+}
+
+.dept-empty {
+  margin: 40px 0;
+}
+
+.dept-tree {
+  background: #fafafa;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dept-node {
+  border-bottom: 1px solid #f5f5f5;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dept-node-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #f0f7ff;
+
+    .dept-actions {
+      opacity: 1;
+    }
+  }
+}
+
+.dept-expand-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.dept-expand-placeholder {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.dept-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dept-icon {
+  font-size: 14px;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.dept-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dept-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.dept-member-count {
+  font-size: 12px;
+  color: #999;
+  background: #f0f0f0;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.dept-head {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.dept-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-col {
+  margin-bottom: 0;
+}
+
+.color-picker {
+  width: 48px;
+  height: 32px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 4px;
+}

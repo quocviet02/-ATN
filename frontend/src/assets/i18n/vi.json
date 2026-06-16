@@ -244,6 +244,13 @@
       "transitionProps": "Thuộc tính transition"
     }
   },
+  "org": {
+    "myOrganizations": "Tổ chức của tôi",
+    "createNew": "Tạo Organization",
+    "noOrg": "Chọn tổ chức",
+    "switchSuccess": "Đã chuyển sang {{name}}",
+    "switchError": "Không thể chuyển organization"
+  },
   "releases": {
     "nav": "Releases",
     "title": "Quản lý Releases",

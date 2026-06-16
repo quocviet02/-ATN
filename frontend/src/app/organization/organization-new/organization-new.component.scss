@@ -1,0 +1,147 @@
+.org-new-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.org-new-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.org-new-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1a1a1a;
+}
+
+.org-new-subtitle {
+  color: #666;
+  font-size: 15px;
+}
+
+.org-steps {
+  margin-bottom: 32px;
+}
+
+.org-step-content {
+  margin-top: 24px;
+}
+
+.org-form-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-col {
+  margin-bottom: 0;
+}
+
+.org-step-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.step-info {
+  text-align: center;
+  padding: 32px 16px;
+
+  .step-info-icon {
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
+
+// ─── Plan grid ───────────────────────────────────────────
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.plan-card {
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+
+  &:hover {
+    border-color: #1890ff;
+    box-shadow: 0 4px 16px rgba(24,144,255,0.1);
+  }
+
+  &--selected {
+    border-color: #1890ff;
+    background: #f0f7ff;
+    box-shadow: 0 4px 16px rgba(24,144,255,0.15);
+  }
+}
+
+.plan-card-header {
+  margin-bottom: 12px;
+}
+
+.plan-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.plan-price {
+  display: block;
+  font-size: 13px;
+  color: #1890ff;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    font-size: 12px;
+    color: #555;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.plan-selected-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 11px;
+  color: #1890ff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}

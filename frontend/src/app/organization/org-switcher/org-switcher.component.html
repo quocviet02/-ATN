@@ -1,0 +1,82 @@
+<div class="org-switcher">
+  <div nz-dropdown
+    [(nzVisible)]="visible"
+    [nzDropdownMenu]="orgMenu"
+    nzTrigger="click"
+    nzPlacement="rightTop"
+    class="org-icon-btn"
+    nz-tooltip
+    [nzTooltipTitle]="currentOrg ? currentOrg.name : 'Chọn tổ chức'"
+    nzTooltipPlacement="right">
+
+    <nz-spin [nzSpinning]="loading" nzSize="small">
+      @if (currentOrg?.logo) {
+        <img [src]="currentOrg!.logo" [alt]="currentOrg!.name" class="org-logo-img" />
+      } @else if (currentOrg) {
+        <span class="org-initial">{{ currentOrg.name.charAt(0).toUpperCase() }}</span>
+      } @else {
+        <i nz-icon nzType="bank" nzTheme="outline" class="org-icon-default"></i>
+      }
+    </nz-spin>
+  </div>
+
+  <nz-dropdown-menu #orgMenu="nzDropdownMenu">
+    <div class="org-dropdown">
+      <!-- Search -->
+      <div class="org-search-wrap">
+        <i nz-icon nzType="search" class="org-search-icon"></i>
+        <input
+          class="org-search-input"
+          type="text"
+          placeholder="Tìm kiếm tổ chức..."
+          [(ngModel)]="searchText"
+          (ngModelChange)="onSearch()"
+          (click)="$event.stopPropagation()"
+        />
+      </div>
+
+      <div class="org-section-label">ORGANIZATIONS CỦA TÔI</div>
+
+      <ul nz-menu class="org-list">
+        @for (org of filteredOrgs; track org.id) {
+          <li nz-menu-item
+            class="org-item"
+            [class.org-item--active]="org.id === currentOrg?.id"
+            (click)="selectOrg(org)">
+            <span class="org-item-logo">
+              @if (org.logo) {
+                <img [src]="org.logo" [alt]="org.name" class="org-item-img" />
+              } @else {
+                <span class="org-item-initial">{{ org.name.charAt(0).toUpperCase() }}</span>
+              }
+            </span>
+            <span class="org-item-info">
+              <span class="org-item-name">{{ org.name }}</span>
+              <span class="org-item-role"
+                [style.color]="getRoleColor(org.myRole || '')">
+                {{ getRoleBadge(org.myRole || '') }}
+              </span>
+            </span>
+            @if (org.id === currentOrg?.id) {
+              <i nz-icon nzType="check" class="org-item-check"></i>
+            }
+          </li>
+        }
+
+        @if (filteredOrgs.length === 0) {
+          <li nz-menu-item class="org-empty">Không tìm thấy</li>
+        }
+      </ul>
+
+      <div class="org-divider"></div>
+
+      <ul nz-menu class="org-actions">
+        <li nz-menu-item class="org-action-item"
+          (click)="visible=false" routerLink="/organizations/new">
+          <i nz-icon nzType="plus-circle" nzTheme="outline"></i>
+          Tạo Organization mới
+        </li>
+      </ul>
+    </div>
+  </nz-dropdown-menu>
+</div>

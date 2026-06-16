@@ -1,0 +1,147 @@
+<div class="org-new-page">
+  <div class="org-new-header">
+    <h1 class="org-new-title">Tạo Organization mới</h1>
+    <p class="org-new-subtitle">Thiết lập không gian làm việc cho tổ chức của bạn</p>
+  </div>
+
+  <nz-steps [nzCurrent]="currentStep" class="org-steps">
+    <nz-step nzTitle="Thông tin cơ bản" nzIcon="solution"></nz-step>
+    <nz-step nzTitle="Cấu trúc ban đầu" nzIcon="team"></nz-step>
+    <nz-step nzTitle="Chọn Plan" nzIcon="rocket"></nz-step>
+  </nz-steps>
+
+  <!-- Step 0: Thông tin cơ bản -->
+  @if (currentStep === 0) {
+    <div class="org-step-content">
+      <nz-card class="org-form-card">
+        <form nz-form [formGroup]="basicForm" nzLayout="vertical">
+          <nz-form-item>
+            <nz-form-label nzRequired>Tên tổ chức</nz-form-label>
+            <nz-form-control nzErrorTip="Tên tổ chức là bắt buộc">
+              <input nz-input formControlName="name"
+                placeholder="VD: Vietcombank, FPT Software" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label>Mô tả</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="description"
+                placeholder="Mô tả ngắn về tổ chức" [nzAutosize]="{minRows:2,maxRows:4}">
+              </textarea>
+            </nz-form-control>
+          </nz-form-item>
+
+          <div class="form-row">
+            <nz-form-item class="form-col">
+              <nz-form-label nzRequired>Ngành nghề</nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="industry" nzPlaceHolder="Chọn ngành nghề">
+                  @for (ind of industries; track ind.value) {
+                    <nz-option [nzValue]="ind.value" [nzLabel]="ind.label"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="form-col">
+              <nz-form-label nzRequired>Quy mô</nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="size" nzPlaceHolder="Chọn quy mô">
+                  @for (s of sizes; track s.value) {
+                    <nz-option [nzValue]="s.value" [nzLabel]="s.label"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div class="form-row">
+            <nz-form-item class="form-col">
+              <nz-form-label>Quốc gia</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="country" placeholder="VD: Vietnam" />
+              </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item class="form-col">
+              <nz-form-label>Website</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="website" placeholder="https://..." />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </form>
+      </nz-card>
+
+      <div class="org-step-actions">
+        <button nz-button nzType="primary" (click)="goNext()" [nzLoading]="loading">
+          Tiếp theo <i nz-icon nzType="arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 1: Cấu trúc ban đầu -->
+  @if (currentStep === 1) {
+    <div class="org-step-content">
+      <nz-card class="org-form-card">
+        <div class="step-info">
+          <div class="step-info-icon">
+            <i nz-icon nzType="check-circle" nzTheme="twotone" [nzTwotoneColor]="'#52c41a'" style="font-size:48px"></i>
+          </div>
+          <h3>Organization đã được tạo thành công!</h3>
+          <p>Chúng tôi đã tự động tạo phòng ban <strong>Mặc định</strong> cho tổ chức của bạn.</p>
+          <p>Bạn có thể thêm cấu trúc phòng ban và mời thành viên sau trong phần cài đặt.</p>
+        </div>
+      </nz-card>
+
+      <div class="org-step-actions">
+        <button nz-button (click)="goPrev()">
+          <i nz-icon nzType="arrow-left"></i> Quay lại
+        </button>
+        <button nz-button nzType="primary" (click)="goNext()">
+          Tiếp theo <i nz-icon nzType="arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 2: Chọn Plan -->
+  @if (currentStep === 2) {
+    <div class="org-step-content">
+      <div class="plan-grid">
+        @for (plan of plans; track plan.value) {
+          <div class="plan-card"
+            [class.plan-card--selected]="selectedPlan === plan.value"
+            (click)="selectedPlan = plan.value">
+            <div class="plan-card-header">
+              <span class="plan-name">{{ plan.label }}</span>
+              <span class="plan-price">{{ plan.price }}</span>
+            </div>
+            <ul class="plan-features">
+              @for (f of plan.features; track f) {
+                <li><i nz-icon nzType="check" style="color:#52c41a"></i> {{ f }}</li>
+              }
+            </ul>
+            @if (selectedPlan === plan.value) {
+              <div class="plan-selected-badge">
+                <i nz-icon nzType="check-circle" nzTheme="fill"></i> Đã chọn
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="org-step-actions">
+        <button nz-button (click)="goPrev()">
+          <i nz-icon nzType="arrow-left"></i> Quay lại
+        </button>
+        <button nz-button nzType="primary" (click)="finish()">
+          <i nz-icon nzType="rocket" nzTheme="outline"></i>
+          Hoàn tất & Vào Dashboard
+        </button>
+      </div>
+    </div>
+  }
+</div>

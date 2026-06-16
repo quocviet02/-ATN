@@ -1,3 +1,5 @@
+*, *::before, *::after { box-sizing: border-box; }
+
 @import '../node_modules/ng-zorro-antd/style/index.min.css';
 @import '../node_modules/ng-zorro-antd/tooltip/style/index.min.css';
 @import '../node_modules/ng-zorro-antd/spin/style/index.min.css';

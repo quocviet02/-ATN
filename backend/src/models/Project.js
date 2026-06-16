@@ -31,7 +31,14 @@ const projectSchema = new mongoose.Schema(
     progress:    { type: Number, default: 0, min: 0, max: 100 },
     techStack:   [{ type: String }],
     repository:  { type: String, default: '' },
-    demoUrl:     { type: String, default: '' },
+    demoUrl:        { type: String, default: '' },
+    organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', default: null, index: true },
+    departmentId:   { type: mongoose.Schema.Types.ObjectId, ref: 'Department', default: null },
+    visibility:     {
+      type:    String,
+      enum:    ['private', 'department', 'organization', 'public'],
+      default: 'private',
+    },
   },
   { timestamps: true, toJSON: JSON_OPTS }
 );

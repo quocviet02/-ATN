@@ -1,0 +1,78 @@
+<div class="org-layout">
+
+  <!-- Top Navigation Bar -->
+  <header class="org-topnav">
+    <div class="org-topnav-left">
+      <!-- Back to Project -->
+      <button class="back-btn" (click)="goToProject()"
+        title="Quay lại Project">
+        <i nz-icon nzType="arrow-left" nzTheme="outline"></i>
+        <span class="back-label">Dự án</span>
+      </button>
+
+      <div class="topnav-divider"></div>
+
+      <!-- App Logo -->
+      <a routerLink="/project/board" class="topnav-logo">
+        <svg class="logo-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient x1="108.695%" x2="12.439%" y1="-14.936%" y2="45.215%" id="og1">
+              <stop stop-color="#1890ff" stop-opacity="0.6" offset="0%"></stop>
+              <stop stop-color="#1890ff" offset="100%"></stop>
+            </linearGradient>
+          </defs>
+          <g>
+            <path d="M15.967 29.362a6.675 6.675 0 0 0 0-9.442l-8.699-8.671-3.957 3.957a1.062 1.062 0 0 0 0 1.5l12.656 12.656zm12.656-14.156L15.967 2.55l-.039.039a6.675 6.675 0 0 0 .028 9.41l8.706 8.667 3.96-3.96a1.062 1.062 0 0 0 0-1.5z" fill="#1890ff"></path>
+          </g>
+        </svg>
+        <span class="topnav-app-name">Task Manager</span>
+      </a>
+    </div>
+
+    <div class="org-topnav-right">
+      @if (authQuery.user$ | async; as user) {
+        <div class="topnav-user"
+          nz-dropdown
+          [nzDropdownMenu]="userMenu"
+          nzTrigger="click"
+          nzPlacement="bottomRight">
+          <nz-avatar
+            [nzSrc]="user.avatarUrl"
+            [nzText]="user.name?.charAt(0)?.toUpperCase() || ''"
+            nzSize="small"
+            class="topnav-avatar">
+          </nz-avatar>
+          <span class="topnav-username">{{ user.name }}</span>
+          <i nz-icon nzType="down" style="font-size:10px;color:#999"></i>
+        </div>
+
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu style="min-width:180px">
+            <li nz-menu-item [nzDisabled]="true"
+              style="padding:10px 16px;cursor:default">
+              <div style="font-weight:600;font-size:13px">{{ user.name }}</div>
+              <div style="font-size:12px;color:#999">{{ user.email }}</div>
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="goToProject()">
+              <i nz-icon nzType="project" nzTheme="outline" class="mr-2"></i>
+              Quay lại Dự án
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout()"
+              style="color:#ff4d4f">
+              <i nz-icon nzType="logout" nzTheme="outline" class="mr-2"></i>
+              Đăng xuất
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      }
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <main class="org-content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

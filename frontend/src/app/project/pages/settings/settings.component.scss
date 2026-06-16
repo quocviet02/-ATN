@@ -1,7 +1,9 @@
-.project-form { max-width: 640px; }
+.project-form { max-width: 640px; width: 100%; box-sizing: border-box; }
 
 .danger-zone {
   max-width: 640px;
+  width: 100%;
+  box-sizing: border-box;
   border: 1px solid #ffd2d2;
   border-radius: 4px;
   overflow: hidden;
@@ -21,5 +23,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
 }

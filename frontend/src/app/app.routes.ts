@@ -20,6 +20,10 @@ export const appRoutes: Routes = [
     loadChildren: () => import('./project/project.routes').then((m) => m.PROJECT_ROUTES)
   },
   {
+    path: 'organizations',
+    loadChildren: () => import('./organization/organization.routes').then((m) => m.ORGANIZATION_ROUTES)
+  },
+  {
     path: 'wip',
     loadChildren: () => import('./work-in-progress/work-in-progress.routes').then((m) => m.WIP_ROUTES)
   },
