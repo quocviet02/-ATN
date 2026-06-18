@@ -51,7 +51,22 @@
       "Bash(node -e \"require\\('./src/routes/organizations'\\); console.log\\('Routes OK'\\)\")",
       "Bash(node -e \"require\\('./src/routes/departments'\\); console.log\\('Dept routes OK'\\)\")",
       "Bash(findstr \"organization\\\\|org-switcher\\\\|org-members\\\\|org-departments\")",
-      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $result = npx tsc --noEmit --project tsconfig.json 2>&1; $result | Where-Object { $_ -match \"organization|org-switch|org-member|org-depart\" })"
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $result = npx tsc --noEmit --project tsconfig.json 2>&1; $result | Where-Object { $_ -match \"organization|org-switch|org-member|org-depart\" })",
+      "Bash(node *)",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $result = npx ng build --configuration development 2>&1; $result | Where-Object { $_ -match \"ERROR|error TS\" } | Select-Object -First 40)",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $result = npx ng build --configuration development 2>&1; $errors = $result | Where-Object { $_ -match \"ERROR|error TS|Cannot find\" }; if \\($errors.Count -eq 0\\) { \"BUILD SUCCESS - No errors found\" } else { $errors | Select-Object -First 50 })",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $result = npx ng build --configuration development 2>&1 | Out-String; if \\($result -match \"ERROR\" -or $result -match \"error TS\"\\) { $lines = $result -split \"`n\"; $errors = $lines | Where-Object { $_ -match \"ERROR|error TS\" }; Write-Output \"BUILD FAILED\"; $errors | Select-Object -First 30 | ForEach-Object { Write-Output $_ } } else { Write-Output \"BUILD SUCCESS - No errors found\" })",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $result = npx ng build --configuration development 2>&1 | Out-String; if \\($result -match \"ERROR\" -or $result -match \"error TS\"\\) { $lines = $result -split \"`n\"; $errors = $lines | Where-Object { $_ -match \"ERROR|error TS\" }; Write-Output \"BUILD FAILED\"; $errors | Select-Object -First 40 | ForEach-Object { Write-Output $_ } } else { Write-Output \"BUILD SUCCESS - No errors found\" })",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; npx ng build --configuration development 2>&1 | Out-String | Select-String -Pattern \"\\(?ms\\).{0,200}\\(ERROR|NG\\\\d{4}|TS\\\\d{4}\\).{0,400}\" | Select-Object -First 20 -ExpandProperty Matches | ForEach-Object { $_.Value })",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $out = npx ng build --configuration development 2>&1; $errLines = $out | Where-Object { $_ -match \"NG\\\\d{4}|error TS\\\\d+|Cannot find|is not a known\" }; if \\($errLines\\) { $errLines | Select-Object -First 30 } else { \"No TS/NG errors found\" })",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $out = npx ng build --configuration development 2>&1; $out | Where-Object { $_ -match \"Build at|BUILD|Initial chunk|Successfully\" } | Select-Object -Last 5)",
+      "Bash(New-Item -ItemType Directory -Force -Path \"D:\\\\đatn\\\\frontend\\\\src\\\\app\\\\auth\\\\register\")",
+      "Bash(Out-Null)",
+      "Bash(Write-Output \"OK\")",
+      "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $out = npx ng build --configuration development 2>&1; $errLines = $out | Where-Object { $_ -match \"NG\\\\d{4}|error TS\\\\d+|Cannot find|is not a known|Cannot bind\" }; if \\($errLines\\) { $errLines | Select-Object -First 30 } else { $out | Where-Object { $_ -match \"✔|BUILD|Initial chunk\" } | Select-Object -Last 5 })",
+      "PowerShell(Get-Content \"C:\\\\Users\\\\User\\\\.claude\\\\projects\\\\D---atn\\\\753bfd5e-8466-4ce9-9be0-0cd0ebb9febd\\\\tool-results\\\\toolu_011ChQ6ZWT1QN3f1tnTQQsBC.txt\" | Select-String \"ng-zorro-antd/\\([a-z0-9\\\\-]+\\)\" | ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique)",
+      "PowerShell($content = Get-Content \"C:\\\\Users\\\\User\\\\.claude\\\\projects\\\\D---atn\\\\753bfd5e-8466-4ce9-9be0-0cd0ebb9febd\\\\tool-results\\\\toolu_011ChQ6ZWT1QN3f1tnTQQsBC.txt\" -Raw; Write-Host \"Length: $\\($content.Length\\)\"; Write-Host $content.Substring\\(0, 500\\))",
+      "PowerShell($f = Get-Item \"D:\\\\đatn\\\\PROJECT_REVIEW.md\"; \"Size: $\\([math]::Round\\($f.Length/1024\\)\\)KB\"; \\(Get-Content \"D:\\\\đatn\\\\PROJECT_REVIEW.md\" | Measure-Object -Line\\).Lines)"
     ]
   }
 }

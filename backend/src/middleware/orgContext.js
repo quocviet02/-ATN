@@ -44,7 +44,7 @@ module.exports = async (req, res, next) => {
     next();
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(404).json({ statusCode: 404, message: 'Organization not found', error: 'Not Found' });
+      return res.status(400).json({ statusCode: 400, message: 'Invalid Organization ID format', error: 'Bad Request' });
     }
     res.status(500).json({ statusCode: 500, message: err.message, error: 'Internal Server Error' });
   }

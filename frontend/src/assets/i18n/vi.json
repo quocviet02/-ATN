@@ -9,7 +9,20 @@
     "password": "Mật khẩu",
     "signingIn": "Đang đăng nhập...",
     "signIn": "Đăng nhập",
-    "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại."
+    "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "noAccount": "Chưa có tài khoản?",
+    "registerNow": "Đăng ký ngay",
+    "createAccount": "Tạo tài khoản mới",
+    "fullName": "Họ và tên",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "registerButton": "Đăng ký",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "loginNow": "Đăng nhập ngay",
+    "registerSuccess": "Đăng ký thành công! Chào mừng bạn đến với hệ thống.",
+    "emailExists": "Email này đã được sử dụng",
+    "passwordMismatch": "Mật khẩu xác nhận không khớp",
+    "validationError": "Vui lòng kiểm tra lại thông tin.",
+    "serverError": "Đã có lỗi xảy ra, vui lòng thử lại sau."
   },
   "nav": {
     "searchIssues": "Tìm kiếm task",
@@ -61,7 +74,7 @@
     "projectName": "Tên project",
     "required": "*",
     "projectNamePlaceholder": "Ví dụ: Website Redesign",
-    "descriptionOptional": "Mô tả (tuỳ chọn)",
+    "descriptionOptional": "Mô tả (tùy chọn)",
     "descriptionPlaceholder": "Mô tả ngắn về project...",
     "creating": "Đang tạo...",
     "createProjectBoard": "Tạo Project & Board",
@@ -271,5 +284,17 @@
     "byName": "Tên A→Z",
     "gridView": "Dạng lưới",
     "listView": "Dạng danh sách"
+  },
+  "portfolio": {
+    "title": "Portfolios",
+    "list": "Danh sách Portfolio",
+    "create": "Tạo Portfolio",
+    "programs": "Programs",
+    "risks": "Rủi ro",
+    "budget": "Ngân sách",
+    "aiInsights": "AI Insights",
+    "overview": "Tổng quan",
+    "goals": "Mục tiêu",
+    "roadmap": "Lộ trình"
   }
 }

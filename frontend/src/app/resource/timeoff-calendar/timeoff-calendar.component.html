@@ -1,0 +1,174 @@
+<div class="timeoff-page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">
+        <i nz-icon nzType="calendar" nzTheme="outline" class="title-icon"></i>
+        Quản lý Nghỉ phép
+      </h1>
+      <span class="page-subtitle">Đăng ký và quản lý thời gian nghỉ của đội nhóm</span>
+    </div>
+    <button nz-button nzType="primary" (click)="openCreate()">
+      <i nz-icon nzType="plus"></i> Đăng ký nghỉ phép
+    </button>
+  </div>
+
+  <div class="timeoff-layout">
+    <!-- Left: Calendar -->
+    <div class="calendar-section">
+      <nz-calendar
+        [(ngModel)]="currentDate"
+        nzMode="month"
+        (nzPanelChange)="onMonthChange($event.date)"
+        (nzSelectChange)="selectDate($event)">
+        <ng-container *nzDateCell="let date">
+          <div class="calendar-day-off">
+            @for (t of getDayOff(date); track t.id) {
+              <div class="off-dot" [style.background]="typeColor(t.type)"
+                nz-tooltip [nzTooltipTitle]="(t.userId?.name || 'Ai đó') + ' — ' + typeLabel(t.type)">
+              </div>
+            }
+          </div>
+        </ng-container>
+      </nz-calendar>
+
+      <!-- Selected day detail -->
+      @if (selectedDate && selectedDayOff.length) {
+        <div class="day-detail">
+          <div class="day-detail-title">{{ selectedDate | date:'dd/MM/yyyy' }} — {{ selectedDayOff.length }} người nghỉ</div>
+          @for (t of selectedDayOff; track t.id) {
+            <div class="day-detail-item">
+              <nz-avatar [nzSrc]="t.userId?.avatar" [nzText]="(t.userId?.name || '?').charAt(0)" [nzSize]="28"></nz-avatar>
+              <span class="day-detail-name">{{ t.userId?.name }}</span>
+              <nz-tag [style.background]="typeColor(t.type)" nzColor="default" class="type-tag">
+                {{ typeLabel(t.type) }}
+              </nz-tag>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Legend -->
+      <div class="calendar-legend">
+        @for (opt of typeOptions; track opt.value) {
+          <span class="cl-item">
+            <span class="cl-dot" [style.background]="opt.color"></span>
+            {{ opt.label }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <!-- Right: Side Panel -->
+    <div class="side-panel">
+      <!-- Pending requests -->
+      @if (pendingRequests.length) {
+        <nz-card nzTitle="Chờ duyệt ({{ pendingRequests.length }})" class="side-card">
+          <div class="pending-list">
+            @for (t of pendingRequests; track t.id) {
+              <div class="pending-item">
+                <div class="pending-header">
+                  <nz-avatar [nzSrc]="t.userId?.avatar" [nzText]="(t.userId?.name || '?').charAt(0)" nzSize="small"></nz-avatar>
+                  <span class="pending-name">{{ t.userId?.name }}</span>
+                  <nz-tag [style.background]="typeColor(t.type)" nzColor="default" style="font-size:10px">{{ typeLabel(t.type) }}</nz-tag>
+                </div>
+                <div class="pending-dates">
+                  {{ t.startDate | date:'dd/MM' }} → {{ t.endDate | date:'dd/MM/yyyy' }}
+                  ({{ t.totalHours }}h)
+                </div>
+                @if (t.reason) {
+                  <div class="pending-reason">{{ t.reason }}</div>
+                }
+                <div class="pending-actions">
+                  <button nz-button nzType="primary" nzSize="small" (click)="approve(t)">Duyệt</button>
+                  <button nz-button nzDanger nzType="default" nzSize="small" (click)="reject(t)">Từ chối</button>
+                </div>
+              </div>
+            }
+          </div>
+        </nz-card>
+        <nz-divider></nz-divider>
+      }
+
+      <!-- My Time Off -->
+      <nz-card nzTitle="Lịch nghỉ của tôi" class="side-card">
+        @if (loading) {
+          <nz-spin></nz-spin>
+        } @else if (myTimeOffs.length === 0) {
+          <nz-empty nzNotFoundContent="Chưa có lịch nghỉ nào"></nz-empty>
+        } @else {
+          <div class="my-list">
+            @for (t of myTimeOffs; track t.id) {
+              <div class="my-item">
+                <div class="my-type-dot" [style.background]="typeColor(t.type)"></div>
+                <div class="my-info">
+                  <div class="my-dates">
+                    {{ t.startDate | date:'dd/MM' }} → {{ t.endDate | date:'dd/MM/yyyy' }}
+                  </div>
+                  <div class="my-meta">
+                    {{ typeLabel(t.type) }} · {{ t.totalHours }}h
+                    <nz-tag [nzColor]="statusColor(t.status)" style="margin-left:6px;font-size:10px">
+                      {{ t.status }}
+                    </nz-tag>
+                  </div>
+                </div>
+                @if (t.status === 'pending' || t.status === 'approved') {
+                  <button nz-button nzType="text" nzDanger nzSize="small" (click)="cancel(t)">
+                    <i nz-icon nzType="close"></i>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      </nz-card>
+    </div>
+  </div>
+</div>
+
+<!-- Create Time Off Modal -->
+<nz-modal
+  [(nzVisible)]="createVisible"
+  nzTitle="Đăng ký nghỉ phép"
+  [nzOkLoading]="creating"
+  nzOkText="Đăng ký"
+  (nzOnOk)="submitCreate()"
+  (nzOnCancel)="createVisible = false"
+  nzWidth="480px">
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Loại nghỉ phép</nz-form-label>
+        <nz-form-control>
+          <nz-select [(ngModel)]="form.type" name="type" style="width:100%">
+            @for (opt of typeOptions; track opt.value) {
+              <nz-option [nzValue]="opt.value" [nzLabel]="opt.label"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <div class="form-row-2">
+        <nz-form-item>
+          <nz-form-label nzRequired>Ngày bắt đầu</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker [(ngModel)]="form.startDate" name="start" style="width:100%"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label nzRequired>Ngày kết thúc</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker [(ngModel)]="form.endDate" name="end" style="width:100%"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <nz-form-item>
+        <nz-form-label>Lý do</nz-form-label>
+        <nz-form-control>
+          <textarea nz-input [(ngModel)]="form.reason" name="reason"
+            placeholder="Mô tả lý do nghỉ phép..."
+            [nzAutosize]="{ minRows: 2, maxRows: 4 }">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>

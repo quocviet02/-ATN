@@ -26,6 +26,11 @@ import {
   BankOutline, DownOutline, CheckOutline, CaretDownOutline, CaretRightOutline,
   CrownOutline, UserAddOutline, ProjectOutline, CheckCircleFill,
   UserOutline, SettingOutline, InfoCircleOutline,
+  // Portfolio & Program Management icons
+  FolderOutline, SafetyCertificateOutline, BulbOutline, ArrowUpOutline, ArrowDownOutline,
+  MinusOutline,
+  // Resource & Capacity Management icons
+  TrophyOutline, UserDeleteOutline,
 } from '@ant-design/icons-angular/icons';
 import { AkitaNgRouterStoreModule } from '@datorama/akita-ng-router-store';
 import { AkitaNgDevtools } from '@datorama/akita-ngdevtools';
@@ -73,6 +78,9 @@ bootstrapApplication(AppComponent, {
               BankOutline, DownOutline, CheckOutline, CaretDownOutline, CaretRightOutline,
               CrownOutline, UserAddOutline, ProjectOutline, CheckCircleFill,
               UserOutline, SettingOutline, InfoCircleOutline,
+              FolderOutline, SafetyCertificateOutline, BulbOutline, ArrowUpOutline, ArrowDownOutline,
+              MinusOutline,
+              TrophyOutline, UserDeleteOutline,
             ]),
             environment.production ? [] : AkitaNgDevtools,
             AkitaNgRouterStoreModule,

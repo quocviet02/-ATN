@@ -9,7 +9,20 @@
     "password": "Password",
     "signingIn": "Signing in…",
     "signIn": "Sign in",
-    "loginFailed": "Login failed. Please try again."
+    "loginFailed": "Login failed. Please try again.",
+    "noAccount": "Don't have an account?",
+    "registerNow": "Sign up",
+    "createAccount": "Create a new account",
+    "fullName": "Full name",
+    "confirmPassword": "Confirm password",
+    "registerButton": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginNow": "Sign in",
+    "registerSuccess": "Registration successful! Welcome to the system.",
+    "emailExists": "This email is already in use",
+    "passwordMismatch": "Passwords do not match",
+    "validationError": "Please check your input and try again.",
+    "serverError": "An error occurred. Please try again later."
   },
   "nav": {
     "searchIssues": "Search issues",

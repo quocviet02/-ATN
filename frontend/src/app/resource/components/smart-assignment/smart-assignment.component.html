@@ -1,0 +1,80 @@
+<nz-modal
+  [nzVisible]="visible"
+  nzTitle="Gợi ý phân công thông minh"
+  nzWidth="640px"
+  [nzFooter]="null"
+  (nzOnCancel)="close()">
+
+  @if (loading) {
+    <div class="sa-loading">
+      <nz-spin nzSize="large"></nz-spin>
+      <p>AI đang phân tích task và đánh giá năng lực thành viên...</p>
+    </div>
+  }
+
+  @if (!loading && error) {
+    <div class="sa-error">
+      <i nz-icon nzType="warning" nzTheme="twotone" [nzTwotoneColor]="'#faad14'" style="font-size:32px"></i>
+      <p>{{ error }}</p>
+      <button nz-button (click)="analyze()">Thử lại</button>
+    </div>
+  }
+
+  @if (!loading && !error && candidates.length > 0) {
+    <div class="sa-content">
+      @if (detectedSkills.length) {
+        <div class="detected-skills">
+          <span class="ds-label">Kỹ năng cần thiết:</span>
+          @for (s of detectedSkills; track s) {
+            <nz-tag nzColor="blue">{{ s }}</nz-tag>
+          }
+        </div>
+      }
+
+      <div class="candidates-list">
+        @for (c of candidates; track c.userId; let i = $index) {
+          <div class="candidate-card" (click)="pick(c)">
+            <div class="c-rank" [class.rank-1]="i === 0" [class.rank-2]="i === 1" [class.rank-3]="i === 2">
+              #{{ i + 1 }}
+            </div>
+            <nz-avatar [nzSrc]="c.avatar" [nzText]="(c.name || '?').charAt(0)" [nzSize]="42"></nz-avatar>
+            <div class="c-info">
+              <div class="c-name">{{ c.name }}</div>
+              <div class="c-reasons">
+                @for (r of c.reasons; track $index) {
+                  <span class="c-reason">{{ r }}</span>
+                }
+              </div>
+            </div>
+            <div class="c-scores">
+              <div class="score-item" nz-tooltip [nzTooltipTitle]="'Match score'">
+                <nz-progress nzType="circle" [nzPercent]="c.matchScore"
+                  [nzWidth]="44"
+                  [nzStrokeColor]="scoreColor(c.matchScore)"
+                  [nzFormat]="pctFmt">
+                </nz-progress>
+              </div>
+              <div class="load-bar" nz-tooltip [nzTooltipTitle]="'Workload hiện tại: ' + c.currentLoad + '%'">
+                <span class="load-label">Load</span>
+                <nz-progress nzType="line" [nzPercent]="c.currentLoad"
+                  [nzStrokeColor]="loadColor(c.currentLoad)"
+                  nzSize="small" style="width:80px">
+                </nz-progress>
+              </div>
+            </div>
+            <button nz-button nzType="primary" nzSize="small" (click)="$event.stopPropagation(); pick(c)">
+              Chọn
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!loading && !error && candidates.length === 0) {
+    <div class="sa-empty">
+      <i nz-icon nzType="user-delete" nzTheme="outline" style="font-size:32px;color:#d9d9d9"></i>
+      <p>Không tìm thấy ứng viên phù hợp cho task này.</p>
+    </div>
+  }
+</nz-modal>

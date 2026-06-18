@@ -44,6 +44,7 @@ export class IssueCardComponent implements OnChanges, OnInit {
   openIssueModal(issueId: string) {
     this._modalService.create({
       nzContent: IssueModalComponent,
+      nzClassName: 'issue-detail-modal',
       nzWidth: 1040,
       nzClosable: false,
       nzFooter: null,

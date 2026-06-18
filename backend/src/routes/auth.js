@@ -7,9 +7,16 @@ const ctrl     = require('../controllers/authController');
 // ─── Validation rule sets ─────────────────────────────────────────────────────
 
 const registerRules = [
-  body('name').trim().notEmpty().withMessage('Name is required'),
-  body('email').isEmail().withMessage('Valid email is required').normalizeEmail(),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('name').trim().notEmpty().withMessage('Họ tên là bắt buộc')
+    .isLength({ min: 2 }).withMessage('Họ tên phải có ít nhất 2 ký tự')
+    .isLength({ max: 50 }).withMessage('Họ tên không được vượt quá 50 ký tự'),
+  body('email').isEmail().withMessage('Email không hợp lệ').normalizeEmail(),
+  body('password').isLength({ min: 6 }).withMessage('Mật khẩu phải có ít nhất 6 ký tự'),
+  body('confirmPassword').notEmpty().withMessage('Vui lòng xác nhận mật khẩu')
+    .custom((value, { req }) => {
+      if (value !== req.body.password) throw new Error('Mật khẩu xác nhận không khớp');
+      return true;
+    }),
 ];
 
 const loginRules = [

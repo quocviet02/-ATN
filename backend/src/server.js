@@ -67,6 +67,15 @@ app.use('/api/auth',           require('./routes/auth'));
 app.use('/api/notifications',  require('./routes/notifications'));
 app.use('/api/organizations',  require('./routes/organizations'));
 app.use('/api/departments',    require('./routes/departments'));
+app.use('/api/portfolios',     require('./routes/portfolios'));
+app.use('/api/programs',       require('./routes/programs'));
+app.use('/api/dependencies',   require('./routes/dependencies'));
+app.use('/api/risks',          require('./routes/risks'));
+app.use('/api/skills',         require('./routes/skills'));
+app.use('/api/timeoffs',       require('./routes/timeoffs'));
+app.use('/api',                require('./routes/capacity'));
+app.use('/api',                require('./routes/assignments'));
+app.use('/api',                require('./routes/resourceAi'));
 app.use('/api/projects',      require('./routes/projects'));
 app.use('/api/projects',      require('./routes/ai'));
 app.use('/api/projects/:projectId/boards',                        require('./routes/boards'));
@@ -238,15 +247,128 @@ function scheduleSlaCheck() {
   setInterval(run, ONE_HOUR);
 }
 
+// ─── Cron: Weekly Workload Snapshot (Sunday 23:00) ───────────────────────────
+
+function scheduleWeeklyWorkloadSnapshot() {
+  const ONE_HOUR = 60 * 60 * 1000;
+  const run = async () => {
+    try {
+      const now = new Date();
+      if (now.getDay() !== 0 || now.getHours() !== 23) return; // Sunday 23:xx only
+
+      const { User, Task, WorkloadSnapshot, OrganizationMember } = require('./models');
+      const { getWeekStart, getWeekLabel, getWeeksInRange, calcBurnoutRisk } = require('./utils/workloadUtils');
+
+      const weekStart = getWeekStart(now); weekStart.setDate(weekStart.getDate() - 7);
+      const weekEnd   = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+      const wLabel    = getWeekLabel(weekStart);
+
+      const users = await User.find({ deletedAt: null }).select('_id workCapacity');
+      for (const user of users) {
+        const capacity = user.workCapacity?.hoursPerWeek || 40;
+        const tasks = await Task.find({
+          assignee: user._id, deletedAt: null,
+          $or: [{ startDate: { $lte: weekEnd }, dueDate: { $gte: weekStart } }, { dueDate: { $gte: weekStart, $lte: weekEnd } }],
+        }).populate({ path: 'boardId', select: 'projectId', populate: { path: 'projectId', select: 'name' } });
+
+        let allocated = 0;
+        const projectMap = {};
+        tasks.forEach(t => {
+          const wks = getWeeksInRange(t.startDate || t.dueDate, t.dueDate);
+          const hrs = t.estimatedHours ? t.estimatedHours / Math.max(wks.length, 1) : 0;
+          allocated += hrs;
+          const pId = t.boardId?.projectId?._id?.toString() || 'unknown';
+          const pNm = t.boardId?.projectId?.name || 'Unknown';
+          if (!projectMap[pId]) projectMap[pId] = { projectId: pId, projectName: pNm, hours: 0 };
+          projectMap[pId].hours += hrs;
+        });
+
+        const util = capacity > 0 ? Math.round((allocated / capacity) * 100) : 0;
+        const prevSnaps = await WorkloadSnapshot.find({ userId: user._id }).sort({ weekStart: -1 }).limit(3);
+        const consecutive = prevSnaps.filter(s => s.isOverloaded).length;
+        const burnoutRisk = calcBurnoutRisk(util, consecutive);
+
+        await WorkloadSnapshot.findOneAndUpdate(
+          { userId: user._id, weekStart },
+          { userId: user._id, weekStart, capacityHours: capacity, allocatedHours: Math.round(allocated), utilization: util,
+            isOverloaded: util > 100, burnoutRisk, projectBreakdown: Object.values(projectMap) },
+          { upsert: true }
+        );
+
+        if (['high','critical'].includes(burnoutRisk)) {
+          notifService.create({
+            recipient: user._id,
+            type: 'task_updated',
+            title: '⚠️ Cảnh báo nguy cơ burnout',
+            body: `Bạn đã làm việc ${util}% công suất trong tuần vừa qua. Hãy chú ý sức khỏe!`,
+            link: '/resources/workload',
+            meta: { burnoutRisk, utilization: util },
+          });
+        }
+      }
+      console.log('[Cron] Weekly workload snapshots saved');
+    } catch (e) {
+      console.error('[Cron] Workload snapshot error:', e.message);
+    }
+  };
+  setInterval(run, ONE_HOUR);
+}
+
+// ─── Cron: Capacity check daily ──────────────────────────────────────────────
+
+function scheduleCapacityCheck() {
+  const ONE_HOUR = 60 * 60 * 1000;
+  const run = async () => {
+    try {
+      const now = new Date();
+      if (now.getHours() !== 8) return; // 8 AM only
+      const { Task, TimeOff } = require('./models');
+      const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      const tomorrowEnd = new Date(tomorrow); tomorrowEnd.setHours(23, 59, 59);
+
+      const leaves = await TimeOff.find({
+        status: 'approved',
+        startDate: { $lte: tomorrowEnd },
+        endDate:   { $gte: tomorrow },
+      }).select('userId');
+
+      for (const leave of leaves) {
+        const tasks = await Task.find({
+          assignee: leave.userId, deletedAt: null,
+          dueDate: { $gte: tomorrow, $lte: tomorrowEnd },
+        }).select('title');
+        if (tasks.length) {
+          notifService.create({
+            recipient: leave.userId,
+            type: 'task_due_soon',
+            title: '📅 Task sắp đến hạn ngày nghỉ',
+            body: `Bạn có ${tasks.length} task đến hạn vào ngày mai khi bạn đang nghỉ phép.`,
+            link: '/resources/timeoff',
+          });
+        }
+      }
+    } catch (e) {
+      console.error('[Cron] Capacity check error:', e.message);
+    }
+  };
+  setInterval(run, ONE_HOUR);
+}
+
 // ─── Start ────────────────────────────────────────────────────────────────────
 
 const PORT = process.env.PORT || 3000;
 
 connectDB()
-  .then(() => {
+  .then(async () => {
+    // Seed skills if empty
+    const { Skill } = require('./models');
+    await Skill.seed().catch(e => console.error('[Seed] Skills error:', e.message));
     scheduleInvitationExpiry();
     scheduleDeadlineNotifications();
     scheduleSlaCheck();
+    scheduleWeeklyWorkloadSnapshot();
+    scheduleCapacityCheck();
     server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
   })
   .catch((err) => {

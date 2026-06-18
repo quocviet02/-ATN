@@ -59,6 +59,7 @@ export class SearchDrawerComponent implements OnInit {
   openIssueModal(issue: JIssue) {
     this._modalService.create({
       nzContent: IssueModalComponent,
+      nzClassName: 'issue-detail-modal',
       nzWidth: 1040,
       nzClosable: false,
       nzFooter: null,

@@ -1,0 +1,167 @@
+<div class="portfolio-list-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">
+        <i nz-icon nzType="folder" nzTheme="outline" class="title-icon"></i>
+        Portfolios
+      </h1>
+      <span class="page-subtitle">Quản lý danh mục dự án theo chiến lược</span>
+    </div>
+    <button nz-button nzType="primary" (click)="openCreate()">
+      <i nz-icon nzType="plus"></i>
+      Tạo Portfolio
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="loading-wrap">
+      <nz-spin nzSize="large"></nz-spin>
+    </div>
+  }
+
+  <!-- Empty -->
+  @if (!loading && portfolios.length === 0) {
+    <nz-empty
+      nzNotFoundContent="Chưa có portfolio nào. Hãy tạo portfolio đầu tiên!"
+      class="empty-state">
+    </nz-empty>
+  }
+
+  <!-- Portfolio Grid -->
+  @if (!loading && portfolios.length > 0) {
+    <div class="portfolio-grid">
+      @for (p of portfolios; track p.id) {
+        <div class="portfolio-card" (click)="goToDetail(p)">
+          <div class="card-color-bar" [style.background]="p.color"></div>
+
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-title-row">
+                <span class="card-name">{{ p.name }}</span>
+                <nz-tag [nzColor]="statusColor(p.status)">{{ statusLabel(p.status) }}</nz-tag>
+              </div>
+              <p class="card-desc">{{ p.description || 'Không có mô tả' }}</p>
+            </div>
+
+            <div class="card-stats">
+              @if (p.budget?.total) {
+                <div class="stat-item">
+                  <span class="stat-label">Ngân sách</span>
+                  <div class="budget-row">
+                    <nz-progress
+                      [nzPercent]="budgetPercent(p)"
+                      nzSize="small"
+                      [nzStatus]="budgetPercent(p) >= 90 ? 'exception' : 'normal'"
+                      style="flex:1">
+                    </nz-progress>
+                    <span class="budget-pct">{{ budgetPercent(p) }}%</span>
+                  </div>
+                  <span class="budget-amount">{{ formatVnd(p.budget.spent) }} / {{ formatVnd(p.budget.total) }}</span>
+                </div>
+              }
+
+              <div class="card-dates">
+                @if (p.startDate) {
+                  <span class="date-item">
+                    <i nz-icon nzType="calendar" nzTheme="outline"></i>
+                    {{ p.startDate | date:'dd/MM/yyyy' }}
+                  </span>
+                }
+                @if (p.targetEndDate) {
+                  <span class="date-sep">→</span>
+                  <span class="date-item">{{ p.targetEndDate | date:'dd/MM/yyyy' }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="card-footer">
+              @if (p.ownerId?.name) {
+                <div class="owner-row">
+                  <i nz-icon nzType="user" nzTheme="outline"></i>
+                  <span>{{ p.ownerId.name }}</span>
+                </div>
+              }
+              <button nz-button nzDanger nzType="text" nzSize="small"
+                (click)="deletePortfolio(p, $event)"
+                nz-tooltip nzTooltipTitle="Xóa">
+                <i nz-icon nzType="delete"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<!-- Create Modal -->
+<nz-modal
+  [(nzVisible)]="createVisible"
+  nzTitle="Tạo Portfolio mới"
+  [nzOkLoading]="creating"
+  nzOkText="Tạo"
+  (nzOnOk)="submitCreate()"
+  (nzOnCancel)="createVisible = false"
+  nzWidth="520px">
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>Tên Portfolio</nz-form-label>
+        <nz-form-control>
+          <input nz-input [(ngModel)]="form.name" name="name" placeholder="Nhập tên portfolio..." />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Mô tả</nz-form-label>
+        <nz-form-control>
+          <textarea nz-input [(ngModel)]="form.description" name="description"
+            placeholder="Mô tả portfolio..." [nzAutosize]="{ minRows: 2, maxRows: 5 }">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="form-row-2">
+        <nz-form-item>
+          <nz-form-label>Trạng thái</nz-form-label>
+          <nz-form-control>
+            <nz-select [(ngModel)]="form.status" name="status" style="width:100%">
+              @for (opt of statusOptions; track opt.value) {
+                <nz-option [nzValue]="opt.value" [nzLabel]="opt.label"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Ngân sách (VND)</nz-form-label>
+          <nz-form-control>
+            <nz-input-number [(ngModel)]="form.budgetTotal" name="budgetTotal"
+              [nzMin]="0" [nzStep]="1000000" style="width:100%">
+            </nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="form-row-2">
+        <nz-form-item>
+          <nz-form-label>Ngày bắt đầu</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker [(ngModel)]="form.startDate" name="startDate" style="width:100%"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label>Ngày dự kiến kết thúc</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker [(ngModel)]="form.targetEndDate" name="targetEndDate" style="width:100%"></nz-date-picker>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>

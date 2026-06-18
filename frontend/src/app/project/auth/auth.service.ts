@@ -54,9 +54,9 @@ export class AuthService {
     );
   }
 
-  register(name: string, email: string, password: string) {
+  register(name: string, email: string, password: string, confirmPassword?: string) {
     this._store.setLoading(true);
-    return this._http.post<LoginResponse>(`${this.base}/auth/register`, { name, email, password }).pipe(
+    return this._http.post<LoginResponse>(`${this.base}/auth/register`, { name, email, password, confirmPassword }).pipe(
       tap(({ user, accessToken, refreshToken }) => {
         this._token.setTokens(accessToken, refreshToken);
         this._store.update({ ...mapBackendUser(user), accessToken, refreshToken });

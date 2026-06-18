@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
     const accessToken  = signAccessToken(user.id);
     const refreshToken = await createRefreshToken(user.id);
 
-    res.status(201).json({ user: toPublic(user), accessToken, refreshToken });
+    res.status(201).json({ message: 'Đăng ký thành công', user: toPublic(user), accessToken, refreshToken });
   } catch (e) {
     err(res, 500, e.message, 'Internal Server Error');
   }

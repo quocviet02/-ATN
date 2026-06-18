@@ -1,0 +1,86 @@
+.workload-page { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.page-header-left { display: flex; flex-direction: column; gap: 4px; }
+.page-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin: 0; display: flex; align-items: center; gap: 10px; }
+.title-icon { font-size: 22px; color: #1890ff; }
+.page-subtitle { font-size: 13px; color: #8c8c8c; }
+.page-header-actions { display: flex; gap: 8px; align-items: center; }
+
+.loading-wrap { display: flex; justify-content: center; padding: 80px 0; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.kpi-card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+
+  &--danger  { border-left: 4px solid #ff4d4f; }
+  &--warning { border-left: 4px solid #faad14; }
+  &--success { border-left: 4px solid #52c41a; }
+  &--critical{ border-left: 4px solid #ff4d4f; background: #fff1f0; }
+}
+.kpi-label { font-size: 12px; color: #8c8c8c; font-weight: 600; margin-bottom: 6px; }
+.kpi-big-num { font-size: 32px; font-weight: 800; color: #262626; }
+.kpi-pct { font-size: 12px; color: #8c8c8c; margin-top: 4px; }
+.text-danger  { color: #ff4d4f !important; }
+.text-warning { color: #faad14 !important; }
+.text-success { color: #52c41a !important; }
+
+.filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.filter-label { font-size: 13px; color: #8c8c8c; }
+.filter-count { font-size: 12px; color: #bfbfbf; margin-left: 4px; }
+
+.member-list { display: flex; flex-direction: column; gap: 12px; }
+
+.member-card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 240px 1fr 100px;
+  align-items: center;
+  gap: 20px;
+  transition: box-shadow .2s;
+  &:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+  &--overloaded { border-left: 4px solid #fa8c16; }
+  &--critical   { border-left: 4px solid #ff4d4f; background: #fff9f0; }
+}
+
+.member-left { display: flex; align-items: center; gap: 12px; }
+.member-avatar { flex-shrink: 0; }
+.member-name { font-size: 14px; font-weight: 600; color: #262626; }
+.member-email { font-size: 12px; color: #8c8c8c; }
+
+.member-middle { flex: 1; }
+.capacity-label { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; color: #595959; }
+.status-tag { font-size: 10px; font-weight: 700; }
+
+.burnout-badge { font-size: 11px; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
+.member-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+// Drawer
+.drawer-loading { display: flex; justify-content: center; padding: 40px; }
+.drawer-content { padding: 0 4px; }
+.section-title { font-size: 14px; font-weight: 600; color: #262626; margin-bottom: 12px; }
+
+.cw-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.cw-stat { text-align: center; padding: 12px; background: #fafafa; border-radius: 8px; }
+.cw-label { font-size: 11px; color: #8c8c8c; margin-bottom: 4px; }
+.cw-val { font-size: 20px; font-weight: 700; color: #262626; }
+
+.project-breakdown { margin-top: 12px; }
+.breakdown-title { font-size: 12px; color: #8c8c8c; margin-bottom: 8px; font-weight: 600; }
+.breakdown-item { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.proj-name { font-size: 12px; color: #262626; min-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj-hours { font-size: 12px; color: #8c8c8c; min-width: 35px; text-align: right; }
+
+.week-heatmap { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; }
+.heat-cell { border-radius: 6px; padding: 8px 4px; text-align: center; cursor: default; }
+.heat-label { font-size: 10px; color: #595959; font-weight: 600; }
+.heat-val { font-size: 12px; font-weight: 700; margin-top: 2px; }

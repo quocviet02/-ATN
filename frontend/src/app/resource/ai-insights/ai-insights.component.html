@@ -1,0 +1,113 @@
+<div class="ai-page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">
+        <i nz-icon nzType="robot" nzTheme="outline" class="title-icon"></i>
+        AI Resource Insights
+      </h1>
+      <span class="page-subtitle">Phân tích AI về nguồn lực và nguy cơ burnout</span>
+    </div>
+    <button nz-button nzType="primary" [nzLoading]="loading" (click)="runBurnout()">
+      <i nz-icon nzType="reload"></i> Phân tích lại
+    </button>
+  </div>
+
+  <nz-tabset>
+
+    <!-- Burnout Predictions -->
+    <nz-tab nzTitle="Dự báo Burnout">
+      @if (loading) {
+        <div class="ai-loading">
+          <nz-spin nzSize="large"></nz-spin>
+          <p>AI đang phân tích dữ liệu workload...</p>
+        </div>
+      }
+
+      @if (!loading && burnoutData) {
+        @if (burnoutData.atRisk?.length === 0) {
+          <nz-alert nzType="success"
+            nzMessage="Không có nguy cơ burnout"
+            nzDescription="Toàn bộ đội ngũ đang ở trạng thái workload lành mạnh."
+            nzShowIcon class="healthy-alert">
+          </nz-alert>
+        }
+
+        @if (burnoutData.aiAnalysis?.teamHealthSummary) {
+          <nz-card nzTitle="Tổng quan sức khỏe đội nhóm" class="summary-card">
+            <p class="summary-text">{{ burnoutData.aiAnalysis.teamHealthSummary }}</p>
+            <div class="ai-meta">🤖 Phân tích {{ burnoutData.analysedUsers }} thành viên</div>
+          </nz-card>
+        }
+
+        @if (burnoutData.atRisk?.length > 0) {
+          <div class="at-risk-list">
+            @for (member of burnoutData.atRisk; track member.user?.id) {
+              <div class="risk-card" [style.border-left]="'4px solid ' + riskColor(member.burnoutRisk)">
+                <div class="risk-header">
+                  <nz-avatar [nzSrc]="member.user?.avatar"
+                    [nzText]="(member.user?.name || '?').charAt(0)"
+                    [nzSize]="40">
+                  </nz-avatar>
+                  <div class="risk-user-info">
+                    <div class="risk-name">{{ member.user?.name }}</div>
+                    <div class="risk-stats">
+                      Avg {{ member.avgUtilization }}% · {{ member.overloadedWeeks }}/{{ member.snapshots }} tuần quá tải
+                    </div>
+                  </div>
+                  <div class="risk-badge" [style.background]="riskColor(member.burnoutRisk)">
+                    {{ member.burnoutRisk | uppercase }}
+                  </div>
+                </div>
+
+                @if (getAnalysis(member.user?.name); as analysis) {
+                  <nz-divider style="margin:10px 0"></nz-divider>
+                  <div class="risk-body">
+                    <div class="risk-section">
+                      <div class="risk-section-title">Dấu hiệu:</div>
+                      <ul class="risk-list">
+                        @for (i of analysis.indicators; track $index) { <li>{{ i }}</li> }
+                      </ul>
+                    </div>
+                    <div class="risk-section">
+                      <div class="risk-section-title">Đề xuất:</div>
+                      <ul class="risk-list">
+                        @for (r of analysis.recommendations; track $index) { <li>{{ r }}</li> }
+                      </ul>
+                    </div>
+                    <nz-tag [nzColor]="urgencyTag(analysis.urgency)">
+                      Mức độ: {{ urgencyLabel(analysis.urgency) }}
+                    </nz-tag>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (burnoutData.aiAnalysis?.organizationalRecommendations?.length) {
+          <nz-card nzTitle="Đề xuất cấp tổ chức" class="org-rec-card">
+            <ul class="org-rec-list">
+              @for (r of burnoutData.aiAnalysis.organizationalRecommendations; track $index) {
+                <li>{{ r }}</li>
+              }
+            </ul>
+          </nz-card>
+        }
+      }
+    </nz-tab>
+
+    <!-- Skills Analysis -->
+    <nz-tab nzTitle="Phân tích Skills">
+      <div class="coming-soon">
+        <nz-empty
+          nzNotFoundContent="Tính năng phân tích skills gap đang được phát triển"
+          [nzNotFoundFooter]="skillsFooter">
+        </nz-empty>
+        <ng-template #skillsFooter>
+          <p style="color:#8c8c8c;font-size:12px">Sẽ phân tích: Kỹ năng còn thiếu trong team, đề xuất đào tạo, tuyển dụng</p>
+        </ng-template>
+      </div>
+    </nz-tab>
+
+  </nz-tabset>
+</div>

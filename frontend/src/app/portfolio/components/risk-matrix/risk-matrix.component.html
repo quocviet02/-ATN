@@ -1,0 +1,69 @@
+<div class="risk-matrix-wrap">
+  <div class="matrix-title">Risk Matrix (5×5)</div>
+
+  <div class="matrix-container">
+    <!-- Y axis label -->
+    <div class="axis-label axis-y">
+      <span>Impact</span>
+    </div>
+
+    <div class="matrix-inner">
+      <!-- Header row: probability labels -->
+      <div class="matrix-header-row">
+        <div class="row-label-spacer"></div>
+        @for (label of probLabels; track $index) {
+          <div class="col-label">{{ label }}</div>
+        }
+      </div>
+
+      <!-- Matrix rows (impact descending: 5→1) -->
+      @for (row of matrix; track $index) {
+        <div class="matrix-row">
+          <div class="row-label">{{ impactLabels[4 - $index] }}</div>
+          @for (cell of row; track cell.probability) {
+            <div class="matrix-cell {{ cellClass(cell) }}"
+              [nz-tooltip]="cell.risks.length ? cellTooltip : null"
+              #cellTooltip="nzTooltip">
+              @if (cell.risks.length > 0) {
+                <span class="risk-count">{{ cell.risks.length }}</span>
+              }
+              <span class="score">{{ cell.impact * cell.probability }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- X axis label -->
+  <div class="axis-label axis-x">Probability →</div>
+
+  <!-- Legend -->
+  <div class="matrix-legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#52c41a"></span>Thấp (1-3)</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#faad14"></span>Trung bình (4-8)</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#fa8c16"></span>Cao (9-14)</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#ff4d4f"></span>Nguy hiểm (15-25)</span>
+  </div>
+
+  <!-- Risk list below matrix -->
+  @if (risks.length > 0) {
+    <div class="risk-list-section">
+      <div class="risk-list-title">Danh sách rủi ro ({{ risks.length }})</div>
+      <div class="risk-list">
+        @for (r of risks; track r.id) {
+          <div class="risk-item">
+            <span class="risk-score-badge"
+              [style.background]="levelColor(r.riskScore >= 15 ? 'critical' : r.riskScore >= 9 ? 'high' : r.riskScore >= 4 ? 'medium' : 'low')">
+              {{ r.riskScore }}
+            </span>
+            <span class="risk-title">{{ r.title }}</span>
+            <nz-tag [nzColor]="r.status === 'identified' ? 'orange' : r.status === 'mitigated' ? 'green' : r.status === 'occurred' ? 'red' : 'default'">
+              {{ r.status }}
+            </nz-tag>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

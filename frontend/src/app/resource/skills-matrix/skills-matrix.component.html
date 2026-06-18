@@ -1,0 +1,118 @@
+<div class="skills-page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">
+        <i nz-icon nzType="trophy" nzTheme="outline" class="title-icon"></i>
+        Skills Matrix
+      </h1>
+      <span class="page-subtitle">Ma trận kỹ năng của toàn bộ đội ngũ</span>
+    </div>
+    <button nz-button nzType="text" nzShape="circle" (click)="load()">
+      <i nz-icon nzType="reload"></i>
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-row">
+    <nz-select [(ngModel)]="categoryFilter" style="width:160px">
+      @for (c of categories; track c.value) {
+        <nz-option [nzValue]="c.value" [nzLabel]="c.label"></nz-option>
+      }
+    </nz-select>
+    <nz-input-group [nzPrefix]="prefixIcon" style="width:200px">
+      <input nz-input [(ngModel)]="nameSearch" placeholder="Tìm theo tên..." />
+    </nz-input-group>
+    <ng-template #prefixIcon><i nz-icon nzType="search"></i></ng-template>
+    <span class="filter-count">{{ filteredMatrix.length }} thành viên · {{ filteredSkills.length }} skills</span>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend-row">
+    <span class="legend-title">Mức độ:</span>
+    @for (i of [1,2,3,4,5]; track i) {
+      <span class="legend-item" [style.background]="cellBg(i)" [style.color]="cellColor(i)">
+        {{ i }} — {{ levelLabels[i] }}
+      </span>
+    }
+    <span class="legend-item" style="background:#fafafa;color:#8c8c8c">0 — Không có</span>
+  </div>
+
+  @if (loading) {
+    <div class="loading-wrap"><nz-spin nzSize="large"></nz-spin></div>
+  }
+
+  @if (!loading) {
+    <!-- Matrix Table -->
+    <div class="matrix-scroll">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th class="th-member">Thành viên</th>
+            @for (skill of filteredSkills; track skill.id) {
+              <th class="th-skill" [style.border-bottom]="'3px solid ' + skill.color" nz-tooltip [nzTooltipTitle]="skill.name">
+                <span class="skill-abbr">{{ skill.name.substring(0, 7) }}</span>
+              </th>
+            }
+            <th class="th-action"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of filteredMatrix; track row.user?.id) {
+            <tr class="matrix-row">
+              <td class="td-member">
+                <nz-avatar [nzSrc]="row.user?.avatar" [nzText]="(row.user?.name || '?').charAt(0)" [nzSize]="28"></nz-avatar>
+                <span class="member-name">{{ row.user?.name }}</span>
+              </td>
+              @for (skill of filteredSkills; track skill.id) {
+                <td class="td-cell"
+                  [style.background]="cellBg(getSkillLevel(row, skill))"
+                  [style.color]="cellColor(getSkillLevel(row, skill))"
+                  nz-tooltip
+                  [nzTooltipTitle]="getSkillLevel(row, skill) ? skill.name + ': ' + levelLabels[getSkillLevel(row, skill)] : skill.name + ': Chưa có'">
+                  {{ getSkillLevel(row, skill) || '' }}
+                </td>
+              }
+              <td class="td-action">
+                <button nz-button nzType="link" nzSize="small" (click)="openEdit(row)">
+                  <i nz-icon nzType="edit"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (filteredMatrix.length === 0) {
+        <nz-empty nzNotFoundContent="Không có thành viên nào" class="empty-state"></nz-empty>
+      }
+    </div>
+  }
+</div>
+
+<!-- Edit Skills Modal -->
+<nz-modal
+  [(nzVisible)]="editVisible"
+  [nzTitle]="'Cập nhật Skills — ' + editUserName"
+  [nzOkLoading]="saving"
+  nzOkText="Lưu"
+  (nzOnOk)="saveEdit()"
+  (nzOnCancel)="editVisible = false"
+  nzWidth="600px">
+  <ng-container *nzModalContent>
+    <div class="edit-skills-list">
+      @for (item of editSkills; track item.skillId) {
+        <div class="edit-skill-item">
+          <span class="es-name">{{ getSkillName(item.skillId) }}</span>
+          <div class="es-level">
+            <span class="es-label">Level:</span>
+            <nz-input-number [(ngModel)]="item.level" [nzMin]="0" [nzMax]="5" [nzStep]="1" style="width:70px"></nz-input-number>
+          </div>
+          <div class="es-years">
+            <span class="es-label">Năm KN:</span>
+            <nz-input-number [(ngModel)]="item.yearsOfExperience" [nzMin]="0" [nzMax]="50" style="width:70px"></nz-input-number>
+          </div>
+        </div>
+      }
+    </div>
+  </ng-container>
+</nz-modal>

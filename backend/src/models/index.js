@@ -16,6 +16,15 @@ const Release            = require('./Release');
 const Organization       = require('./Organization');
 const Department         = require('./Department');
 const OrganizationMember = require('./OrganizationMember');
+const Portfolio          = require('./Portfolio');
+const Program            = require('./Program');
+const ProjectDependency  = require('./ProjectDependency');
+const Risk               = require('./Risk');
+const Skill              = require('./Skill');
+const UserSkill          = require('./UserSkill');
+const TaskAssignment     = require('./TaskAssignment');
+const TimeOff            = require('./TimeOff');
+const WorkloadSnapshot   = require('./WorkloadSnapshot');
 
 module.exports = {
   User, RefreshToken,
@@ -24,4 +33,6 @@ module.exports = {
   Comment, ActivityLog,
   Notification, Workflow, Release,
   Organization, Department, OrganizationMember,
+  Portfolio, Program, ProjectDependency, Risk,
+  Skill, UserSkill, TaskAssignment, TimeOff, WorkloadSnapshot,
 };

@@ -1,0 +1,135 @@
+<div class="program-detail-page">
+
+  @if (loading) {
+    <div class="loading-wrap"><nz-spin nzSize="large"></nz-spin></div>
+  }
+
+  @if (!loading && program) {
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-header-left">
+        <button nz-button nzType="text" class="back-btn" (click)="goBack()">
+          <i nz-icon nzType="arrow-left"></i> Portfolio
+        </button>
+        <div class="title-row">
+          <span class="color-dot" [style.background]="program.color"></span>
+          <h1 class="detail-title">{{ program.name }}</h1>
+          <nz-tag [nzColor]="statusColor(program.status)">{{ statusLabel(program.status) }}</nz-tag>
+        </div>
+        @if (program.description) {
+          <p class="detail-desc">{{ program.description }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <nz-statistic nzTitle="Dự án" [nzValue]="projects.length"></nz-statistic>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Tiến độ TB</div>
+        <nz-progress [nzPercent]="avgProgress()" nzSize="small"></nz-progress>
+      </div>
+      @if (program.budget?.total) {
+        <div class="kpi-card">
+          <div class="kpi-label">Ngân sách</div>
+          <div class="kpi-val">{{ formatVnd(program.budget.spent) }}</div>
+          <div class="kpi-sub">/ {{ formatVnd(program.budget.total) }}</div>
+        </div>
+      }
+    </div>
+
+    <!-- Tabs -->
+    <nz-tabset>
+      <!-- Projects -->
+      <nz-tab nzTitle="Dự án ({{ projects.length }})">
+        <div class="tab-content">
+          @if (projects.length === 0) {
+            <nz-empty nzNotFoundContent="Chưa có dự án nào trong program này"></nz-empty>
+          } @else {
+            <nz-table #projTable [nzData]="projects" nzSize="small">
+              <thead>
+                <tr>
+                  <th>Tên dự án</th>
+                  <th>Trạng thái</th>
+                  <th>Tiến độ</th>
+                  <th>Ngày dự kiến</th>
+                  <th nzWidth="60px"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of projTable.data; track p.id) {
+                  <tr>
+                    <td>
+                      <span class="proj-name">{{ p.name }}</span>
+                    </td>
+                    <td>
+                      <nz-tag [nzColor]="statusColor(p.status)">{{ statusLabel(p.status) }}</nz-tag>
+                    </td>
+                    <td>
+                      <nz-progress [nzPercent]="p.progress || 0" nzSize="small" style="min-width:100px"></nz-progress>
+                    </td>
+                    <td>{{ p.dueDate ? (p.dueDate | date:'dd/MM/yyyy') : '—' }}</td>
+                    <td>
+                      <button nz-button nzType="link" nzSize="small" (click)="goToProject(p)">
+                        <i nz-icon nzType="arrow-right"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
+          }
+        </div>
+      </nz-tab>
+
+      <!-- Objectives -->
+      <nz-tab nzTitle="Mục tiêu">
+        <div class="tab-content">
+          @if (program.objectives?.length) {
+            <ul class="obj-list">
+              @for (o of program.objectives; track $index) {
+                <li class="obj-item">
+                  <div class="obj-num">{{ $index + 1 }}</div>
+                  <span>{{ o }}</span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <nz-empty nzNotFoundContent="Chưa có mục tiêu nào"></nz-empty>
+          }
+        </div>
+      </nz-tab>
+
+      <!-- Success Metrics -->
+      <nz-tab nzTitle="Chỉ số thành công">
+        <div class="tab-content">
+          @if (program.successMetrics?.length) {
+            <nz-table [nzData]="program.successMetrics" nzSize="small">
+              <thead>
+                <tr>
+                  <th>Chỉ số</th>
+                  <th>Mục tiêu</th>
+                  <th>Hiện tại</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (m of program.successMetrics; track $index) {
+                  <tr>
+                    <td>{{ m.metric }}</td>
+                    <td>{{ m.target }}</td>
+                    <td>{{ m.current }}</td>
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
+          } @else {
+            <nz-empty nzNotFoundContent="Chưa có chỉ số nào"></nz-empty>
+          }
+        </div>
+      </nz-tab>
+    </nz-tabset>
+  }
+
+</div>

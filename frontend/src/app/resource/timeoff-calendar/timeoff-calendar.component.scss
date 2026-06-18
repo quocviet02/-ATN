@@ -1,0 +1,67 @@
+.timeoff-page { padding: 24px; max-width: 1300px; margin: 0 auto; }
+
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.page-header-left { display: flex; flex-direction: column; gap: 4px; }
+.page-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin: 0; display: flex; align-items: center; gap: 10px; }
+.title-icon { color: #1890ff; font-size: 22px; }
+.page-subtitle { font-size: 13px; color: #8c8c8c; }
+
+.timeoff-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+
+.calendar-section { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.06); overflow: hidden; }
+
+.calendar-day-off { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; min-height: 6px; }
+.off-dot { width: 6px; height: 6px; border-radius: 50%; cursor: default; }
+
+.day-detail {
+  padding: 14px 16px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+.day-detail-title { font-size: 13px; font-weight: 600; color: #262626; margin-bottom: 10px; }
+.day-detail-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.day-detail-name { font-size: 13px; color: #262626; flex: 1; }
+.type-tag { font-size: 10px; border: none; color: #fff; }
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 16px;
+  border-top: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+.cl-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #595959; }
+.cl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.side-panel { display: flex; flex-direction: column; gap: 16px; }
+.side-card { border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+
+.pending-list { display: flex; flex-direction: column; gap: 12px; }
+.pending-item {
+  padding: 10px;
+  background: #fff9f0;
+  border: 1px solid #ffd591;
+  border-radius: 8px;
+}
+.pending-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.pending-name { font-size: 13px; font-weight: 500; color: #262626; flex: 1; }
+.pending-dates { font-size: 12px; color: #595959; margin-bottom: 3px; }
+.pending-reason { font-size: 11px; color: #8c8c8c; margin-bottom: 6px; font-style: italic; }
+.pending-actions { display: flex; gap: 6px; }
+
+.my-list { display: flex; flex-direction: column; gap: 8px; }
+.my-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  &:last-child { border-bottom: none; }
+}
+.my-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.my-info { flex: 1; }
+.my-dates { font-size: 12px; font-weight: 500; color: #262626; }
+.my-meta { font-size: 11px; color: #8c8c8c; margin-top: 2px; display: flex; align-items: center; }
+
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

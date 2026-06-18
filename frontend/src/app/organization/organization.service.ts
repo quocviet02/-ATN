@@ -19,7 +19,7 @@ export class OrganizationService {
     return this._currentOrgId$.value;
   }
 
-  private get orgHeaders(): HttpHeaders {
+  get orgHeaders(): HttpHeaders {
     const orgId = this.currentOrgId;
     return orgId ? new HttpHeaders({ 'X-Org-Id': orgId }) : new HttpHeaders();
   }

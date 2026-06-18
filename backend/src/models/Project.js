@@ -34,6 +34,8 @@ const projectSchema = new mongoose.Schema(
     demoUrl:        { type: String, default: '' },
     organizationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', default: null, index: true },
     departmentId:   { type: mongoose.Schema.Types.ObjectId, ref: 'Department', default: null },
+    portfolioId:    { type: mongoose.Schema.Types.ObjectId, ref: 'Portfolio', default: null, index: true },
+    programId:      { type: mongoose.Schema.Types.ObjectId, ref: 'Program', default: null, index: true },
     visibility:     {
       type:    String,
       enum:    ['private', 'department', 'organization', 'public'],

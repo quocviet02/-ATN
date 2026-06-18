@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '@trungk18/project/auth/auth.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule],
   template: `
     <div class="login-wrapper">
 
@@ -112,6 +112,16 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
               </span>
             </button>
           </form>
+
+          <div style="text-align:center;margin-top:18px;font-size:13px;color:#5E6C84">
+            {{ 'auth.noAccount' | translate }}
+            <a routerLink="/register" style="color:#0052cc;font-weight:600;text-decoration:none;margin-left:4px"
+               onmouseover="this.style.textDecoration='underline'"
+               onmouseout="this.style.textDecoration='none'">
+              {{ 'auth.registerNow' | translate }}
+            </a>
+          </div>
+
         </div>
       </div>
 

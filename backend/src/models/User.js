@@ -18,6 +18,13 @@ const userSchema = new mongoose.Schema(
     password:  { type: String, required: true },
     avatar:    { type: String, default: null },
     deletedAt: { type: Date,   default: null },
+    workCapacity: {
+      hoursPerWeek: { type: Number, default: 40 },
+      workingDays:  { type: [String], default: ['mon','tue','wed','thu','fri'] },
+      timezone:     { type: String, default: 'Asia/Ho_Chi_Minh' },
+      startTime:    { type: String, default: '09:00' },
+      endTime:      { type: String, default: '18:00' },
+    },
   },
   { timestamps: true, toJSON: JSON_OPTS }
 );

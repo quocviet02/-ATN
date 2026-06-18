@@ -1,0 +1,218 @@
+<div class="workload-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">
+        <i nz-icon nzType="bar-chart" nzTheme="outline" class="title-icon"></i>
+        Workload Dashboard
+      </h1>
+      <span class="page-subtitle">Quản lý phân bổ công việc và nguồn lực</span>
+    </div>
+    <div class="page-header-actions">
+      <button nz-button nzType="default" (click)="goToSkills()">
+        <i nz-icon nzType="trophy"></i> Skills Matrix
+      </button>
+      <button nz-button nzType="default" (click)="goToTimeOff()">
+        <i nz-icon nzType="calendar"></i> Nghỉ phép
+      </button>
+      <button nz-button nzType="primary" (click)="goToAi()">
+        <i nz-icon nzType="robot"></i> AI Insights
+      </button>
+      <button nz-button nzType="text" nzShape="circle" (click)="load()">
+        <i nz-icon nzType="reload"></i>
+      </button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading-wrap"><nz-spin nzSize="large"></nz-spin></div>
+  }
+
+  @if (!loading && overview) {
+
+    <!-- KPI Summary -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <nz-statistic nzTitle="Tổng thành viên" [nzValue]="overview.summary.total"></nz-statistic>
+      </div>
+      <div class="kpi-card kpi-card--danger">
+        <div class="kpi-label">Quá tải</div>
+        <div class="kpi-big-num text-danger">{{ overview.summary.overloaded }}</div>
+      </div>
+      <div class="kpi-card kpi-card--warning">
+        <div class="kpi-label">Gần đầy</div>
+        <div class="kpi-big-num text-warning">{{ overview.summary.nearCapacity }}</div>
+      </div>
+      <div class="kpi-card kpi-card--success">
+        <div class="kpi-label">Bình thường</div>
+        <div class="kpi-big-num text-success">{{ overview.summary.healthy }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Utilization</div>
+        <nz-progress [nzPercent]="overview.summary.avgUtilization"
+          nzSize="small"
+          [nzStrokeColor]="progressColor(overview.summary.avgUtilization)"
+          style="margin-top:6px">
+        </nz-progress>
+        <div class="kpi-pct">{{ overview.summary.avgUtilization }}%</div>
+      </div>
+      <div class="kpi-card kpi-card--critical">
+        <div class="kpi-label">Nguy cơ burnout</div>
+        <div class="kpi-big-num text-danger">{{ overview.summary.burnoutAtRisk }}</div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-row">
+      <span class="filter-label">Lọc theo trạng thái:</span>
+      <nz-select [(ngModel)]="filterStatus" style="width:180px">
+        <nz-option nzValue="all"          nzLabel="Tất cả"></nz-option>
+        <nz-option nzValue="critical"     nzLabel="🔴 Nguy hiểm"></nz-option>
+        <nz-option nzValue="overloaded"   nzLabel="🟠 Quá tải"></nz-option>
+        <nz-option nzValue="near_capacity" nzLabel="🟡 Gần đầy"></nz-option>
+        <nz-option nzValue="healthy"      nzLabel="🟢 Bình thường"></nz-option>
+        <nz-option nzValue="underloaded"  nzLabel="⚪ Rảnh"></nz-option>
+      </nz-select>
+      <span class="filter-count">{{ filtered.length }} thành viên</span>
+    </div>
+
+    <!-- Member List -->
+    @if (filtered.length === 0) {
+      <nz-empty nzNotFoundContent="Không có thành viên nào phù hợp"></nz-empty>
+    }
+
+    <div class="member-list">
+      @for (m of filtered; track trackBy($index, m)) {
+        <div class="member-card" [class.member-card--critical]="m.status === 'critical'"
+          [class.member-card--overloaded]="m.status === 'overloaded'">
+
+          <div class="member-left">
+            <nz-avatar
+              [nzSrc]="m.user?.avatar"
+              [nzText]="(m.user?.name || '?').charAt(0).toUpperCase()"
+              [nzSize]="44"
+              class="member-avatar">
+            </nz-avatar>
+            <div class="member-info">
+              <div class="member-name">{{ m.user?.name }}</div>
+              <div class="member-email">{{ m.user?.email }}</div>
+            </div>
+          </div>
+
+          <div class="member-middle">
+            <div class="capacity-label">
+              <span>{{ m.allocatedHours }}h / {{ m.capacityHours }}h</span>
+              <nz-tag [nzColor]="statusColor(m.status)" class="status-tag">
+                {{ statusLabel(m.status) }}
+              </nz-tag>
+            </div>
+            <nz-progress
+              [nzPercent]="m.utilization > 150 ? 150 : m.utilization"
+              [nzSuccessPercent]="100"
+              nzSize="default"
+              [nzStrokeColor]="progressColor(m.utilization)"
+              [nzFormat]="utilFormat">
+            </nz-progress>
+
+            @if (m.burnoutRisk !== 'low') {
+              <div class="burnout-badge" [style.color]="burnoutColor(m.burnoutRisk)">
+                <i nz-icon nzType="warning"></i>
+                Nguy cơ burnout: {{ m.burnoutRisk | uppercase }}
+              </div>
+            }
+          </div>
+
+          <div class="member-right">
+            <button nz-button nzType="link" nzSize="small" (click)="openDetail(m)">
+              <i nz-icon nzType="bar-chart"></i> Chi tiết
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+  }
+
+</div>
+
+<!-- User Workload Drawer -->
+<nz-drawer
+  [nzVisible]="drawerVisible"
+  nzTitle="{{ selectedUser?.user?.name }} — Workload chi tiết"
+  nzWidth="600"
+  (nzOnClose)="drawerVisible = false">
+  <ng-container *nzDrawerContent>
+    @if (workloadLoading) {
+      <div class="drawer-loading"><nz-spin nzSize="large"></nz-spin></div>
+    }
+    @if (!workloadLoading && userWorkload) {
+      <div class="drawer-content">
+        <!-- Current week summary -->
+        <div class="current-week">
+          <h3 class="section-title">Tuần hiện tại: {{ userWorkload.currentWeek?.weekLabel }}</h3>
+          <div class="cw-stats">
+            <div class="cw-stat">
+              <div class="cw-label">Công suất</div>
+              <div class="cw-val">{{ userWorkload.currentWeek?.capacityHours }}h</div>
+            </div>
+            <div class="cw-stat">
+              <div class="cw-label">Đã phân bổ</div>
+              <div class="cw-val">{{ userWorkload.currentWeek?.allocatedHours }}h</div>
+            </div>
+            <div class="cw-stat">
+              <div class="cw-label">Utilization</div>
+              <div class="cw-val" [style.color]="progressColor(userWorkload.currentWeek?.utilization || 0)">
+                {{ userWorkload.currentWeek?.utilization }}%
+              </div>
+            </div>
+          </div>
+
+          @if (userWorkload.currentWeek?.projects?.length) {
+            <div class="project-breakdown">
+              <div class="breakdown-title">Phân bổ theo dự án:</div>
+              @for (p of userWorkload.currentWeek.projects; track p.projectId) {
+                <div class="breakdown-item">
+                  <span class="proj-name">{{ p.projectName }}</span>
+                  <span class="proj-hours">{{ p.hours }}h</span>
+                  <nz-progress
+                    [nzPercent]="userWorkload.currentWeek.capacityHours > 0 ? Math.round((p.hours / userWorkload.currentWeek.capacityHours) * 100) : 0"
+                    nzSize="small" style="flex:1">
+                  </nz-progress>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <nz-divider></nz-divider>
+
+        <!-- Weekly heatmap -->
+        <h3 class="section-title">Lịch sử 8 tuần</h3>
+        <div class="week-heatmap">
+          @for (w of userWorkload.weeks; track w.weekLabel) {
+            <div class="heat-cell"
+              [style.background]="progressColor(w.utilization) + '33'"
+              [style.border]="'2px solid ' + progressColor(w.utilization)"
+              nz-tooltip
+              [nzTooltipTitle]="w.weekLabel + ': ' + w.allocatedHours + 'h / ' + w.capacityHours + 'h (' + w.utilization + '%)'">
+              <div class="heat-label">{{ w.weekLabel.split('-W')[1] ? 'W' + w.weekLabel.split('-W')[1] : '' }}</div>
+              <div class="heat-val" [style.color]="progressColor(w.utilization)">{{ w.utilization }}%</div>
+            </div>
+          }
+        </div>
+
+        <!-- Burnout risk -->
+        @if (userWorkload.burnoutRisk !== 'low') {
+          <nz-alert
+            [nzType]="userWorkload.burnoutRisk === 'critical' ? 'error' : userWorkload.burnoutRisk === 'high' ? 'warning' : 'warning'"
+            [nzMessage]="'Nguy cơ burnout: ' + (userWorkload.burnoutRisk | uppercase)"
+            [nzDescription]="'Avg utilization: ' + userWorkload.avgUtilization + '%. Cần điều chỉnh khối lượng công việc.'"
+            nzShowIcon
+            style="margin-top:16px">
+          </nz-alert>
+        }
+      </div>
+    }
+  </ng-container>
+</nz-drawer>

@@ -1,0 +1,115 @@
+.skills-page { padding: 24px; max-width: 100%; }
+
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.page-header-left { display: flex; flex-direction: column; gap: 4px; }
+.page-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin: 0; display: flex; align-items: center; gap: 10px; }
+.title-icon { font-size: 22px; color: #faad14; }
+.page-subtitle { font-size: 13px; color: #8c8c8c; }
+
+.filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-count { font-size: 12px; color: #8c8c8c; }
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+.legend-title { font-size: 12px; font-weight: 600; color: #595959; }
+.legend-item { padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; border: 1px solid rgba(0,0,0,.08); }
+
+.loading-wrap { display: flex; justify-content: center; padding: 60px; }
+
+.matrix-scroll { overflow-x: auto; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 13px;
+}
+
+.th-member {
+  text-align: left;
+  padding: 10px 16px;
+  background: #fafafa;
+  font-weight: 600;
+  color: #595959;
+  border-bottom: 2px solid #f0f0f0;
+  min-width: 180px;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+.th-skill {
+  text-align: center;
+  padding: 6px 4px;
+  background: #fafafa;
+  font-weight: 600;
+  color: #595959;
+  border-bottom: 2px solid #f0f0f0;
+  min-width: 70px;
+  max-width: 90px;
+}
+
+.skill-abbr { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+
+.th-action { width: 50px; background: #fafafa; border-bottom: 2px solid #f0f0f0; }
+
+.matrix-row {
+  &:hover td { background: rgba(24, 144, 255, .04); }
+}
+
+.td-member {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #f5f5f5;
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.member-name { font-size: 13px; font-weight: 500; color: #262626; }
+
+.td-cell {
+  text-align: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid #f5f5f5;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: default;
+  transition: transform .1s;
+  &:hover { transform: scale(1.1); z-index: 1; position: relative; }
+}
+
+.td-action {
+  text-align: center;
+  border-bottom: 1px solid #f5f5f5;
+  padding: 0 4px;
+}
+
+.empty-state { margin: 40px 0; }
+
+// Edit modal
+.edit-skills-list { max-height: 420px; overflow-y: auto; }
+.edit-skill-item {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  &:last-child { border-bottom: none; }
+}
+.es-name { font-size: 13px; font-weight: 500; color: #262626; }
+.es-level, .es-years { display: flex; align-items: center; gap: 6px; }
+.es-label { font-size: 11px; color: #8c8c8c; white-space: nowrap; }
