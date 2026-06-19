@@ -5,6 +5,7 @@ async function buildTransporter() {
   const host = process.env.MAIL_HOST;
   const user = process.env.MAIL_USER;
   const pass = process.env.MAIL_PASSWORD;
+  const port = parseInt(process.env.MAIL_PORT || '587', 10);
 
   if (!host || !user || !pass || user === 'your_gmail@gmail.com') {
     return null;
@@ -27,11 +28,33 @@ async function buildTransporter() {
   return nodemailer.createTransport({
     host: connectHost,
     servername: host,
-    port: parseInt(process.env.MAIL_PORT || '587', 10),
-    secure: false,
+    port,
+    secure: port === 465, // 465 = implicit TLS, 587 = STARTTLS
     auth: { user, pass },
+    // Render's free tier can be slow to establish outbound connections
+    connectionTimeout: 60000,
+    greetingTimeout: 30000,
+    socketTimeout: 60000,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 }
+
+exports.verifyConnection = async () => {
+  const transporter = await buildTransporter();
+  if (!transporter) {
+    console.log('[EMAIL] SMTP not configured — invitation emails will be logged to console instead of sent.');
+    return;
+  }
+  transporter.verify((error) => {
+    if (error) {
+      console.error('[EMAIL] SMTP connection failed:', error.message);
+    } else {
+      console.log('[EMAIL] SMTP server is ready to send messages');
+    }
+  });
+};
 
 function buildInvitationHtml({ inviterName, projectName, roleName, acceptUrl, rejectUrl }) {
   return `<!DOCTYPE html>
@@ -204,26 +227,31 @@ exports.sendOrgInvitationEmail = async ({ toEmail, inviterName, orgName, role, j
   const loginUrl  = `${clientUrl}/login`;
   const roleLabel = ORG_ROLE_LABELS[role] || role;
 
-  const transporter = await buildTransporter();
+  try {
+    const transporter = await buildTransporter();
 
-  if (!transporter) {
-    console.log('\n[EMAIL — DEV MODE] Organization invitation email (not sent, SMTP not configured)');
-    console.log(`  To:       ${toEmail}`);
-    console.log(`  Inviter:  ${inviterName}  Org: ${orgName}  Role: ${role}`);
-    console.log(`  Login:    ${loginUrl}\n`);
-    return;
+    if (!transporter) {
+      console.log('\n[EMAIL — DEV MODE] Organization invitation email (not sent, SMTP not configured)');
+      console.log(`  To:       ${toEmail}`);
+      console.log(`  Inviter:  ${inviterName}  Org: ${orgName}  Role: ${role}`);
+      console.log(`  Login:    ${loginUrl}\n`);
+      return;
+    }
+
+    const html = buildOrgInvitationHtml({ inviterName, orgName, roleLabel, jobTitle, loginUrl });
+
+    await transporter.sendMail({
+      from:    process.env.MAIL_FROM || `"Project Manager" <${process.env.MAIL_USER}>`,
+      to:      toEmail,
+      subject: `[Project Manager] ${inviterName} đã thêm bạn vào tổ chức "${orgName}"`,
+      html,
+    });
+
+    console.log(`[EMAIL] Organization invitation sent to ${toEmail}`);
+  } catch (error) {
+    console.error(`[EMAIL] Failed to send organization invitation to ${toEmail}:`, error.message);
+    console.error(error.stack);
   }
-
-  const html = buildOrgInvitationHtml({ inviterName, orgName, roleLabel, jobTitle, loginUrl });
-
-  await transporter.sendMail({
-    from:    process.env.MAIL_FROM || `"Project Manager" <${process.env.MAIL_USER}>`,
-    to:      toEmail,
-    subject: `[Project Manager] ${inviterName} đã thêm bạn vào tổ chức "${orgName}"`,
-    html,
-  });
-
-  console.log(`[EMAIL] Organization invitation sent to ${toEmail}`);
 };
 
 exports.sendInvitationEmail = async ({ toEmail, inviterName, projectName, role, token }) => {
@@ -232,26 +260,31 @@ exports.sendInvitationEmail = async ({ toEmail, inviterName, projectName, role, 
   const rejectUrl = `${clientUrl}/invite/reject/${token}`;
   const roleName  = role === 'admin' ? 'Admin' : 'Member';
 
-  const transporter = await buildTransporter();
+  try {
+    const transporter = await buildTransporter();
 
-  if (!transporter) {
-    // Dev mode — log to console instead of sending
-    console.log('\n[EMAIL — DEV MODE] Invitation email (not sent, SMTP not configured)');
-    console.log(`  To:     ${toEmail}`);
-    console.log(`  Inviter:${inviterName}  Project: ${projectName}  Role: ${role}`);
-    console.log(`  Accept: ${acceptUrl}`);
-    console.log(`  Reject: ${rejectUrl}\n`);
-    return;
+    if (!transporter) {
+      // Dev mode — log to console instead of sending
+      console.log('\n[EMAIL — DEV MODE] Invitation email (not sent, SMTP not configured)');
+      console.log(`  To:     ${toEmail}`);
+      console.log(`  Inviter:${inviterName}  Project: ${projectName}  Role: ${role}`);
+      console.log(`  Accept: ${acceptUrl}`);
+      console.log(`  Reject: ${rejectUrl}\n`);
+      return;
+    }
+
+    const html = buildInvitationHtml({ inviterName, projectName, roleName, acceptUrl, rejectUrl });
+
+    await transporter.sendMail({
+      from:    process.env.MAIL_FROM || `"Project Manager" <${process.env.MAIL_USER}>`,
+      to:      toEmail,
+      subject: `[Project Manager] ${inviterName} mời bạn tham gia "${projectName}"`,
+      html,
+    });
+
+    console.log(`[EMAIL] Invitation sent to ${toEmail}`);
+  } catch (error) {
+    console.error(`[EMAIL] Failed to send invitation to ${toEmail}:`, error.message);
+    console.error(error.stack);
   }
-
-  const html = buildInvitationHtml({ inviterName, projectName, roleName, acceptUrl, rejectUrl });
-
-  await transporter.sendMail({
-    from:    process.env.MAIL_FROM || `"Project Manager" <${process.env.MAIL_USER}>`,
-    to:      toEmail,
-    subject: `[Project Manager] ${inviterName} mời bạn tham gia "${projectName}"`,
-    html,
-  });
-
-  console.log(`[EMAIL] Invitation sent to ${toEmail}`);
 };

@@ -364,6 +364,7 @@ connectDB()
     // Seed skills if empty
     const { Skill } = require('./models');
     await Skill.seed().catch(e => console.error('[Seed] Skills error:', e.message));
+    require('./utils/emailService').verifyConnection();
     scheduleInvitationExpiry();
     scheduleDeadlineNotifications();
     scheduleSlaCheck();
