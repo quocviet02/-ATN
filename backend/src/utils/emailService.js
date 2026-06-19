@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
+const dns        = require('dns');
 
-function buildTransporter() {
+async function buildTransporter() {
   const host = process.env.MAIL_HOST;
   const user = process.env.MAIL_USER;
   const pass = process.env.MAIL_PASSWORD;
@@ -9,14 +10,26 @@ function buildTransporter() {
     return null;
   }
 
+  // nodemailer resolves both A and AAAA records for the host and picks one
+  // at random to connect to. Many hosting providers (e.g. Render) advertise
+  // an IPv6 interface with no real outbound route, so a random AAAA pick
+  // fails with ENETUNREACH. Resolve the IPv4 address ourselves and connect
+  // to that literal IP, keeping `servername` so TLS still validates against
+  // the real hostname.
+  let connectHost = host;
+  try {
+    const [ipv4] = await dns.promises.resolve4(host);
+    if (ipv4) connectHost = ipv4;
+  } catch (_e) {
+    // DNS resolve4 failed (e.g. offline/local dev) — fall back to hostname
+  }
+
   return nodemailer.createTransport({
-    host,
+    host: connectHost,
+    servername: host,
     port: parseInt(process.env.MAIL_PORT || '587', 10),
     secure: false,
     auth: { user, pass },
-    // Many hosting providers don't route IPv6 egress; smtp.gmail.com resolves
-    // to both AAAA and A records and Node tries IPv6 first, causing ENETUNREACH.
-    family: 4,
   });
 }
 
@@ -191,7 +204,7 @@ exports.sendOrgInvitationEmail = async ({ toEmail, inviterName, orgName, role, j
   const loginUrl  = `${clientUrl}/login`;
   const roleLabel = ORG_ROLE_LABELS[role] || role;
 
-  const transporter = buildTransporter();
+  const transporter = await buildTransporter();
 
   if (!transporter) {
     console.log('\n[EMAIL — DEV MODE] Organization invitation email (not sent, SMTP not configured)');
@@ -219,7 +232,7 @@ exports.sendInvitationEmail = async ({ toEmail, inviterName, projectName, role, 
   const rejectUrl = `${clientUrl}/invite/reject/${token}`;
   const roleName  = role === 'admin' ? 'Admin' : 'Member';
 
-  const transporter = buildTransporter();
+  const transporter = await buildTransporter();
 
   if (!transporter) {
     // Dev mode — log to console instead of sending
