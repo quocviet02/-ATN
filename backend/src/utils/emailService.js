@@ -14,6 +14,9 @@ function buildTransporter() {
     port: parseInt(process.env.MAIL_PORT || '587', 10),
     secure: false,
     auth: { user, pass },
+    // Many hosting providers don't route IPv6 egress; smtp.gmail.com resolves
+    // to both AAAA and A records and Node tries IPv6 first, causing ENETUNREACH.
+    family: 4,
   });
 }
 
@@ -101,6 +104,114 @@ function buildInvitationHtml({ inviterName, projectName, roleName, acceptUrl, re
 </body>
 </html>`;
 }
+
+const ORG_ROLE_LABELS = {
+  owner:           'Owner',
+  admin:           'Admin',
+  department_head: 'Trưởng phòng',
+  team_lead:       'Trưởng nhóm',
+  member:          'Thành viên',
+  guest:           'Khách',
+};
+
+function buildOrgInvitationHtml({ inviterName, orgName, roleLabel, jobTitle, loginUrl }) {
+  return `<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Lời mời tham gia tổ chức</title></head>
+<body style="margin:0;padding:0;background:#f4f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 16px;">
+      <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td align="center" style="background:#0052cc;border-radius:8px 8px 0 0;padding:28px 40px;">
+            <span style="color:#fff;font-size:20px;font-weight:700;letter-spacing:-.3px;">🏢 Project Manager</span>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="background:#fff;padding:36px 40px;border-left:1px solid #dfe1e6;border-right:1px solid #dfe1e6;">
+            <h1 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#172b4d;">
+              Bạn đã được thêm vào một tổ chức!
+            </h1>
+            <p style="margin:0 0 24px;color:#42526e;font-size:15px;line-height:1.7;">
+              <strong style="color:#172b4d;">${inviterName}</strong> đã thêm bạn vào tổ chức
+              <strong style="color:#172b4d;">${orgName}</strong>${jobTitle ? ` với chức danh <strong style="color:#172b4d;">${jobTitle}</strong>` : ''} với vai trò:
+            </p>
+
+            <!-- Role badge -->
+            <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <tr>
+                <td style="background:#deebff;border-radius:20px;padding:7px 18px;color:#0052cc;font-size:13px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;">
+                  ${roleLabel}
+                </td>
+              </tr>
+            </table>
+
+            <!-- Login button -->
+            <table cellpadding="0" cellspacing="0" style="margin-bottom:10px;width:100%;">
+              <tr>
+                <td align="center" style="background:#0052cc;border-radius:4px;">
+                  <a href="${loginUrl}"
+                     style="display:block;padding:15px 32px;color:#fff;font-size:15px;font-weight:600;text-decoration:none;letter-spacing:.1px;">
+                    Đăng nhập &amp; xem tổ chức
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Divider + note -->
+            <p style="margin:0;padding-top:20px;border-top:1px solid #f4f5f7;color:#97a0af;font-size:13px;line-height:1.6;">
+              Nếu bạn không mong đợi email này, vui lòng bỏ qua.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f4f5f7;border-radius:0 0 8px 8px;padding:18px 40px;border:1px solid #dfe1e6;border-top:none;">
+            <p style="margin:0;color:#97a0af;font-size:12px;text-align:center;line-height:1.6;">
+              Email này được gửi tự động từ Project Manager.<br>
+              Vui lòng không trả lời email này.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+exports.sendOrgInvitationEmail = async ({ toEmail, inviterName, orgName, role, jobTitle }) => {
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:4200';
+  const loginUrl  = `${clientUrl}/login`;
+  const roleLabel = ORG_ROLE_LABELS[role] || role;
+
+  const transporter = buildTransporter();
+
+  if (!transporter) {
+    console.log('\n[EMAIL — DEV MODE] Organization invitation email (not sent, SMTP not configured)');
+    console.log(`  To:       ${toEmail}`);
+    console.log(`  Inviter:  ${inviterName}  Org: ${orgName}  Role: ${role}`);
+    console.log(`  Login:    ${loginUrl}\n`);
+    return;
+  }
+
+  const html = buildOrgInvitationHtml({ inviterName, orgName, roleLabel, jobTitle, loginUrl });
+
+  await transporter.sendMail({
+    from:    process.env.MAIL_FROM || `"Project Manager" <${process.env.MAIL_USER}>`,
+    to:      toEmail,
+    subject: `[Project Manager] ${inviterName} đã thêm bạn vào tổ chức "${orgName}"`,
+    html,
+  });
+
+  console.log(`[EMAIL] Organization invitation sent to ${toEmail}`);
+};
 
 exports.sendInvitationEmail = async ({ toEmail, inviterName, projectName, role, token }) => {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:4200';

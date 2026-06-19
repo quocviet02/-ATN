@@ -66,7 +66,8 @@
       "PowerShell(cd \"D:\\\\đatn\\\\frontend\"; $out = npx ng build --configuration development 2>&1; $errLines = $out | Where-Object { $_ -match \"NG\\\\d{4}|error TS\\\\d+|Cannot find|is not a known|Cannot bind\" }; if \\($errLines\\) { $errLines | Select-Object -First 30 } else { $out | Where-Object { $_ -match \"✔|BUILD|Initial chunk\" } | Select-Object -Last 5 })",
       "PowerShell(Get-Content \"C:\\\\Users\\\\User\\\\.claude\\\\projects\\\\D---atn\\\\753bfd5e-8466-4ce9-9be0-0cd0ebb9febd\\\\tool-results\\\\toolu_011ChQ6ZWT1QN3f1tnTQQsBC.txt\" | Select-String \"ng-zorro-antd/\\([a-z0-9\\\\-]+\\)\" | ForEach-Object { $_.Matches[0].Groups[1].Value } | Sort-Object -Unique)",
       "PowerShell($content = Get-Content \"C:\\\\Users\\\\User\\\\.claude\\\\projects\\\\D---atn\\\\753bfd5e-8466-4ce9-9be0-0cd0ebb9febd\\\\tool-results\\\\toolu_011ChQ6ZWT1QN3f1tnTQQsBC.txt\" -Raw; Write-Host \"Length: $\\($content.Length\\)\"; Write-Host $content.Substring\\(0, 500\\))",
-      "PowerShell($f = Get-Item \"D:\\\\đatn\\\\PROJECT_REVIEW.md\"; \"Size: $\\([math]::Round\\($f.Length/1024\\)\\)KB\"; \\(Get-Content \"D:\\\\đatn\\\\PROJECT_REVIEW.md\" | Measure-Object -Line\\).Lines)"
+      "PowerShell($f = Get-Item \"D:\\\\đatn\\\\PROJECT_REVIEW.md\"; \"Size: $\\([math]::Round\\($f.Length/1024\\)\\)KB\"; \\(Get-Content \"D:\\\\đatn\\\\PROJECT_REVIEW.md\" | Measure-Object -Line\\).Lines)",
+      "Bash(tasklist)"
     ]
   }
 }

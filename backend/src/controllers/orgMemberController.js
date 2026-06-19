@@ -1,5 +1,5 @@
 const { OrganizationMember, User, Department } = require('../models');
-const nodemailer = require('nodemailer');
+const { sendOrgInvitationEmail } = require('../utils/emailService');
 
 const USER_SELECT = 'id name email avatar';
 
@@ -84,6 +84,19 @@ exports.inviteMember = async (req, res) => {
     });
 
     await membership.populate('userId', USER_SELECT);
+
+    try {
+      await sendOrgInvitationEmail({
+        toEmail:     user.email,
+        inviterName: req.user.name,
+        orgName:     req.organization.name,
+        role:        orgRole,
+        jobTitle,
+      });
+    } catch (mailErr) {
+      console.error('[EMAIL] Failed to send organization invitation:', mailErr.message);
+    }
+
     res.status(201).json({ member: membership });
   } catch (e) {
     err(res, 400, e.message, 'Bad Request');
@@ -129,6 +142,18 @@ exports.bulkInvite = async (req, res) => {
           status:         'invited',
           joinedAt:       new Date(),
         });
+
+        try {
+          await sendOrgInvitationEmail({
+            toEmail:     user.email,
+            inviterName: req.user.name,
+            orgName:     req.organization.name,
+            role:        item.orgRole || 'member',
+            jobTitle:    item.jobTitle || '',
+          });
+        } catch (mailErr) {
+          console.error('[EMAIL] Failed to send organization invitation:', mailErr.message);
+        }
 
         results.invited.push(item.email);
       } catch (itemErr) {
