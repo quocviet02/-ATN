@@ -1,59 +1,26 @@
-const nodemailer = require('nodemailer');
-const dns        = require('dns');
+const { Resend } = require('resend');
 
-async function buildTransporter() {
-  const host = process.env.MAIL_HOST;
-  const user = process.env.MAIL_USER;
-  const pass = process.env.MAIL_PASSWORD;
-  const port = parseInt(process.env.MAIL_PORT || '587', 10);
+// Render (and most PaaS free tiers) block outbound SMTP (ports 25/465/587)
+// entirely at the network level — no amount of Nodemailer config can get
+// around that. Resend's API is plain HTTPS (port 443), which isn't blocked.
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || apiKey === 'your_resend_api_key') return null;
+  return new Resend(apiKey);
+}
 
-  if (!host || !user || !pass || user === 'your_gmail@gmail.com') {
-    return null;
-  }
-
-  // nodemailer resolves both A and AAAA records for the host and picks one
-  // at random to connect to. Many hosting providers (e.g. Render) advertise
-  // an IPv6 interface with no real outbound route, so a random AAAA pick
-  // fails with ENETUNREACH. Resolve the IPv4 address ourselves and connect
-  // to that literal IP, keeping `servername` so TLS still validates against
-  // the real hostname.
-  let connectHost = host;
-  try {
-    const [ipv4] = await dns.promises.resolve4(host);
-    if (ipv4) connectHost = ipv4;
-  } catch (_e) {
-    // DNS resolve4 failed (e.g. offline/local dev) — fall back to hostname
-  }
-
-  return nodemailer.createTransport({
-    host: connectHost,
-    servername: host,
-    port,
-    secure: port === 465, // 465 = implicit TLS, 587 = STARTTLS
-    auth: { user, pass },
-    // Render's free tier can be slow to establish outbound connections
-    connectionTimeout: 60000,
-    greetingTimeout: 30000,
-    socketTimeout: 60000,
-    tls: {
-      rejectUnauthorized: false,
-    },
-  });
+// Resend's sandbox sender only delivers to the email address you signed up
+// with, until you verify a custom domain at resend.com/domains.
+function getFromAddress() {
+  return process.env.MAIL_FROM || 'Project Manager <onboarding@resend.dev>';
 }
 
 exports.verifyConnection = async () => {
-  const transporter = await buildTransporter();
-  if (!transporter) {
-    console.log('[EMAIL] SMTP not configured — invitation emails will be logged to console instead of sent.');
+  if (!getResendClient()) {
+    console.log('[EMAIL] RESEND_API_KEY not configured — invitation emails will be logged to console instead of sent.');
     return;
   }
-  transporter.verify((error) => {
-    if (error) {
-      console.error('[EMAIL] SMTP connection failed:', error.message);
-    } else {
-      console.log('[EMAIL] SMTP server is ready to send messages');
-    }
-  });
+  console.log('[EMAIL] Resend API key configured — ready to send messages');
 };
 
 function buildInvitationHtml({ inviterName, projectName, roleName, acceptUrl, rejectUrl }) {
@@ -228,10 +195,10 @@ exports.sendOrgInvitationEmail = async ({ toEmail, inviterName, orgName, role, j
   const roleLabel = ORG_ROLE_LABELS[role] || role;
 
   try {
-    const transporter = await buildTransporter();
+    const resend = getResendClient();
 
-    if (!transporter) {
-      console.log('\n[EMAIL — DEV MODE] Organization invitation email (not sent, SMTP not configured)');
+    if (!resend) {
+      console.log('\n[EMAIL — DEV MODE] Organization invitation email (not sent, RESEND_API_KEY not configured)');
       console.log(`  To:       ${toEmail}`);
       console.log(`  Inviter:  ${inviterName}  Org: ${orgName}  Role: ${role}`);
       console.log(`  Login:    ${loginUrl}\n`);
@@ -240,14 +207,16 @@ exports.sendOrgInvitationEmail = async ({ toEmail, inviterName, orgName, role, j
 
     const html = buildOrgInvitationHtml({ inviterName, orgName, roleLabel, jobTitle, loginUrl });
 
-    await transporter.sendMail({
-      from:    process.env.MAIL_FROM || `"Project Manager" <${process.env.MAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from:    getFromAddress(),
       to:      toEmail,
       subject: `[Project Manager] ${inviterName} đã thêm bạn vào tổ chức "${orgName}"`,
       html,
     });
 
-    console.log(`[EMAIL] Organization invitation sent to ${toEmail}`);
+    if (error) throw new Error(error.message || JSON.stringify(error));
+
+    console.log(`[EMAIL] Organization invitation sent to ${toEmail} (id: ${data?.id})`);
   } catch (error) {
     console.error(`[EMAIL] Failed to send organization invitation to ${toEmail}:`, error.message);
     console.error(error.stack);
@@ -261,11 +230,11 @@ exports.sendInvitationEmail = async ({ toEmail, inviterName, projectName, role, 
   const roleName  = role === 'admin' ? 'Admin' : 'Member';
 
   try {
-    const transporter = await buildTransporter();
+    const resend = getResendClient();
 
-    if (!transporter) {
+    if (!resend) {
       // Dev mode — log to console instead of sending
-      console.log('\n[EMAIL — DEV MODE] Invitation email (not sent, SMTP not configured)');
+      console.log('\n[EMAIL — DEV MODE] Invitation email (not sent, RESEND_API_KEY not configured)');
       console.log(`  To:     ${toEmail}`);
       console.log(`  Inviter:${inviterName}  Project: ${projectName}  Role: ${role}`);
       console.log(`  Accept: ${acceptUrl}`);
@@ -275,14 +244,16 @@ exports.sendInvitationEmail = async ({ toEmail, inviterName, projectName, role, 
 
     const html = buildInvitationHtml({ inviterName, projectName, roleName, acceptUrl, rejectUrl });
 
-    await transporter.sendMail({
-      from:    process.env.MAIL_FROM || `"Project Manager" <${process.env.MAIL_USER}>`,
+    const { data, error } = await resend.emails.send({
+      from:    getFromAddress(),
       to:      toEmail,
       subject: `[Project Manager] ${inviterName} mời bạn tham gia "${projectName}"`,
       html,
     });
 
-    console.log(`[EMAIL] Invitation sent to ${toEmail}`);
+    if (error) throw new Error(error.message || JSON.stringify(error));
+
+    console.log(`[EMAIL] Invitation sent to ${toEmail} (id: ${data?.id})`);
   } catch (error) {
     console.error(`[EMAIL] Failed to send invitation to ${toEmail}:`, error.message);
     console.error(error.stack);
